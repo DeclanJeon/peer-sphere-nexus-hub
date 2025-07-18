@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeTab, setActiveTab] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [newMallData, setNewMallData] = useState({
     name: '',
     category: '',
@@ -115,6 +116,12 @@ const Dashboard = () => {
     { id: 3, title: '리뷰 작성 이벤트', description: '리뷰 작성 시 포인트 적립', period: '상시 진행', image: '/placeholder.svg' },
   ];
 
+  // 필터링된 데이터 가져오기
+  const getFilteredData = (data: any[], filterKey: string) => {
+    if (selectedCategory === 'all') return data;
+    return data.filter(item => item[filterKey] === selectedCategory);
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'new':
@@ -125,7 +132,12 @@ const Dashboard = () => {
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>신규 피어몰</CardTitle>
-                  <CardDescription>새롭게 오픈한 피어몰들을 만나보세요</CardDescription>
+                  <CardDescription>
+                    새롭게 오픈한 피어몰들을 만나보세요
+                    {selectedCategory !== 'all' && (
+                      <span className="text-primary ml-1">({selectedCategory} 카테고리)</span>
+                    )}
+                  </CardDescription>
                 </div>
                 <Button variant="outline" asChild>
                   <Link to="/peermalls/new">전체보기</Link>
@@ -133,7 +145,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {newPeermalls.map((mall) => (
+                  {getFilteredData(newPeermalls, 'category').map((mall) => (
                     <Link key={mall.id} to={`/peermalls/${mall.id}`}>
                       <Card className="hover:shadow-md transition-shadow cursor-pointer">
                         <CardContent className="p-4">
@@ -151,6 +163,11 @@ const Dashboard = () => {
                     </Link>
                   ))}
                 </div>
+                {getFilteredData(newPeermalls, 'category').length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    선택한 카테고리에 해당하는 피어몰이 없습니다.
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -604,6 +621,41 @@ const Dashboard = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-12 text-lg"
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      <section className="bg-muted/50 py-6">
+        <div className="container mx-auto px-4">
+          <h3 className="text-lg font-semibold mb-4">인기 카테고리</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`p-3 rounded-lg text-center border transition-colors ${
+                selectedCategory === 'all' 
+                  ? 'bg-primary text-primary-foreground border-primary' 
+                  : 'bg-card hover:bg-muted border-border'
+              }`}
+            >
+              <div className="text-2xl mb-1">🏪</div>
+              <div className="text-xs font-medium">전체</div>
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category.name}
+                onClick={() => setSelectedCategory(category.name)}
+                className={`p-3 rounded-lg text-center border transition-colors ${
+                  selectedCategory === category.name 
+                    ? 'bg-primary text-primary-foreground border-primary' 
+                    : 'bg-card hover:bg-muted border-border'
+                }`}
+              >
+                <div className="text-2xl mb-1">{category.icon}</div>
+                <div className="text-xs font-medium">{category.name}</div>
+                <div className="text-xs text-muted-foreground">{category.count}</div>
+              </button>
+            ))}
           </div>
         </div>
       </section>
