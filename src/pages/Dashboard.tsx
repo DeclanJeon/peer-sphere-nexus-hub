@@ -19,15 +19,8 @@ import {
   Plus,
   Search,
   ChevronLeft,
-  ChevronRight,
-  ChevronDown
+  ChevronRight
 } from 'lucide-react';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { toast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
@@ -538,7 +531,7 @@ const Dashboard = () => {
               <DialogTrigger asChild>
                 <Button size="lg" variant="secondary">
                   <Plus className="h-5 w-5 mr-2" />
-                  내 피어몰 만들기
+                  입장하기
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -679,59 +672,22 @@ const Dashboard = () => {
             >
               전체
             </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className={`font-medium hover:text-primary transition-colors flex items-center gap-1 ${
-                    activeTab === 'new' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
-                  }`}
-                >
-                  신규
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-background border shadow-lg">
-                <DropdownMenuItem asChild>
-                  <Link to="/peermalls/new" className="flex items-center w-full">
-                    <Store className="h-4 w-4 mr-2" />
-                    신규 피어몰
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/products/new" className="flex items-center w-full">
-                    <ShoppingBag className="h-4 w-4 mr-2" />
-                    신규 제품
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className={`font-medium hover:text-primary transition-colors flex items-center gap-1 ${
-                    activeTab === 'best' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
-                  }`}
-                >
-                  베스트
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-background border shadow-lg">
-                <DropdownMenuItem asChild>
-                  <Link to="/peermalls/best" className="flex items-center w-full">
-                    <Store className="h-4 w-4 mr-2" />
-                    베스트 피어몰
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/products/best" className="flex items-center w-full">
-                    <ShoppingBag className="h-4 w-4 mr-2" />
-                    베스트 제품
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <button
+              onClick={() => setActiveTab('new')}
+              className={`font-medium hover:text-primary transition-colors ${
+                activeTab === 'new' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+              }`}
+            >
+              신규
+            </button>
+            <button
+              onClick={() => setActiveTab('best')}
+              className={`font-medium hover:text-primary transition-colors ${
+                activeTab === 'best' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+              }`}
+            >
+              베스트
+            </button>
             <button
               onClick={() => setActiveTab('community')}
               className={`font-medium hover:text-primary transition-colors ${
