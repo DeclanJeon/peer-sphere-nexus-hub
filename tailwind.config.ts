@@ -26,7 +26,14 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					hover: 'hsl(var(--primary-hover))'
+				},
+				korean: {
+					red: 'hsl(var(--korean-red))',
+					blue: 'hsl(var(--korean-blue))',
+					yellow: 'hsl(var(--korean-yellow))',
+					green: 'hsl(var(--korean-green))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',

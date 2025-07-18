@@ -9,32 +9,54 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 220 10% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 10% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 10% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 346 100% 58%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 346 100% 50%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 30% 96%;
+    --secondary-foreground: 220 10% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 30% 96%;
+    --muted-foreground: 220 5% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 346 100% 95%;
+    --accent-foreground: 346 100% 20%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 346 100% 58%;
+
+    /* Korean-inspired colors */
+    --korean-red: 346 100% 58%;
+    --korean-blue: 218 100% 50%;
+    --korean-yellow: 50 100% 60%;
+    --korean-green: 142 76% 36%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(346 100% 58%), hsl(346 100% 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(218 100% 50%), hsl(210 100% 60%));
+    --gradient-accent: linear-gradient(135deg, hsl(346 100% 95%), hsl(210 30% 96%));
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 13% 91% / 0.3);
+    --shadow-md: 0 4px 6px -1px hsl(220 13% 91% / 0.4);
+    --shadow-lg: 0 10px 15px -3px hsl(220 13% 91% / 0.5);
+    --shadow-card: 0 4px 12px hsl(346 100% 58% / 0.1);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --radius: 0.5rem;
 
