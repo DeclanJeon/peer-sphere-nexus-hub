@@ -1,6 +1,14 @@
 import { ReactNode } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import { 
   Home, 
   Store, 
@@ -10,7 +18,12 @@ import {
   Calendar,
   QrCode,
   LogOut,
-  Menu
+  Menu,
+  Plus,
+  Settings,
+  FileText,
+  Star,
+  Package
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -71,11 +84,65 @@ const Layout = ({ children }: LayoutProps) => {
               })}
             </nav>
 
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="h-4 w-4 mr-2" />
-                로그아웃
+            <div className="flex items-center space-x-3">
+              {/* 피어몰 생성 버튼 */}
+              <Button variant="default" size="sm" asChild>
+                <Link to="/peermalls/create">
+                  <Plus className="h-4 w-4 mr-2" />
+                  피어몰 생성
+                </Link>
               </Button>
+
+              {/* 프로필 드롭다운 */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="" alt="프로필" />
+                      <AvatarFallback>
+                        <User className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuItem asChild>
+                    <Link to="/mypage/info" className="flex items-center">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>내 정보 관리</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/mypage/mall" className="flex items-center">
+                      <Store className="mr-2 h-4 w-4" />
+                      <span>내 피어몰 관리</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/mypage/reviews" className="flex items-center">
+                      <Star className="mr-2 h-4 w-4" />
+                      <span>내 리뷰 관리</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/mypage/products" className="flex items-center">
+                      <Package className="mr-2 h-4 w-4" />
+                      <span>내 제품 관리</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/mypage/posts" className="flex items-center">
+                      <FileText className="mr-2 h-4 w-4" />
+                      <span>내 게시글 관리</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>로그아웃</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               
               {/* Mobile menu button */}
               <Button
