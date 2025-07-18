@@ -69,7 +69,7 @@ const HeroSection = ({ categories }: HeroSectionProps) => {
       <div className="relative z-10 container mx-auto px-4 h-full flex items-center justify-center">
         <div className="text-white text-center max-w-3xl">
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            피어몰 Image
+            이벤트, 광고 섹션
           </h1>
           <p className="text-xl mb-8 text-primary-foreground/90">
             {heroSlides[currentSlide].subtitle}
