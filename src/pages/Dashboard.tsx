@@ -26,6 +26,7 @@ import { toast } from '@/hooks/use-toast';
 const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [activeTab, setActiveTab] = useState('all');
   const [newMallData, setNewMallData] = useState({
     name: '',
     category: '',
@@ -101,6 +102,387 @@ const Dashboard = () => {
     { id: 2, name: '프로틴 파우더', price: '89,000원', mall: '헬스 앤 라이프', rating: 4.8, image: '/placeholder.svg' },
     { id: 3, name: '교육용 태블릿', price: '299,000원', mall: '키즈 원더랜드', rating: 4.9, image: '/placeholder.svg' },
   ];
+
+  const communityPosts = [
+    { id: 1, title: '뷰티 제품 추천해주세요!', author: '뷰티러버', comments: 23, likes: 45 },
+    { id: 2, title: '신규 피어몰 오픈 후기', author: '몰관리자', comments: 15, likes: 32 },
+    { id: 3, title: '전자기기 할인 정보 공유', author: '테크매니아', comments: 8, likes: 18 },
+  ];
+
+  const events = [
+    { id: 1, title: '신규 가입 이벤트', description: '첫 구매 시 20% 할인', period: '2024.01.01 ~ 01.31', image: '/placeholder.svg' },
+    { id: 2, title: '베스트 피어몰 선정', description: '월간 베스트 피어몰을 선정합니다', period: '2024.01.15 ~ 01.30', image: '/placeholder.svg' },
+    { id: 3, title: '리뷰 작성 이벤트', description: '리뷰 작성 시 포인트 적립', period: '상시 진행', image: '/placeholder.svg' },
+  ];
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'new':
+        return (
+          <div className="space-y-8">
+            {/* 신규 피어몰 */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>신규 피어몰</CardTitle>
+                  <CardDescription>새롭게 오픈한 피어몰들을 만나보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/peermalls/new">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {newPeermalls.map((mall) => (
+                    <Link key={mall.id} to={`/peermalls/${mall.id}`}>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-4">
+                          <div className="aspect-video bg-muted rounded-lg mb-3">
+                            <img src={mall.image} alt={mall.name} className="w-full h-full object-cover rounded-lg" />
+                          </div>
+                          <h4 className="font-semibold text-base mb-1">{mall.name}</h4>
+                          <Badge variant="secondary" className="mb-2">{mall.category}</Badge>
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm font-medium">{mall.rating}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 신규 제품/상품 */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>신규 제품/상품</CardTitle>
+                  <CardDescription>새롭게 등록된 상품들을 확인해보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/products/new">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {newProducts.map((product) => (
+                    <Link key={product.id} to={`/products/${product.id}`}>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-3">
+                          <div className="aspect-square bg-muted rounded-lg mb-2">
+                            <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" />
+                          </div>
+                          <h4 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h4>
+                          <p className="text-primary font-semibold text-sm mb-1">{product.price}</p>
+                          <p className="text-xs text-muted-foreground">{product.mall}</p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 'best':
+        return (
+          <div className="space-y-8">
+            {/* 베스트 피어몰 */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>베스트 피어몰</CardTitle>
+                  <CardDescription>인기 높은 베스트 피어몰들을 확인해보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/peermalls/best">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {bestPeermalls.map((mall) => (
+                    <Link key={mall.id} to={`/peermalls/${mall.id}`}>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-4">
+                          <div className="aspect-video bg-muted rounded-lg mb-3">
+                            <img src={mall.image} alt={mall.name} className="w-full h-full object-cover rounded-lg" />
+                          </div>
+                          <h4 className="font-semibold text-base mb-1">{mall.name}</h4>
+                          <div className="flex items-center justify-between mb-2">
+                            <Badge variant="secondary">{mall.category}</Badge>
+                            <span className="text-sm text-muted-foreground">판매 {mall.sales}건</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm font-medium">{mall.rating}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 베스트 제품/상품 */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>베스트 제품/상품</CardTitle>
+                  <CardDescription>인기 높은 베스트 상품들을 만나보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/products/best">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {bestProducts.map((product) => (
+                    <Link key={product.id} to={`/products/${product.id}`}>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-3">
+                          <div className="aspect-square bg-muted rounded-lg mb-2">
+                            <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" />
+                          </div>
+                          <h4 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h4>
+                          <p className="text-primary font-semibold text-sm mb-1">{product.price}</p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-muted-foreground">{product.mall}</p>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              <span className="text-xs">{product.rating}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 'community':
+        return (
+          <div className="space-y-8">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>커뮤니티 인기 게시글</CardTitle>
+                  <CardDescription>피어몰 사용자들의 생생한 이야기를 만나보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/community">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {communityPosts.map((post) => (
+                    <Link key={post.id} to={`/community/${post.id}`}>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-4">
+                          <h4 className="font-semibold text-base mb-2">{post.title}</h4>
+                          <div className="flex items-center justify-between text-sm text-muted-foreground">
+                            <span>작성자: {post.author}</span>
+                            <div className="flex items-center gap-4">
+                              <span>💬 {post.comments}</span>
+                              <span>❤️ {post.likes}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 'events':
+        return (
+          <div className="space-y-8">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>진행중인 이벤트</CardTitle>
+                  <CardDescription>다양한 혜택과 이벤트를 확인해보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/events">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {events.map((event) => (
+                    <Link key={event.id} to={`/events/${event.id}`}>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-4">
+                          <div className="aspect-video bg-muted rounded-lg mb-3">
+                            <img src={event.image} alt={event.title} className="w-full h-full object-cover rounded-lg" />
+                          </div>
+                          <h4 className="font-semibold text-base mb-1">{event.title}</h4>
+                          <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
+                          <Badge variant="outline">{event.period}</Badge>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      default: // 'all'
+        return (
+          <div className="space-y-8">
+            {/* 신규 피어몰 */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>신규 피어몰</CardTitle>
+                  <CardDescription>새롭게 오픈한 피어몰들을 만나보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/peermalls/new">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {newPeermalls.map((mall) => (
+                    <Link key={mall.id} to={`/peermalls/${mall.id}`}>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-4">
+                          <div className="aspect-video bg-muted rounded-lg mb-3">
+                            <img src={mall.image} alt={mall.name} className="w-full h-full object-cover rounded-lg" />
+                          </div>
+                          <h4 className="font-semibold text-base mb-1">{mall.name}</h4>
+                          <Badge variant="secondary" className="mb-2">{mall.category}</Badge>
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm font-medium">{mall.rating}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 베스트 피어몰 */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>베스트 피어몰</CardTitle>
+                  <CardDescription>인기 높은 베스트 피어몰들을 확인해보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/peermalls/best">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {bestPeermalls.map((mall) => (
+                    <Link key={mall.id} to={`/peermalls/${mall.id}`}>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-4">
+                          <div className="aspect-video bg-muted rounded-lg mb-3">
+                            <img src={mall.image} alt={mall.name} className="w-full h-full object-cover rounded-lg" />
+                          </div>
+                          <h4 className="font-semibold text-base mb-1">{mall.name}</h4>
+                          <div className="flex items-center justify-between mb-2">
+                            <Badge variant="secondary">{mall.category}</Badge>
+                            <span className="text-sm text-muted-foreground">판매 {mall.sales}건</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm font-medium">{mall.rating}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 신규 제품/상품 */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>신규 제품/상품</CardTitle>
+                  <CardDescription>새롭게 등록된 상품들을 확인해보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/products/new">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {newProducts.map((product) => (
+                    <Link key={product.id} to={`/products/${product.id}`}>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-3">
+                          <div className="aspect-square bg-muted rounded-lg mb-2">
+                            <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" />
+                          </div>
+                          <h4 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h4>
+                          <p className="text-primary font-semibold text-sm mb-1">{product.price}</p>
+                          <p className="text-xs text-muted-foreground">{product.mall}</p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 베스트 제품/상품 */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>베스트 제품/상품</CardTitle>
+                  <CardDescription>인기 높은 베스트 상품들을 만나보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/products/best">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {bestProducts.map((product) => (
+                    <Link key={product.id} to={`/products/${product.id}`}>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-3">
+                          <div className="aspect-square bg-muted rounded-lg mb-2">
+                            <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" />
+                          </div>
+                          <h4 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h4>
+                          <p className="text-primary font-semibold text-sm mb-1">{product.price}</p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-muted-foreground">{product.mall}</p>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              <span className="text-xs">{product.rating}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+    }
+  };
 
   const stats = [
     { title: '전체 피어몰', value: '1,234', icon: Store, change: '+12%' },
@@ -230,161 +612,52 @@ const Dashboard = () => {
       <section className="bg-white border-b">
         <div className="container mx-auto px-4">
           <div className="flex space-x-8 py-4">
-            <Link to="/peermalls/new" className="text-primary font-medium hover:text-primary-hover">
+            <button
+              onClick={() => setActiveTab('all')}
+              className={`font-medium hover:text-primary transition-colors ${
+                activeTab === 'all' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+              }`}
+            >
+              전체
+            </button>
+            <button
+              onClick={() => setActiveTab('new')}
+              className={`font-medium hover:text-primary transition-colors ${
+                activeTab === 'new' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+              }`}
+            >
               신규
-            </Link>
-            <Link to="/peermalls/best" className="text-muted-foreground hover:text-primary">
+            </button>
+            <button
+              onClick={() => setActiveTab('best')}
+              className={`font-medium hover:text-primary transition-colors ${
+                activeTab === 'best' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+              }`}
+            >
               베스트
-            </Link>
-            <Link to="/community" className="text-muted-foreground hover:text-primary">
+            </button>
+            <button
+              onClick={() => setActiveTab('community')}
+              className={`font-medium hover:text-primary transition-colors ${
+                activeTab === 'community' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+              }`}
+            >
               커뮤니티
-            </Link>
-            <Link to="/events" className="text-muted-foreground hover:text-primary">
+            </button>
+            <button
+              onClick={() => setActiveTab('events')}
+              className={`font-medium hover:text-primary transition-colors ${
+                activeTab === 'events' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+              }`}
+            >
               이벤트
-            </Link>
+            </button>
           </div>
         </div>
       </section>
 
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* 신규 피어몰 리스트 */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>신규 피어몰</CardTitle>
-              <CardDescription>새롭게 오픈한 피어몰들을 만나보세요</CardDescription>
-            </div>
-            <Button variant="outline" asChild>
-              <Link to="/peermalls/new">전체보기</Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {newPeermalls.map((mall) => (
-                <Link key={mall.id} to={`/peermalls/${mall.id}`}>
-                  <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="p-4">
-                      <div className="aspect-video bg-muted rounded-lg mb-3">
-                        <img src={mall.image} alt={mall.name} className="w-full h-full object-cover rounded-lg" />
-                      </div>
-                      <h4 className="font-semibold text-base mb-1">{mall.name}</h4>
-                      <Badge variant="secondary" className="mb-2">{mall.category}</Badge>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium">{mall.rating}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 베스트 피어몰 리스트 */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>베스트 피어몰</CardTitle>
-              <CardDescription>인기 높은 베스트 피어몰들을 확인해보세요</CardDescription>
-            </div>
-            <Button variant="outline" asChild>
-              <Link to="/peermalls/best">전체보기</Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {bestPeermalls.map((mall) => (
-                <Link key={mall.id} to={`/peermalls/${mall.id}`}>
-                  <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="p-4">
-                      <div className="aspect-video bg-muted rounded-lg mb-3">
-                        <img src={mall.image} alt={mall.name} className="w-full h-full object-cover rounded-lg" />
-                      </div>
-                      <h4 className="font-semibold text-base mb-1">{mall.name}</h4>
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="secondary">{mall.category}</Badge>
-                        <span className="text-sm text-muted-foreground">판매 {mall.sales}건</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium">{mall.rating}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 신규 제품/상품 리스트 */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>신규 제품/상품</CardTitle>
-              <CardDescription>새롭게 등록된 상품들을 확인해보세요</CardDescription>
-            </div>
-            <Button variant="outline" asChild>
-              <Link to="/products/new">전체보기</Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {newProducts.map((product) => (
-                <Link key={product.id} to={`/products/${product.id}`}>
-                  <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="p-3">
-                      <div className="aspect-square bg-muted rounded-lg mb-2">
-                        <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" />
-                      </div>
-                      <h4 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h4>
-                      <p className="text-primary font-semibold text-sm mb-1">{product.price}</p>
-                      <p className="text-xs text-muted-foreground">{product.mall}</p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 베스트 제품/상품 리스트 */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>베스트 제품/상품</CardTitle>
-              <CardDescription>인기 높은 베스트 상품들을 만나보세요</CardDescription>
-            </div>
-            <Button variant="outline" asChild>
-              <Link to="/products/best">전체보기</Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {bestProducts.map((product) => (
-                <Link key={product.id} to={`/products/${product.id}`}>
-                  <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="p-3">
-                      <div className="aspect-square bg-muted rounded-lg mb-2">
-                        <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" />
-                      </div>
-                      <h4 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h4>
-                      <p className="text-primary font-semibold text-sm mb-1">{product.price}</p>
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs text-muted-foreground">{product.mall}</p>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span className="text-xs">{product.rating}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {renderContent()}
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
