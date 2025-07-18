@@ -125,3 +125,32 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+
+/* NavigationMenu 커스텀 스타일 */
+[data-radix-navigation-menu-viewport] {
+  position: relative !important;
+  left: 0 !important;
+  right: auto !important;
+  width: 100% !important;
+  transform-origin: top left !important;
+}
+
+[data-radix-navigation-menu-content] {
+  left: 0 !important;
+  right: auto !important;
+}
+
+/* 네비게이션 메뉴 왼쪽 정렬 */
+.navigation-tabs [data-radix-navigation-menu-root] {
+  justify-content: flex-start;
+}
+
+.navigation-tabs [data-radix-navigation-menu-list] {
+  justify-content: flex-start !important;
+}
+
+/* viewport 위치 조정 */
+.navigation-tabs [data-radix-navigation-menu-viewport] {
+  left: var(--radix-navigation-menu-trigger-left, 0) !important;
+}

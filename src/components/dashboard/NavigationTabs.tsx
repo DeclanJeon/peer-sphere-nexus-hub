@@ -19,7 +19,7 @@ const NavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) => {
   return (
     <section className="bg-white border-b sticky top-16 z-40">
       <div className="container mx-auto px-4">
-        <NavigationMenu className="max-w-full">
+        <NavigationMenu className="justify-start">
           <NavigationMenuList className="flex justify-start space-x-2">
             {/* 전체 탭 */}
             <NavigationMenuItem>
@@ -36,7 +36,7 @@ const NavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) => {
             </NavigationMenuItem>
             
             {/* 신규 탭 with 드롭다운 */}
-            <NavigationMenuItem>
+            <NavigationMenuItem className="relative">
               <NavigationMenuTrigger 
                 className={cn(
                   "font-semibold",
@@ -45,7 +45,7 @@ const NavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) => {
               >
                 신규
               </NavigationMenuTrigger>
-              <NavigationMenuContent>
+              <NavigationMenuContent className="left-0">
                 <ul className="grid w-[200px] gap-2 p-4">
                   <li>
                     <NavigationMenuLink asChild>
@@ -80,7 +80,7 @@ const NavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) => {
             </NavigationMenuItem>
 
             {/* 베스트 탭 with 드롭다운 */}
-            <NavigationMenuItem>
+            <NavigationMenuItem className="relative">
               <NavigationMenuTrigger 
                 className={cn(
                   "font-semibold",
@@ -89,7 +89,7 @@ const NavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) => {
               >
                 베스트
               </NavigationMenuTrigger>
-              <NavigationMenuContent>
+              <NavigationMenuContent className="left-0">
                 <ul className="grid w-[200px] gap-2 p-4">
                   <li>
                     <NavigationMenuLink asChild>
