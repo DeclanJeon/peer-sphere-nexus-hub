@@ -30,11 +30,11 @@ const Layout = ({ children }: LayoutProps) => {
 
   const navigation = [
     { name: '홈', href: '/dashboard', icon: Home },
-    { name: '피어몰', href: '/peermalls', icon: Store },
-    { name: '제품', href: '/products', icon: ShoppingBag },
-    { name: '커뮤니티', href: '/community', icon: MessageCircle },
-    { name: '이벤트', href: '/events', icon: Calendar },
-    { name: 'QR코드', href: '/qr', icon: QrCode },
+    // { name: '피어몰', href: '/peermalls', icon: Store },
+    // { name: '제품', href: '/products', icon: ShoppingBag },
+    // { name: '커뮤니티', href: '/community', icon: MessageCircle },
+    // { name: '이벤트', href: '/events', icon: Calendar },
+    // { name: 'QR코드', href: '/qr', icon: QrCode },
     { name: '마이페이지', href: '/mypage', icon: User },
   ];
 
