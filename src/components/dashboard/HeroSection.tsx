@@ -78,7 +78,7 @@ const HeroSection = ({ categories }: HeroSectionProps) => {
             <DialogTrigger asChild>
               <Button size="lg" variant="secondary" className="px-8 py-3">
                 <Plus className="h-5 w-5 mr-2" />
-                피어몰 시작하기
+                입장하기
               </Button>
             </DialogTrigger>
             <DialogContent>
