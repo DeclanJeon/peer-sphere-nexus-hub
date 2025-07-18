@@ -281,7 +281,6 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
       default: // 'all'
         return (
           <div className="space-y-12">
-            
             <Card className="shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
@@ -294,7 +293,7 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {newPeermalls.map((mall) => (
+                  {newPeermalls.slice(0, 3).map((mall) => (
                     <Link key={mall.id} to={`/peermalls/${mall.id}`}>
                       <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105">
                         <CardContent className="p-0">
@@ -320,32 +319,88 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
             <Card className="shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl">베스트 피어몰</CardTitle>
-                  <CardDescription className="text-base">인기 높은 베스트 피어몰들을 확인해보세요</CardDescription>
+                  <CardTitle className="text-2xl">신규 제품/상품</CardTitle>
+                  <CardDescription className="text-base">새롭게 등록된 상품들을 확인해보세요</CardDescription>
                 </div>
                 <Button variant="outline" asChild>
-                  <Link to="/peermalls/best">전체보기</Link>
+                  <Link to="/products/new">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {newProducts.slice(0, 4).map((product) => (
+                    <Link key={product.id} to={`/products/${product.id}`}>
+                      <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105">
+                        <CardContent className="p-3">
+                          <div className="aspect-square overflow-hidden rounded-lg mb-3">
+                            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                          </div>
+                          <h4 className="font-semibold text-sm mb-2 line-clamp-2">{product.name}</h4>
+                          <p className="text-primary font-bold mb-1">{product.price}</p>
+                          <p className="text-xs text-muted-foreground">{product.mall}</p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-2xl">커뮤니티 인기 게시글</CardTitle>
+                  <CardDescription className="text-base">피어몰 사용자들의 생생한 이야기를 만나보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/community">전체보기</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {communityPosts.slice(0, 2).map((post) => (
+                    <Link key={post.id} to={`/community/${post.id}`}>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-6">
+                          <h4 className="font-bold text-lg mb-3">{post.title}</h4>
+                          <div className="flex items-center justify-between text-sm text-muted-foreground">
+                            <span>작성자: {post.author}</span>
+                            <div className="flex items-center gap-4">
+                              <span>💬 {post.comments}</span>
+                              <span>❤️ {post.likes}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-2xl">진행중인 이벤트</CardTitle>
+                  <CardDescription className="text-base">다양한 혜택과 이벤트를 확인해보세요</CardDescription>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/events">전체보기</Link>
                 </Button>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {bestPeermalls.map((mall) => (
-                    <Link key={mall.id} to={`/peermalls/${mall.id}`}>
+                  {events.slice(0, 3).map((event) => (
+                    <Link key={event.id} to={`/events/${event.id}`}>
                       <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105">
                         <CardContent className="p-0">
                           <div className="aspect-video overflow-hidden rounded-t-lg">
-                            <img src={mall.image} alt={mall.name} className="w-full h-full object-cover" />
+                            <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
                           </div>
                           <div className="p-4">
-                            <h4 className="font-bold text-lg mb-2">{mall.name}</h4>
-                            <div className="flex items-center justify-between mb-3">
-                              <Badge variant="secondary">{mall.category}</Badge>
-                              <span className="text-sm text-muted-foreground">판매 {mall.sales}건</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="font-semibold">{mall.rating}</span>
-                            </div>
+                            <h4 className="font-bold text-lg mb-2">{event.title}</h4>
+                            <p className="text-muted-foreground mb-3">{event.description}</p>
+                            <Badge variant="outline">{event.period}</Badge>
                           </div>
                         </CardContent>
                       </Card>
@@ -360,9 +415,11 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      {renderContent()}
-    </div>
+    <section className="py-12 bg-muted/30">
+      <div className="container mx-auto px-4">
+        {renderContent()}
+      </div>
+    </section>
   );
 };
 
