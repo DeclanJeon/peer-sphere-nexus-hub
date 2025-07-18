@@ -19,7 +19,7 @@ const NavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) => {
     <section className="bg-white border-b sticky top-16 z-40">
       <div className="container mx-auto px-4">
         <NavigationMenu className="max-w-full">
-          <NavigationMenuList className="flex justify-start space-x-8 py-4">
+          <NavigationMenuList className="flex justify-center space-x-8 py-4">
             <NavigationMenuItem>
               <button
                 onClick={() => setActiveTab('all')}
