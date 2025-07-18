@@ -119,15 +119,15 @@ const Layout = ({ children }: LayoutProps) => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/mypage/reviews" className="flex items-center">
-                      <Star className="mr-2 h-4 w-4" />
-                      <span>내 리뷰 관리</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
                     <Link to="/mypage/products" className="flex items-center">
                       <Package className="mr-2 h-4 w-4" />
                       <span>내 제품 관리</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/mypage/reviews" className="flex items-center">
+                      <Star className="mr-2 h-4 w-4" />
+                      <span>내 리뷰 관리</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
