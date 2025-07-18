@@ -34,6 +34,7 @@ import EventCreate from "./pages/events/EventCreate";
 import EventDetail from "./pages/events/EventDetail";
 
 // My pages
+import MyInfo from "./pages/mypage/MyInfo";
 import MyPage from "./pages/mypage/MyPage";
 import MyMall from "./pages/mypage/MyMall";
 import MyMallInfo from "./pages/mypage/MyMallInfo";
@@ -95,6 +96,7 @@ const App = () => (
           
           {/* My Page Routes */}
           <Route path="/mypage" element={<ProtectedRoute><Layout><MyPage /></Layout></ProtectedRoute>} />
+          <Route path="/mypage/info" element={<ProtectedRoute><Layout><MyInfo /></Layout></ProtectedRoute>} />
           <Route path="/mypage/mall" element={<ProtectedRoute><Layout><MyMall /></Layout></ProtectedRoute>} />
           <Route path="/mypage/mall-info" element={<ProtectedRoute><Layout><MyMallInfo /></Layout></ProtectedRoute>} />
           <Route path="/mypage/posts" element={<ProtectedRoute><Layout><MyPosts /></Layout></ProtectedRoute>} />
