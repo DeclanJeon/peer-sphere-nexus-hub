@@ -712,7 +712,7 @@ const Dashboard = () => {
         {renderContent()}
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardContent className="p-6 text-center">
               <MessageCircle className="h-12 w-12 text-primary mx-auto mb-4" />
@@ -745,7 +745,7 @@ const Dashboard = () => {
               </Button>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </div>
   );
