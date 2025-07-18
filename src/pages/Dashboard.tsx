@@ -24,7 +24,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <NavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      
       <HeroSection categories={categories} />
       <SearchSection searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <CategorySection 
@@ -32,6 +32,7 @@ const Dashboard = () => {
         selectedCategory={selectedCategory} 
         setSelectedCategory={setSelectedCategory} 
       />
+      <NavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       <ContentSection activeTab={activeTab} selectedCategory={selectedCategory} />
     </div>
   );
