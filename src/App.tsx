@@ -80,6 +80,7 @@ const App = () => (
           <Route path="/peermalls/:id" element={<ProtectedRoute><Layout><PeermallDetail /></Layout></ProtectedRoute>} />
           <Route path="/peermalls/:id/manage" element={<ProtectedRoute><Layout><PeermallManagement /></Layout></ProtectedRoute>} />
           <Route path="/peermalls/:peermallId/products/create" element={<ProtectedRoute><Layout><PeermallProductCreate /></Layout></ProtectedRoute>} />
+          <Route path="/peermall/:name" element={<ProtectedRoute><Layout><PeermallDetail /></Layout></ProtectedRoute>} />
           
           {/* Product Routes */}
           <Route path="/products" element={<ProtectedRoute><Layout><ProductList /></Layout></ProtectedRoute>} />

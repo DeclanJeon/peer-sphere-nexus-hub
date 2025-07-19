@@ -59,13 +59,15 @@ const PeermallCreate = () => {
         status: 'active' as const,
       };
 
-      await peermallService.createPeermall(peermallData);
+      const createdPeermall = await peermallService.createPeermall(peermallData);
       
       toast({
         title: '피어몰 생성 완료',
-        description: '새로운 피어몰이 성공적으로 생성되었습니다!',
+        description: `새로운 피어몰 "${createdPeermall.name}"이 성공적으로 생성되었습니다!`,
       });
-      navigate('/mypage/mall');
+      
+      // 생성된 피어몰의 URL로 이동
+      navigate(`/peermall/${encodeURIComponent(createdPeermall.name)}`);
     } catch (error) {
       toast({
         title: '오류',

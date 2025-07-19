@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,12 +11,26 @@ interface ContentSectionProps {
 }
 
 const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) => {
-  // Sample data - in real implementation, this would come from IndexedDB
-  const newPeermalls = [
+  const [newPeermalls, setNewPeermalls] = useState([
     { id: 1, name: '코스메틱 파라다이스', category: '뷰티', rating: 4.8, image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=200&fit=crop' },
     { id: 2, name: '스마트 라이프', category: '전자기기', rating: 4.9, image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop' },
     { id: 3, name: '패션 스트리트', category: '패션', rating: 4.7, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=200&fit=crop' },
-  ];
+  ]);
+
+  // 실제 데이터를 로드하는 함수 (실제 구현에서는 peermallService 사용)
+  const loadPeermallData = async () => {
+    try {
+      // const peermalls = await peermallService.getNewPeermalls(10);
+      // setNewPeermalls(peermalls);
+    } catch (error) {
+      console.error('Failed to load peermall data:', error);
+    }
+  };
+
+  // 컴포넌트 마운트 시 데이터 로드
+  useEffect(() => {
+    loadPeermallData();
+  }, []);
 
   const newProducts = [
     { id: 1, name: '프리미엄 스킨케어 세트', price: '89,000원', mall: '코스메틱 파라다이스', image: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=200&h=200&fit=crop' },
