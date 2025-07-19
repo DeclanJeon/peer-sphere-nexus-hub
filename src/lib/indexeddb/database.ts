@@ -13,13 +13,20 @@ export interface UserProfile {
 export interface Peermall {
   id: string;
   name: string;
+  address: string;
   category: string;
   description: string;
   image?: string;
   ownerId: string;
+  ownerName: string;
+  familyCompany: '클레오파트라솔트' | '대한물산' | '메리밀스' | '퓨어펌' | '벤투즈' | '솔트넬';
+  referralCode?: string;
   rating: number;
   sales: number;
   status: 'active' | 'inactive';
+  logo?: string;
+  footerInfo?: string;
+  companyInfo?: string;
   createdAt: Date;
   updatedAt: Date;
 }
