@@ -3,7 +3,11 @@ import { UserProfile } from './database';
 
 export class AuthService {
   // 회원가입
-  async register(email: string, name: string, phone?: string): Promise<UserProfile> {
+  async register(
+    email: string,
+    name: string,
+    phone?: string
+  ): Promise<UserProfile> {
     // 이미 존재하는 사용자인지 확인
     const existingUser = await userService.getUserByEmail(email);
     if (existingUser) {
@@ -40,10 +44,10 @@ export class AuthService {
 
   // 간단한 OTP 로그인 (peermall 입력시)
   async otpLogin(input: string): Promise<UserProfile> {
-    if (input.toLowerCase() === 'peermall') {
+    if (input.toLowerCase() === 'peermall@example.com') {
       // 기본 사용자 생성 또는 조회
       let user = await userService.getUserByEmail('admin@peermall.com');
-      
+
       if (!user) {
         user = await userService.createUser({
           email: 'admin@peermall.com',

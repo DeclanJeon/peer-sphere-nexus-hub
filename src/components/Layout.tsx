@@ -42,7 +42,7 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   const navigation = [
-    // { name: '홈', href: '/dashboard', icon: Home },
+    // { name: '홈', href: '/', icon: Home },
     // { name: '피어몰', href: '/peermalls', icon: Store },
     // { name: '제품', href: '/products', icon: ShoppingBag },
     // { name: '커뮤니티', href: '/community', icon: MessageCircle },
@@ -58,7 +58,7 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Link to="/dashboard" className="text-2xl font-bold text-primary">
+              <Link to="/" className="text-2xl font-bold text-primary">
                 피어몰
               </Link>
             </div>

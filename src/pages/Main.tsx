@@ -1,12 +1,12 @@
 
 import { useState } from 'react';
-import HeroSection from '@/components/dashboard/HeroSection';
-import SearchSection from '@/components/dashboard/SearchSection';
-import CategorySection from '@/components/dashboard/CategorySection';
-import NavigationTabs from '@/components/dashboard/NavigationTabs';
-import ContentSection from '@/components/dashboard/ContentSection';
+import HeroSection from '@/components/home/HeroSection';
+import SearchSection from '@/components/home/SearchSection';
+import CategorySection from '@/components/home/CategorySection';
+import NavigationTabs from '@/components/home/NavigationTabs';
+import ContentSection from '@/components/home/ContentSection';
 
-const Dashboard = () => {
+const Main = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -38,4 +38,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Main;
