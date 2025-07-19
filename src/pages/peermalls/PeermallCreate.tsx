@@ -68,6 +68,9 @@ const PeermallCreate = () => {
       
       // 생성된 피어몰의 URL로 이동
       navigate(`/peermall/${encodeURIComponent(createdPeermall.name)}`);
+      
+      // 페이지 새로고침을 통해 데이터 갱신
+      window.location.reload();
     } catch (error) {
       toast({
         title: '오류',

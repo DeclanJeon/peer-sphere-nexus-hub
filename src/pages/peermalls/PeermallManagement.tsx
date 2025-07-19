@@ -4,8 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Settings, Package, Plus, Edit, Trash2 } from 'lucide-react';
 import { peermallService, productService } from '@/lib/indexeddb';
+import { toast } from '@/hooks/use-toast';
 import type { Peermall, Product } from '@/lib/indexeddb/database';
 
 const PeermallManagement = () => {
@@ -13,6 +18,13 @@ const PeermallManagement = () => {
   const [peermall, setPeermall] = useState<Peermall | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    address: '',
+    description: '',
+    ownerName: '',
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -22,6 +34,12 @@ const PeermallManagement = () => {
         const peermallData = await peermallService.getPeermallById(id);
         if (peermallData) {
           setPeermall(peermallData);
+          setEditFormData({
+            name: peermallData.name,
+            address: peermallData.address,
+            description: peermallData.description,
+            ownerName: peermallData.ownerName,
+          });
           const productData = await productService.getProductsByPeermallId(id);
           setProducts(productData);
         }
@@ -34,6 +52,51 @@ const PeermallManagement = () => {
 
     loadData();
   }, [id]);
+
+  const handleUpdatePeermall = async () => {
+    if (!id || !peermall) return;
+
+    try {
+      const updatedPeermall = await peermallService.updatePeermall(id, {
+        name: editFormData.name,
+        address: editFormData.address,
+        description: editFormData.description,
+        ownerName: editFormData.ownerName,
+      });
+      
+      setPeermall(updatedPeermall);
+      setEditDialogOpen(false);
+      
+      toast({
+        title: '수정 완료',
+        description: '피어몰 정보가 성공적으로 수정되었습니다.',
+      });
+    } catch (error) {
+      toast({
+        title: '오류',
+        description: '피어몰 정보 수정 중 오류가 발생했습니다.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await productService.deleteProduct(productId);
+      setProducts(products.filter(p => p.id !== productId));
+      
+      toast({
+        title: '삭제 완료',
+        description: '상품이 성공적으로 삭제되었습니다.',
+      });
+    } catch (error) {
+      toast({
+        title: '오류',
+        description: '상품 삭제 중 오류가 발생했습니다.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   if (loading) {
     return <div className="container mx-auto px-4 py-8">로딩 중...</div>;
@@ -119,18 +182,62 @@ const PeermallManagement = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <Link to={`/peermalls/${id}/edit`}>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Edit className="w-4 h-4 mr-2" />
-                    기본 정보 수정
-                  </Button>
-                </Link>
-                <Link to={`/peermalls/${id}/customize`}>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Settings className="w-4 h-4 mr-2" />
-                    피어몰 커스터마이징
-                  </Button>
-                </Link>
+                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Edit className="w-4 h-4 mr-2" />
+                      기본 정보 수정
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>피어몰 정보 수정</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">피어몰 이름</Label>
+                        <Input
+                          id="name"
+                          value={editFormData.name}
+                          onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="address">피어몰 주소</Label>
+                        <Input
+                          id="address"
+                          value={editFormData.address}
+                          onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="ownerName">소유자 이름</Label>
+                        <Input
+                          id="ownerName"
+                          value={editFormData.ownerName}
+                          onChange={(e) => setEditFormData({ ...editFormData, ownerName: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="description">피어몰 소개</Label>
+                        <Textarea
+                          id="description"
+                          value={editFormData.description}
+                          onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                          rows={4}
+                        />
+                      </div>
+                      <div className="flex gap-2 justify-end">
+                        <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                          취소
+                        </Button>
+                        <Button onClick={handleUpdatePeermall}>
+                          수정 완료
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>
@@ -185,7 +292,11 @@ const PeermallManagement = () => {
                             <Edit className="w-4 h-4" />
                           </Button>
                         </Link>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleDeleteProduct(product.id)}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
