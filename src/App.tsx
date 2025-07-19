@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import PeermallPage from "./pages/PeermallPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 import NotFound from "./pages/NotFound";
@@ -80,7 +81,7 @@ const App = () => (
           <Route path="/peermalls/:id" element={<ProtectedRoute><Layout><PeermallDetail /></Layout></ProtectedRoute>} />
           <Route path="/peermalls/:id/manage" element={<ProtectedRoute><Layout><PeermallManagement /></Layout></ProtectedRoute>} />
           <Route path="/peermalls/:peermallId/products/create" element={<ProtectedRoute><Layout><PeermallProductCreate /></Layout></ProtectedRoute>} />
-          <Route path="/peermall/:name" element={<ProtectedRoute><Layout><PeermallDetail /></Layout></ProtectedRoute>} />
+          <Route path="/peermall/:name" element={<ProtectedRoute><Layout><PeermallPage /></Layout></ProtectedRoute>} />
           
           {/* Product Routes */}
           <Route path="/products" element={<ProtectedRoute><Layout><ProductList /></Layout></ProtectedRoute>} />

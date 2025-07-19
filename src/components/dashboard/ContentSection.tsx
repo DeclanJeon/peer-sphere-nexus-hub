@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
+import { peermallService } from '@/lib/indexeddb';
 
 interface ContentSectionProps {
   activeTab: string;
@@ -11,17 +12,36 @@ interface ContentSectionProps {
 }
 
 const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) => {
-  const [newPeermalls, setNewPeermalls] = useState([
-    { id: 1, name: '코스메틱 파라다이스', category: '뷰티', rating: 4.8, image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=200&fit=crop' },
-    { id: 2, name: '스마트 라이프', category: '전자기기', rating: 4.9, image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop' },
-    { id: 3, name: '패션 스트리트', category: '패션', rating: 4.7, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=200&fit=crop' },
-  ]);
+  const [newPeermalls, setNewPeermalls] = useState<any[]>([]);
+  const [bestPeermalls, setBestPeermalls] = useState<any[]>([]);
 
-  // 실제 데이터를 로드하는 함수 (실제 구현에서는 peermallService 사용)
+  // 실제 데이터를 로드하는 함수
   const loadPeermallData = async () => {
     try {
-      // const peermalls = await peermallService.getNewPeermalls(10);
-      // setNewPeermalls(peermalls);
+      const newMalls = await peermallService.getNewPeermalls(6);
+      const bestMalls = await peermallService.getBestPeermalls(6);
+      
+      // 기본 이미지 설정
+      const placeholderImages = [
+        'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=200&fit=crop',
+        'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=300&h=200&fit=crop',
+        'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=300&h=200&fit=crop',
+        'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=300&h=200&fit=crop',
+        'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=300&h=200&fit=crop',
+      ];
+      
+      const newMallsWithImages = newMalls.map((mall, index) => ({
+        ...mall,
+        image: mall.image || placeholderImages[index % placeholderImages.length]
+      }));
+      
+      const bestMallsWithImages = bestMalls.map((mall, index) => ({
+        ...mall,
+        image: mall.image || placeholderImages[index % placeholderImages.length]
+      }));
+      
+      setNewPeermalls(newMallsWithImages);
+      setBestPeermalls(bestMallsWithImages);
     } catch (error) {
       console.error('Failed to load peermall data:', error);
     }
@@ -38,7 +58,7 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
     { id: 3, name: '캐주얼 맨투맨', price: '45,000원', mall: '패션 스트리트', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&h=200&fit=crop' },
   ];
 
-  const bestPeermalls = [
+  const bestPeermallsStatic = [
     { id: 1, name: '럭셔리 브랜드 하우스', category: '명품', rating: 4.9, sales: '1,234', image: 'https://images.unsplash.com/photo-1555529902-5261145633bf?w=300&h=200&fit=crop' },
     { id: 2, name: '헬스 앤 라이프', category: '건강', rating: 4.8, sales: '987', image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop' },
     { id: 3, name: '키즈 원더랜드', category: '유아용품', rating: 4.9, sales: '756', image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=300&h=200&fit=crop' },
@@ -90,7 +110,7 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {getFilteredData(newPeermalls, 'category').map((mall) => (
-                    <Link key={mall.id} to={`/peermalls/${mall.id}`}>
+                    <Link key={mall.id} to={`/peermall/${encodeURIComponent(mall.name)}`}>
                       <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105">
                         <CardContent className="p-0">
                           <div className="aspect-video overflow-hidden rounded-t-lg">
@@ -159,8 +179,8 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {bestPeermalls.map((mall) => (
-                    <Link key={mall.id} to={`/peermalls/${mall.id}`}>
+                  {(bestPeermalls.length > 0 ? bestPeermalls : bestPeermallsStatic).map((mall) => (
+                    <Link key={mall.id} to={`/peermall/${encodeURIComponent(mall.name)}`}>
                       <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105">
                         <CardContent className="p-0">
                           <div className="aspect-video overflow-hidden rounded-t-lg">
@@ -309,7 +329,7 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {newPeermalls.slice(0, 3).map((mall) => (
-                    <Link key={mall.id} to={`/peermalls/${mall.id}`}>
+                    <Link key={mall.id} to={`/peermall/${encodeURIComponent(mall.name)}`}>
                       <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105">
                         <CardContent className="p-0">
                           <div className="aspect-video overflow-hidden rounded-t-lg">
