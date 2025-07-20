@@ -7,6 +7,7 @@ export class PeermallService {
       id: crypto.randomUUID(),
       rating: 0,
       sales: 0,
+      status: 'active', // Default status for new peermalls
       ...peermallData,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -132,6 +133,12 @@ export class PeermallService {
       peermall.description.toLowerCase().includes(lowercaseQuery) ||
       peermall.category.toLowerCase().includes(lowercaseQuery)
     );
+  }
+
+  // 피어몰 조회 (이름으로)
+  async getPeermallByName(name: string): Promise<Peermall | null> {
+    const allPeermalls = await this.getAllPeermalls();
+    return allPeermalls.find(peermall => peermall.name === name) || null;
   }
 }
 

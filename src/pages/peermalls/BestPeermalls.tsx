@@ -1,17 +1,51 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, TrendingUp, Users } from 'lucide-react';
+import { Star, TrendingUp, Users, QrCode, Share } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { peermallService, Peermall } from '@/lib/indexeddb';
+import { toast } from '@/hooks/use-toast';
 
 const BestPeermalls = () => {
-  const bestPeermalls = [
-    { id: 1, name: '럭셔리 브랜드 하우스', category: '명품', rating: 4.9, sales: '1,234', followers: '12,345' },
-    { id: 2, name: '헬스 앤 라이프', category: '건강', rating: 4.8, sales: '987', followers: '8,765' },
-    { id: 3, name: '키즈 원더랜드', category: '유아용품', rating: 4.9, sales: '756', followers: '6,543' },
-    { id: 4, name: '테크 이노베이션', category: '전자기기', rating: 4.8, sales: '654', followers: '5,432' },
-    { id: 5, name: '오가닉 라이프', category: '유기농', rating: 4.7, sales: '543', followers: '4,321' },
-    { id: 6, name: '아트 갤러리', category: '예술품', rating: 4.9, sales: '432', followers: '3,210' },
-  ];
+  const [bestPeermalls, setBestPeermalls] = useState<Peermall[]>([]);
+
+  useEffect(() => {
+    const fetchBestPeermalls = async () => {
+      try {
+        const malls = await peermallService.getBestPeermalls(10);
+        setBestPeermalls(malls);
+      } catch (error) {
+        toast({
+          title: '오류',
+          description: '베스트 피어몰 목록을 불러오는데 실패했습니다.',
+          variant: 'destructive',
+        });
+      }
+    };
+    fetchBestPeermalls();
+  }, []);
+
+  const truncateDescription = (description: string, maxLength: number = 80) => {
+    if (description.length <= maxLength) return description;
+    return description.substring(0, maxLength) + '...';
+  };
+
+  const handleShare = (mallName: string) => {
+    const shareUrl = `${window.location.origin}/peermall/${encodeURIComponent(mallName)}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast({
+      title: '링크 복사 완료',
+      description: `'${mallName}' 피어몰 링크가 클립보드에 복사되었습니다.`, 
+    });
+  };
+
+  const handleGenerateQR = (mallName: string) => {
+    const qrLink = `https://peermall.app/qr/peermall/${encodeURIComponent(mallName)}`;
+    toast({
+      title: 'QR 코드 생성',
+      description: `'${mallName}' 피어몰 QR 코드 링크: ${qrLink}`, 
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -23,17 +57,14 @@ const BestPeermalls = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {bestPeermalls.map((mall, index) => (
-          <Link key={mall.id} to={`/peermalls/${mall.id}`}>
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card key={mall.id} className="hover:shadow-lg transition-shadow cursor-pointer relative">
+            <Link to={`/peermall/${encodeURIComponent(mall.name)}`}>
               <CardContent className="p-4">
-                <div className="aspect-video bg-muted rounded-lg mb-3 relative">
-                  {index < 3 && (
-                    <Badge className={`absolute top-2 left-2 ${
-                      index === 0 ? 'bg-yellow-500' : 
-                      index === 1 ? 'bg-gray-400' : 'bg-orange-500'
-                    }`}>
-                      #{index + 1}
-                    </Badge>
+                <div className="aspect-video bg-muted rounded-lg mb-3 overflow-hidden flex items-center justify-center">
+                  {mall.image ? (
+                    <img src={mall.image} alt={mall.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-muted-foreground">이미지 없음</div>
                   )}
                 </div>
                 <h3 className="font-semibold mb-2">{mall.name}</h3>
@@ -44,16 +75,27 @@ const BestPeermalls = () => {
                     <span className="text-sm">{mall.rating}</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>거래 {mall.sales}건</span>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-3 w-3" />
-                    <span>{mall.followers}</span>
-                  </div>
-                </div>
+                <p className="text-sm text-muted-foreground mb-2">거래 {mall.sales}건</p>
+                <p className="text-sm text-muted-foreground line-clamp-2">{truncateDescription(mall.description)}</p>
               </CardContent>
-            </Card>
-          </Link>
+            </Link>
+            {index < 3 && (
+              <Badge className={`absolute top-2 left-2 ${
+                index === 0 ? 'bg-yellow-500' : 
+                index === 1 ? 'bg-gray-400' : 'bg-orange-500'
+              }`}>
+                #{index + 1}
+              </Badge>
+            )}
+            <div className="absolute top-2 right-2 flex gap-1">
+              <button onClick={() => handleGenerateQR(mall.name)} className="p-1 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm">
+                <QrCode className="h-4 w-4 text-gray-600" />
+              </button>
+              <button onClick={() => handleShare(mall.name)} className="p-1 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm">
+                <Share className="h-4 w-4 text-gray-600" />
+              </button>
+            </div>
+          </Card>
         ))}
       </div>
     </div>

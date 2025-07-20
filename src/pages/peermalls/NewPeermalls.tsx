@@ -1,17 +1,56 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, Calendar } from 'lucide-react';
+import { Star, Calendar, QrCode, Share } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { peermallService, Peermall } from '@/lib/indexeddb';
+import { toast } from '@/hooks/use-toast';
 
 const NewPeermalls = () => {
-  const newPeermalls = [
-    { id: 1, name: '코스메틱 파라다이스', category: '뷰티', rating: 4.8, createdAt: '2024-01-15' },
-    { id: 2, name: '스마트 라이프', category: '전자기기', rating: 4.9, createdAt: '2024-01-14' },
-    { id: 3, name: '패션 스트리트', category: '의류', rating: 4.7, createdAt: '2024-01-13' },
-    { id: 4, name: '프리미엄 푸드', category: '식품', rating: 4.8, createdAt: '2024-01-12' },
-    { id: 5, name: '반려동물 천국', category: '펫샵', rating: 4.6, createdAt: '2024-01-11' },
-    { id: 6, name: '스포츠 월드', category: '스포츠', rating: 4.7, createdAt: '2024-01-10' },
-  ];
+  const [newPeermalls, setNewPeermalls] = useState<Peermall[]>([]);
+
+  useEffect(() => {
+    const fetchNewPeermalls = async () => {
+      try {
+        const malls = await peermallService.getNewPeermalls(10);
+        setNewPeermalls(malls);
+      } catch (error) {
+        toast({
+          title: '오류',
+          description: '신규 피어몰 목록을 불러오는데 실패했습니다.',
+          variant: 'destructive',
+        });
+      }
+    };
+    fetchNewPeermalls();
+  }, []);
+
+  const isNew = (createdAt: Date) => {
+    const sevenDays = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+    return (new Date().getTime() - new Date(createdAt).getTime()) <= sevenDays;
+  };
+
+  const truncateDescription = (description: string, maxLength: number = 80) => {
+    if (description.length <= maxLength) return description;
+    return description.substring(0, maxLength) + '...';
+  };
+
+  const handleShare = (mallName: string) => {
+    const shareUrl = `${window.location.origin}/peermall/${encodeURIComponent(mallName)}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast({
+      title: '링크 복사 완료',
+      description: `'${mallName}' 피어몰 링크가 클립보드에 복사되었습니다.`, 
+    });
+  };
+
+  const handleGenerateQR = (mallName: string) => {
+    const qrLink = `https://peermall.app/qr/peermall/${encodeURIComponent(mallName)}`;
+    toast({
+      title: 'QR 코드 생성',
+      description: `'${mallName}' 피어몰 QR 코드 링크: ${qrLink}`, 
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -23,11 +62,15 @@ const NewPeermalls = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {newPeermalls.map((mall) => (
-          <Link key={mall.id} to={`/peermalls/${mall.id}`}>
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card key={mall.id} className="hover:shadow-lg transition-shadow cursor-pointer relative">
+            <Link to={`/peermall/${encodeURIComponent(mall.name)}`}>
               <CardContent className="p-4">
-                <div className="aspect-video bg-muted rounded-lg mb-3 relative">
-                  <Badge className="absolute top-2 left-2 bg-primary">NEW</Badge>
+                <div className="aspect-video bg-muted rounded-lg mb-3 overflow-hidden flex items-center justify-center">
+                  {mall.image ? (
+                    <img src={mall.image} alt={mall.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-muted-foreground">이미지 없음</div>
+                  )}
                 </div>
                 <h3 className="font-semibold mb-2">{mall.name}</h3>
                 <div className="flex items-center justify-between mb-2">
@@ -37,10 +80,21 @@ const NewPeermalls = () => {
                     <span className="text-sm">{mall.rating}</span>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground">개설일: {mall.createdAt}</p>
+                <p className="text-sm text-muted-foreground line-clamp-2">{truncateDescription(mall.description)}</p>
               </CardContent>
-            </Card>
-          </Link>
+            </Link>
+            {isNew(mall.createdAt) && (
+              <Badge className="absolute top-2 left-2 bg-primary">NEW</Badge>
+            )}
+            <div className="absolute top-2 right-2 flex gap-1">
+              <button onClick={() => handleGenerateQR(mall.name)} className="p-1 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm">
+                <QrCode className="h-4 w-4 text-gray-600" />
+              </button>
+              <button onClick={() => handleShare(mall.name)} className="p-1 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm">
+                <Share className="h-4 w-4 text-gray-600" />
+              </button>
+            </div>
+          </Card>
         ))}
       </div>
     </div>

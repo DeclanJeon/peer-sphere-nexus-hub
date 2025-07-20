@@ -47,7 +47,7 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
     { id: 3, title: '리뷰 작성 이벤트', description: '리뷰 작성 시 포인트 적립', period: '상시 진행', image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=300&h=200&fit=crop' },
   ];
 
-  const getFilteredData = (data: any[], filterKey: string) => {
+  const getFilteredData = <T extends Record<string, unknown>>(data: T[], filterKey: keyof T) => {
     if (selectedCategory === 'all') return data;
     return data.filter(item => item[filterKey] === selectedCategory);
   };
