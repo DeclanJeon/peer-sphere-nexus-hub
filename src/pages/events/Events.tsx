@@ -78,54 +78,50 @@ const Events = () => {
           </Card>
         </div>
 
-        {/* Main Content */}
-        <div className="lg:col-span-3 space-y-6">
-          {events.map((event) => (
-            <Card key={event.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant={event.status === '진행중' ? 'default' : 'secondary'}>
-                        {event.status}
-                      </Badge>
-                      <Badge variant="outline">{event.discount}</Badge>
+        {/* Main Content - Event Cards Grid */}
+        <div className="lg:col-span-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {events.map((event) => (
+              <Card key={event.id} className="hover:shadow-lg transition-shadow relative overflow-hidden">
+                <div className="aspect-video bg-gradient-to-br from-primary/20 to-purple-500/20 relative">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute top-4 left-4">
+                    <Badge variant={event.status === '진행중' ? 'default' : 'secondary'}>
+                      {event.status}
+                    </Badge>
+                  </div>
+                  <div className="absolute top-4 right-4">
+                    <Badge variant="destructive" className="text-white">
+                      D-{event.status === '진행중' ? '2' : '4'}
+                    </Badge>
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <h3 className="text-lg font-bold mb-1">{event.title}</h3>
+                    <p className="text-sm opacity-90">{event.startDate} ~ {event.endDate}</p>
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{event.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span>{event.participants}명 참여</span>
                     </div>
-                    <Link to={`/events/${event.id}`}>
-                      <h3 className="text-xl font-semibold mb-2 hover:text-primary transition-colors">
-                        {event.title}
-                      </h3>
-                    </Link>
-                    <p className="text-muted-foreground mb-4">{event.description}</p>
+                    <Button asChild size="sm">
+                      <Link to={`/events/${event.id}`}>
+                        참여하기
+                      </Link>
+                    </Button>
                   </div>
-                  <Gift className="h-8 w-8 text-primary ml-4" />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>시작: {event.startDate}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span>종료: {event.endDate}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span>참여: {event.participants}명</span>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <Button asChild>
-                    <Link to={`/events/${event.id}`}>
-                      자세히 보기
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          {/* More Events Button */}
+          <div className="flex justify-center mt-8">
+            <Button variant="outline">더 보기</Button>
+          </div>
         </div>
       </div>
     </div>

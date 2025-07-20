@@ -82,46 +82,66 @@ const Community = () => {
           </Card>
         </div>
 
-        {/* Main Content */}
-        <div className="lg:col-span-3 space-y-4">
-          {posts.map((post) => (
-            <Card key={post.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{post.category}</Badge>
-                    <span className="text-sm text-muted-foreground">{post.author}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    <span>{post.createdAt}</span>
-                  </div>
+        {/* Main Content - Table Format */}
+        <div className="lg:col-span-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>게시글 목록</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2 px-4 font-medium">번호</th>
+                      <th className="text-left py-2 px-4 font-medium">제목</th>
+                      <th className="text-left py-2 px-4 font-medium">글쓴이</th>
+                      <th className="text-left py-2 px-4 font-medium">작성일</th>
+                      <th className="text-left py-2 px-4 font-medium">조회</th>
+                      <th className="text-left py-2 px-4 font-medium">추천</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {posts.map((post, index) => (
+                      <tr key={post.id} className="border-b hover:bg-muted/50">
+                        <td className="py-3 px-4">{posts.length - index}</td>
+                        <td className="py-3 px-4">
+                          <Link to={`/community/${post.id}`} className="hover:text-primary transition-colors">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">{post.category}</Badge>
+                              <span className="font-medium">{post.title}</span>
+                            </div>
+                          </Link>
+                        </td>
+                        <td className="py-3 px-4 text-muted-foreground">{post.author}</td>
+                        <td className="py-3 px-4 text-muted-foreground">{post.createdAt}</td>
+                        <td className="py-3 px-4 text-muted-foreground">{post.views}</td>
+                        <td className="py-3 px-4 text-muted-foreground">{post.likes}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Pagination */}
+              <div className="flex justify-center mt-6">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">{'<'}</span>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((page) => (
+                    <Button
+                      key={page}
+                      variant={page === 1 ? "default" : "ghost"}
+                      size="sm"
+                      className="w-8 h-8 p-0"
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                  <span className="text-sm text-muted-foreground">{'>'}</span>
                 </div>
-                
-                <Link to={`/community/${post.id}`} className="block">
-                  <h3 className="text-lg font-semibold mb-2 hover:text-primary transition-colors">
-                    {post.title}
-                  </h3>
-                  <p className="text-muted-foreground mb-4 line-clamp-2">{post.content}</p>
-                </Link>
-
-                <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Eye className="h-4 w-4" />
-                    <span>{post.views}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <MessageCircle className="h-4 w-4" />
-                    <span>{post.comments}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Heart className="h-4 w-4" />
-                    <span>{post.likes}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

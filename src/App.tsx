@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Main from "./pages/Main";
 import PeermallPage from "./pages/PeermallPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
@@ -61,7 +62,7 @@ const App = () => (
           <Route path="/" element={
             <ProtectedRoute>
               <Layout>
-                <Dashboard />
+                <Main />
               </Layout>
             </ProtectedRoute>
           } />
