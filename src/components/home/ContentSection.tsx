@@ -316,7 +316,7 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg">
+            {/* <Card className="shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="text-2xl">신규 제품/상품</CardTitle>
@@ -344,9 +344,9 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
-            <Card className="shadow-lg">
+            {/* <Card className="shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="text-2xl">커뮤니티 인기 게시글</CardTitle>
@@ -376,9 +376,9 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
-            <Card className="shadow-lg">
+            {/* <Card className="shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="text-2xl">진행중인 이벤트</CardTitle>
@@ -408,7 +408,7 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         );
     }

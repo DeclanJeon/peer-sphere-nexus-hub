@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Mail, KeyRound } from 'lucide-react';
+import { Loader2, Mail, KeyRound, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import apiClient from '@/lib/api/clients';
@@ -149,30 +149,64 @@ const Login = () => {
     try {
       const deviceInfo = getDeviceInfo();
       
-      const response = await apiClient.post('/api/v1/users/login', {
+      // 백엔드의 resend-otp 엔드포인트 호출
+      const response = await apiClient.post('/api/v1/users/resend-otp', {
         email,
-        step: 'send-otp',
-        deviceInfo
+        deviceInfo,
+        purpose: 'login' // 로그인 목적임을 명시
       });
 
       if (response.data.success) {
+        // 재전송 성공 시 타이머 초기화 (3분)
         setResendTimer(180);
+        // OTP 입력 필드 초기화
+        setOtp('');
+        
+        // 성공 토스트 메시지 표시
         toast({
           title: "인증번호 재발송",
-          description: "새로운 인증번호가 발송되었습니다.",
+          description: "새로운 인증번호가 이메일로 발송되었습니다. 3분 내에 입력해주세요.",
+          variant: 'default',
+          duration: 5000 // 5초간 표시
         });
       }
     } catch (error: any) {
-      setError(error.response?.data?.message || '인증번호 재발송에 실패했습니다.');
+      console.error('OTP 재전송 오류:', error);
+      
+      // 에러 메시지 설정
+      const errorMessage = error.response?.data?.message || '인증번호 재발송에 실패했습니다. 잠시 후 다시 시도해주세요.';
+      setError(errorMessage);
+      
+      // 에러 토스트 메시지 표시
+      toast({
+        title: "인증번호 발송 실패",
+        description: errorMessage,
+        variant: 'destructive',
+        duration: 5000
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header with Logo */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center">
+            <a href="/" className="text-2xl font-bold text-primary">PeerMall</a>
+          </div>
+        </div>
+      </header>
+
+      {/* Login Form */}
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
+          <div className="flex justify-center mb-4">
+            <h1 className="text-3xl font-bold text-primary">PeerMall</h1>
+          </div>
           <CardTitle className="text-2xl font-bold text-center">
             {step === 'email' ? '로그인' : '인증번호 확인'}
           </CardTitle>
@@ -260,17 +294,32 @@ const Login = () => {
               </Button>
 
               <div className="text-center">
-                <Button
-                  type="button"
-                  variant="link"
-                  onClick={handleResendOTP}
-                  disabled={resendTimer > 0 || isLoading}
-                  className="text-sm"
-                >
-                  {resendTimer > 0 
-                    ? `재전송 가능 (${Math.floor(resendTimer / 60)}:${(resendTimer % 60).toString().padStart(2, '0')})`
-                    : '인증번호 재전송'}
-                </Button>
+                <div className="flex flex-col items-center space-y-2">
+                  <Button
+                    type="button"
+                    variant={resendTimer > 0 ? 'outline' : 'link'}
+                    size="sm"
+                    onClick={handleResendOTP}
+                    disabled={resendTimer > 0 || isLoading}
+                    className={`text-sm ${resendTimer > 0 ? 'text-muted-foreground' : 'text-primary'}`}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        처리 중...
+                      </>
+                    ) : resendTimer > 0 ? (
+                      `재전송 가능 (${Math.floor(resendTimer / 60)}:${(resendTimer % 60).toString().padStart(2, '0')})`
+                    ) : (
+                      '인증번호 재전송'
+                    )}
+                  </Button>
+                  {resendTimer > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {Math.ceil(resendTimer / 60)}분 후에 재발송이 가능합니다
+                    </p>
+                  )}
+                </div>
               </div>
             </form>
           )}
@@ -294,13 +343,14 @@ const Login = () => {
                   }}
                   className="text-sm p-0"
                 >
-                  이메일 변경
+                  뒤로가기
                 </Button>
               </>
             )}
           </div>
         </CardFooter>
       </Card>
+      </div>
     </div>
   );
 };

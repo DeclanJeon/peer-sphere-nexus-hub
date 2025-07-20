@@ -1,5 +1,5 @@
 // lib/api.ts
-import apiClient from './api/clients';
+import apiClient from './clients';
 
 export interface PeermallCreateData {
   url: string;
@@ -12,9 +12,6 @@ export interface PeermallCreateData {
 }
 
 export const createPeermall = async (data: PeermallCreateData) => {
-  const response = await apiClient.post(
-    `/api/v1/peermalls/create`,
-    data
-  );
+  const response = await apiClient.post(`/api/v1/peermalls/create`, data);
   return response.data;
 };

@@ -28,8 +28,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
-
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:9393';
+import { API_BASE_URL } from '@/lib/api/clients';
 
 interface PeermallData {
   name: string;
@@ -211,7 +210,7 @@ const PeermallLayout = ({ children }: LayoutProps) => {
       <footer className="bg-muted border-t mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-muted-foreground">
-            <p>&copy; 2024 {peermall ? peermall.name : '피어몰'}. All rights reserved.</p>
+            <p>&copy; 2025 {peermall ? peermall.name : '피어몰'}. All rights reserved.</p>
           </div>
         </div>
       </footer>
