@@ -50,7 +50,7 @@ const UserPeermallHome = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                <span>운영자: {currentPeermall.creatorName}</span>
+                <span>운영자: {currentPeermall.ownerName}</span>
               </div>
             </div>
           </div>

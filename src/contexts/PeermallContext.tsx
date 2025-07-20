@@ -29,10 +29,10 @@ export const PeermallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       const urlMatch = location.pathname.match(/^\/peermall\/([^\/]+)/);
       if (urlMatch) {
-        const peermallUrl = decodeURIComponent(urlMatch[1]);
+        const peermallAddress = decodeURIComponent(urlMatch[1]);
         try {
           const peermalls = await peermallService.getAllPeermalls();
-          const peermall = peermalls.find(p => p.url === peermallUrl);
+          const peermall = peermalls.find(p => p.address === peermallAddress);
           setCurrentPeermall(peermall || null);
         } catch (error) {
           console.error('Failed to load peermall:', error);

@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Phone, Mail, MapPin, Camera } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { userService } from '@/lib/indexeddb';
 
 const MyInfo = () => {
   const { user } = useAuth();
@@ -15,7 +16,6 @@ const MyInfo = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    address: '',
   });
 
   useEffect(() => {
@@ -23,7 +23,6 @@ const MyInfo = () => {
       setFormData({
         name: user.name || '',
         phone: user.phone || '',
-        address: user.address || '',
       });
     }
   }, [user]);
@@ -43,7 +42,6 @@ const MyInfo = () => {
       const updatedUser = await userService.updateUser(user.uid, {
         name: formData.name,
         phone: formData.phone,
-        address: formData.address,
       });
 
       // If AuthContext doesn't automatically refetch, you might need to manually update it
@@ -107,7 +105,7 @@ const MyInfo = () => {
               {/* 프로필 이미지 */}
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={user.profileImage} alt="프로필" />
+                  <AvatarImage src={user.profile_image} alt="프로필" />
                   <AvatarFallback>
                     <User className="h-8 w-8" />
                   </AvatarFallback>
@@ -172,22 +170,6 @@ const MyInfo = () => {
                 </div>
               </div>
 
-              {/* 주소 */}
-              <div className="space-y-2">
-                <Label htmlFor="address">주소</Label>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <Textarea
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
-                    readOnly={!isEditing}
-                    className={!isEditing ? "bg-muted" : ""}
-                    placeholder="주소를 입력하세요"
-                    rows={2}
-                  />
-                </div>
-              </div>
 
               {/* 버튼 영역 */}
               <div className="flex justify-end gap-2">
@@ -201,7 +183,6 @@ const MyInfo = () => {
                         setFormData({
                           name: user.name || '',
                           phone: user.phone || '',
-                          address: user.address || '',
                         });
                       }}
                     >
@@ -237,13 +218,13 @@ const MyInfo = () => {
               <div>
                 <span className="font-medium">가입일:</span>
                 <p className="text-muted-foreground">
-                  {new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                  {new Date(user.created_at).toLocaleDateString('ko-KR')}
                 </p>
               </div>
               <div>
                 <span className="font-medium">최종 수정일:</span>
                 <p className="text-muted-foreground">
-                  {new Date(user.updatedAt).toLocaleDateString('ko-KR')}
+                  {new Date(user.updated_at).toLocaleDateString('ko-KR')}
                 </p>
               </div>
             </div>

@@ -20,7 +20,7 @@ const PeermallCard = ({ peermall }: PeermallCardProps) => {
   const handleShare = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const shareUrl = `${window.location.origin}/peermall/${encodeURIComponent(peermall.url)}`;
+    const shareUrl = `${window.location.origin}/peermall/${encodeURIComponent(peermall.address)}`;
     navigator.clipboard.writeText(shareUrl);
     toast({
       title: '링크 복사 완료',
@@ -31,7 +31,7 @@ const PeermallCard = ({ peermall }: PeermallCardProps) => {
   const handleGenerateQR = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const qrLink = `https://peermall.app/qr/peermall/${encodeURIComponent(peermall.url)}`;
+    const qrLink = `https://peermall.app/qr/peermall/${encodeURIComponent(peermall.address)}`;
     toast({
       title: 'QR 코드 생성',
       description: `'${peermall.name}' 피어몰 QR 코드 링크: ${qrLink}`,
@@ -40,7 +40,7 @@ const PeermallCard = ({ peermall }: PeermallCardProps) => {
 
   return (
     <Card className="hover:shadow-lg transition-shadow cursor-pointer relative group">
-      <Link to={`/peermall/${encodeURIComponent(peermall.url)}`}>
+      <Link to={`/peermall/${encodeURIComponent(peermall.address)}`}>
         <CardContent className="p-4">
           <div className="aspect-video bg-muted rounded-lg mb-3 overflow-hidden flex items-center justify-center">
             {peermall.image ? (

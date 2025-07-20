@@ -44,12 +44,12 @@ const UserPeermallLayout = ({ children }: UserPeermallLayoutProps) => {
     setIsMobileMenuOpen(false);
   };
 
-  const peermallUrl = currentPeermall?.url || '';
+  const peermallAddress = currentPeermall?.address || '';
   const navigation = [
-    { name: '홈', href: `/peermall/${peermallUrl}`, icon: Home },
-    { name: '제품', href: `/peermall/${peermallUrl}/products`, icon: ShoppingBag },
-    { name: '커뮤니티', href: `/peermall/${peermallUrl}/community`, icon: MessageCircle },
-    { name: '이벤트', href: `/peermall/${peermallUrl}/events`, icon: Calendar },
+    { name: '홈', href: `/peermall/${peermallAddress}`, icon: Home },
+    { name: '제품', href: `/peermall/${peermallAddress}/products`, icon: ShoppingBag },
+    { name: '커뮤니티', href: `/peermall/${peermallAddress}/community`, icon: MessageCircle },
+    { name: '이벤트', href: `/peermall/${peermallAddress}/events`, icon: Calendar },
   ];
 
   return (
@@ -63,10 +63,10 @@ const UserPeermallLayout = ({ children }: UserPeermallLayoutProps) => {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div>
-                <Link to={`/peermall/${peermallUrl}`} className="text-2xl font-bold text-primary">
+                <Link to={`/peermall/${peermallAddress}`} className="text-2xl font-bold text-primary">
                   {currentPeermall?.name || '피어몰'}
                 </Link>
-                <p className="text-sm text-muted-foreground">{currentPeermall?.creatorName}</p>
+                <p className="text-sm text-muted-foreground">{currentPeermall?.ownerName}</p>
               </div>
             </div>
             

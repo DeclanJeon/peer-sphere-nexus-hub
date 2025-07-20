@@ -2,18 +2,19 @@
 export interface Peermall {
   id: string;
   name: string;
-  url: string;
+  address: string;
+  category: string;
   description: string;
   image?: string;
-  creatorName: string;
-  familyCompany?: string;
-  referrerCode?: string;
+  ownerId: string;
+  ownerName: string;
+  familyCompany: string;
+  referralCode?: string;
   rating: number;
   sales: number;
-  category: string;
-  isMain?: boolean;
-  createdAt: string;
-  updatedAt: string;
+  status: 'active' | 'inactive';
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface PeermallContextType {
