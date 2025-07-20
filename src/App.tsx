@@ -15,7 +15,7 @@ import NotFound from "@/pages/NotFound";
 
 // Peermall pages
 import PeermallList from "@/pages/peermalls/PeermallList";
-import PeermallDetail from "@/pages/peermalls/PeermallDetail";
+// import PeermallDetail from "@/pages/peermalls/PeermallDetail";
 import PeermallCreate from "@/pages/peermalls/PeermallCreate";
 import NewPeermalls from "@/pages/peermalls/NewPeermalls";
 import BestPeermalls from "@/pages/peermalls/BestPeermalls";
@@ -86,7 +86,7 @@ const App = () => (
             <Route path="/peermalls" element={<Layout><PeermallList /></Layout>} />
             <Route path="/peermalls/new" element={<Layout><NewPeermalls /></Layout>} />
             <Route path="/peermalls/best" element={<Layout><BestPeermalls /></Layout>} />
-            <Route path="/peermall/:url" element={<Layout><PeermallDetail /></Layout>} />
+            {/* <Route path="/peermall/:url" element={<Layout><PeermallDetail /></Layout>} /> */}
             
             <Route path="/products" element={<Layout><ProductList /></Layout>} />
             <Route path="/products/new" element={<Layout><NewProducts /></Layout>} />
