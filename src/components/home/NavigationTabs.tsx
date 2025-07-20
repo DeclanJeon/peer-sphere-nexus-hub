@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import SearchSection from './SearchSection';
+import { useState } from 'react';
 
 interface NavigationTabsProps {
   activeTab: string;
@@ -151,6 +153,7 @@ const NavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) => {
               </button>
             </NavigationMenuItem>
           </NavigationMenuList>
+
         </NavigationMenu>
       </div>
     </section>

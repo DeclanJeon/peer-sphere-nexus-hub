@@ -25,14 +25,14 @@ const Main = () => {
   return (
     <div className="min-h-screen bg-background">
       
-      <HeroSection categories={categories} />
+      <NavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       <SearchSection searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <HeroSection categories={categories} />
       <CategorySection 
         categories={categories} 
         selectedCategory={selectedCategory} 
         setSelectedCategory={setSelectedCategory} 
       />
-      <NavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       <ContentSection activeTab={activeTab} selectedCategory={selectedCategory} />
     </div>
   );

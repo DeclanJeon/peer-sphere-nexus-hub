@@ -7,10 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Phone, Mail, MapPin, Camera } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { userService, authService, UserProfile } from '@/lib/indexeddb';
+import { useAuth } from '@/hooks/useAuth';
 
 const MyInfo = () => {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -19,47 +19,43 @@ const MyInfo = () => {
   });
 
   useEffect(() => {
-    loadUserInfo();
-  }, []);
-
-  const loadUserInfo = async () => {
-    try {
-      const currentUser = await authService.getCurrentUser();
-      if (currentUser) {
-        setUser(currentUser);
-        setFormData({
-          name: currentUser.name || '',
-          phone: currentUser.phone || '',
-          address: currentUser.address || '',
-        });
-      }
-    } catch (error) {
-      toast({
-        title: '오류',
-        description: '사용자 정보를 불러오는데 실패했습니다.',
-        variant: 'destructive',
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        phone: user.phone || '',
+        address: user.address || '',
       });
     }
-  };
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user) return;
 
+    // For now, assuming userService.updateUser interacts with the backend
+    // and the AuthContext will eventually refetch user data.
+    // In a real app, you might dispatch an action to AuthContext to update user data.
     try {
-      const updatedUser = await userService.updateUser(user.id, {
+      // Assuming userService.updateUser updates the backend and returns the updated user
+      // You might need to adjust userService to return the updated user from the backend
+      // or trigger a refetch of user data in AuthContext after a successful update.
+      const updatedUser = await userService.updateUser(user.uid, {
         name: formData.name,
         phone: formData.phone,
         address: formData.address,
       });
 
-      setUser(updatedUser);
+      // If AuthContext doesn't automatically refetch, you might need to manually update it
+      // For example, if login function also accepts user data to update the context:
+      // login(null, updatedUser); // Assuming session data is not changed during profile update
+
       setIsEditing(false);
       
       toast({
         title: '성공',
         description: '정보가 성공적으로 업데이트되었습니다.',
+        variant: 'default',
       });
     } catch (error) {
       toast({

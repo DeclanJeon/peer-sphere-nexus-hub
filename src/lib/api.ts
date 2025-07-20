@@ -1,8 +1,5 @@
 // lib/api.ts
-import axios from 'axios';
-
-const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_URL || 'http://localhost:9393';
+import apiClient from './api/clients';
 
 export interface PeermallCreateData {
   url: string;
@@ -15,14 +12,9 @@ export interface PeermallCreateData {
 }
 
 export const createPeermall = async (data: PeermallCreateData) => {
-  const response = await axios.post(
-    `${API_BASE_URL}/api/v1/peermalls/create`,
-    data,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }
+  const response = await apiClient.post(
+    `/api/v1/peermalls/create`,
+    data
   );
   return response.data;
 };
