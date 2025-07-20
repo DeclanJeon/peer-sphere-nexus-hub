@@ -1,21 +1,28 @@
-// src/App.tsx
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { PeermallProvider } from "@/contexts/PeermallContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "@/components/PublicRoute";
+import { SessionWarning } from "./components/SessionWarning";
 
 import Login from "@/pages/Login";
-import Main from "@/pages/Main";
-import Layout from "@/components/Layout";
 import NotFound from "@/pages/NotFound";
 
-// Peermall pages
-import PeermallList from "@/pages/peermalls/PeermallList";
-import PeermallDetail from "@/pages/peermalls/PeermallDetail";
+// Main Layout & Pages
+import MainLayout from "@/components/layout/MainLayout";
+import MainPage from "@/pages/main/Main";
+import PeermallListMain from "@/pages/main/peermalls/PeermallList";
+
+// User Peermall Layout & Pages  
+import UserPeermallLayout from "@/components/layout/UserPeermallLayout";
+import UserPeermallHome from "@/pages/user-peermall/UserPeermallHome";
+
+// Shared Pages (used by both main and user peermalls)
 import PeermallCreate from "@/pages/peermalls/PeermallCreate";
 import NewPeermalls from "@/pages/peermalls/NewPeermalls";
 import BestPeermalls from "@/pages/peermalls/BestPeermalls";
@@ -48,9 +55,8 @@ import MyReviews from "@/pages/mypage/MyReviews";
 
 // QR Code
 import QRCode from "@/pages/QRCode";
-import { SessionWarning } from "./components/SessionWarning";
 
-// QueryClient 설정 개선
+// QueryClient 설정
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -66,147 +72,184 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <SessionWarning /> {/* 추가 */}
-          <Routes>
-            {/* Public Route - 로그인 페이지 */}
-            <Route 
-              path="/login" 
-              element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
-              } 
-            />
-            
-            {/* Public Routes - 누구나 접근 가능 */}
-            <Route path="/" element={<Layout><Main /></Layout>} />
-            <Route path="/peermalls" element={<Layout><PeermallList /></Layout>} />
-            <Route path="/peermalls/new" element={<Layout><NewPeermalls /></Layout>} />
-            <Route path="/peermalls/best" element={<Layout><BestPeermalls /></Layout>} />
-            <Route path="/peermall/:url" element={<Layout><PeermallDetail /></Layout>} />
-            
-            <Route path="/products" element={<Layout><ProductList /></Layout>} />
-            <Route path="/products/new" element={<Layout><NewProducts /></Layout>} />
-            <Route path="/products/best" element={<Layout><BestProducts /></Layout>} />
-            <Route path="/products/:id" element={<Layout><ProductDetail /></Layout>} />
-            
-            <Route path="/community" element={<Layout><Community /></Layout>} />
-            <Route path="/community/:id" element={<Layout><BoardDetail /></Layout>} />
-            
-            <Route path="/events" element={<Layout><Events /></Layout>} />
-            <Route path="/events/:id" element={<Layout><EventDetail /></Layout>} />
-            
-            {/* Protected Routes - 로그인 필요 */}
-            <Route 
-              path="/peermalls/create" 
-              element={
-                <ProtectedRoute>
-                  <Layout><PeermallCreate /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/products/create" 
-              element={
-                <ProtectedRoute>
-                  <Layout><ProductCreate /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/community/create" 
-              element={
-                <ProtectedRoute>
-                  <Layout><BoardCreate /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/events/create" 
-              element={
-                <ProtectedRoute>
-                  <Layout><EventCreate /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* My Page Routes - 모두 로그인 필요 */}
-            <Route 
-              path="/mypage" 
-              element={
-                <ProtectedRoute>
-                  <Layout><MyPage /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/mypage/info" 
-              element={
-                <ProtectedRoute>
-                  <Layout><MyInfo /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/mypage/mall" 
-              element={
-                <ProtectedRoute>
-                  <Layout><MyMall /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/mypage/mall-info" 
-              element={
-                <ProtectedRoute>
-                  <Layout><MyMallInfo /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/mypage/posts" 
-              element={
-                <ProtectedRoute>
-                  <Layout><MyPosts /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/mypage/products" 
-              element={
-                <ProtectedRoute>
-                  <Layout><MyProducts /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/mypage/reviews" 
-              element={
-                <ProtectedRoute>
-                  <Layout><MyReviews /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* QR Code - 로그인 필요 */}
-            <Route 
-              path="/qr" 
-              element={
-                <ProtectedRoute>
-                  <Layout><QRCode /></Layout>
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </TooltipProvider>
+        <PeermallProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <SessionWarning />
+            <Routes>
+              {/* Public Route - 로그인 페이지 */}
+              <Route 
+                path="/login" 
+                element={
+                  <PublicRoute>
+                    <Login />
+                  </PublicRoute>
+                } 
+              />
+              
+              {/* Main Peermall Routes */}
+              <Route path="/" element={<MainLayout><MainPage /></MainLayout>} />
+              <Route path="/peermalls" element={<MainLayout><PeermallListMain /></MainLayout>} />
+              <Route path="/peermalls/new" element={<MainLayout><NewPeermalls /></MainLayout>} />
+              <Route path="/peermalls/best" element={<MainLayout><BestPeermalls /></MainLayout>} />
+              
+              <Route path="/products" element={<MainLayout><ProductList /></MainLayout>} />
+              <Route path="/products/new" element={<MainLayout><NewProducts /></MainLayout>} />
+              <Route path="/products/best" element={<MainLayout><BestProducts /></MainLayout>} />
+              <Route path="/products/:id" element={<MainLayout><ProductDetail /></MainLayout>} />
+              
+              <Route path="/community" element={<MainLayout><Community /></MainLayout>} />
+              <Route path="/community/:id" element={<MainLayout><BoardDetail /></MainLayout>} />
+              
+              <Route path="/events" element={<MainLayout><Events /></MainLayout>} />
+              <Route path="/events/:id" element={<MainLayout><EventDetail /></MainLayout>} />
+              
+              {/* User Peermall Routes */}
+              <Route path="/peermall/:url" element={<UserPeermallLayout><UserPeermallHome /></UserPeermallLayout>} />
+              <Route path="/peermall/:url/products" element={<UserPeermallLayout><ProductList /></UserPeermallLayout>} />
+              <Route path="/peermall/:url/products/:id" element={<UserPeermallLayout><ProductDetail /></UserPeermallLayout>} />
+              <Route path="/peermall/:url/community" element={<UserPeermallLayout><Community /></UserPeermallLayout>} />
+              <Route path="/peermall/:url/community/:id" element={<UserPeermallLayout><BoardDetail /></UserPeermallLayout>} />
+              <Route path="/peermall/:url/events" element={<UserPeermallLayout><Events /></UserPeermallLayout>} />
+              <Route path="/peermall/:url/events/:id" element={<UserPeermallLayout><EventDetail /></UserPeermallLayout>} />
+              
+              {/* Protected Routes - 로그인 필요 */}
+              <Route 
+                path="/peermalls/create" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><PeermallCreate /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/products/create" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><ProductCreate /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/community/create" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><BoardCreate /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/events/create" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><EventCreate /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+
+              <Route 
+                path="/peermall/:url/products/create" 
+                element={
+                  <ProtectedRoute>
+                    <UserPeermallLayout><ProductCreate /></UserPeermallLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/peermall/:url/community/create" 
+                element={
+                  <ProtectedRoute>
+                    <UserPeermallLayout><BoardCreate /></UserPeermallLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/peermall/:url/events/create" 
+                element={
+                  <ProtectedRoute>
+                    <UserPeermallLayout><EventCreate /></UserPeermallLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* My Page Routes - 모두 로그인 필요 */}
+              <Route 
+                path="/mypage" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><MyPage /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/mypage/info" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><MyInfo /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/mypage/mall" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><MyMall /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/mypage/mall-info" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><MyMallInfo /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/mypage/posts" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><MyPosts /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/mypage/products" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><MyProducts /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/mypage/reviews" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><MyReviews /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* QR Code - 로그인 필요 */}
+              <Route 
+                path="/qr" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout><QRCode /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </TooltipProvider>
+        </PeermallProvider>
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>
