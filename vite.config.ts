@@ -8,15 +8,20 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    hmr: {
-      port: 8080,
-    },
+    hmr: mode === 'development' ? {
+      port: 8081, // Use a different port for HMR
+      host: 'localhost',
+    } : false,
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
       },
     },
+  },
+  define: {
+    __WS_TOKEN__: JSON.stringify(''),
+    global: 'globalThis',
   },
   plugins: [
     react(),
@@ -27,5 +32,8 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  optimizeDeps: {
+    exclude: ['@vite/client'],
   },
 }));
