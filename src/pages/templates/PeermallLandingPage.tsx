@@ -1,13 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import PeermallHeroSection from '@/components/peermall/PeermallHeroSection';
-import PeermallContentSection from '@/components/peermall/PeermallContentSection';
+import { peermallService } from '@/lib/indexeddb/peermallService';
 import { toast } from '@/hooks/use-toast';
-import SearchSection from '@/components/home/SearchSection';
-
-const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_URL || 'http://localhost:9393';
+import LandingPageTemplate from '@/components/templates/LandingPageTemplate';
 
 interface PeermallData {
   name: string;
@@ -19,18 +14,22 @@ const PeermallLandingPage = () => {
   const { url } = useParams<{ url: string }>();
   const [peermall, setPeermall] = useState<PeermallData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchPeermallData = async () => {
       if (!url) return;
 
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/v1/peermalls/${url}`);
-        if (response.data.success) {
-          setPeermall(response.data.data);
+        // IndexedDB에서 피어몰 데이터 가져오기 (URL은 name으로 대체)
+        const peermallData = await peermallService.getPeermallByName(url);
+        if (peermallData) {
+          setPeermall({
+            name: peermallData.name,
+            description: peermallData.description,
+            imageUrl: peermallData.image
+          });
         } else {
-          throw new Error(response.data.message);
+          throw new Error('피어몰을 찾을 수 없습니다.');
         }
       } catch (error: any) {
         toast({
@@ -53,17 +52,7 @@ const PeermallLandingPage = () => {
     return <div className="container mx-auto px-4 py-8 text-center">피어몰을 찾을 수 없습니다.</div>;
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <PeermallHeroSection 
-        name={peermall.name}
-        description={peermall.description}
-        imageUrl={peermall.imageUrl}
-      />
-      <SearchSection searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      <PeermallContentSection />
-    </div>
-  );
+  return <LandingPageTemplate isMainPage={false} peermallData={peermall} />;
 };
 
 export default PeermallLandingPage;

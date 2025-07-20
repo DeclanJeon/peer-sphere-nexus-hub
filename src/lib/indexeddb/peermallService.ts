@@ -140,6 +140,7 @@ export class PeermallService {
     const allPeermalls = await this.getAllPeermalls();
     return allPeermalls.find(peermall => peermall.name === name) || null;
   }
+
 }
 
 export const peermallService = new PeermallService();
