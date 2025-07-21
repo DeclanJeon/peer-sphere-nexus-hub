@@ -140,21 +140,10 @@ const PeermallCreate = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* 피어몰 이름 */}
-            <div className="space-y-2">
-              <Label htmlFor="name">피어몰 이름 *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="피어몰 이름을 입력해주세요"
-                required
-              />
-            </div>
 
             {/* 피어몰 주소 */}
             <div className="space-y-2">
-              <Label htmlFor="address">피어몰 주소 *</Label>
+              <Label htmlFor="address">피어몰 사이트 주소 *</Label>
               <div className="flex gap-2">
                 <Input
                   id="address"
@@ -180,26 +169,21 @@ const PeermallCreate = () => {
               )}
             </div>
 
-            {/* 카테고리 */}
+            {/* 피어몰 이름 */}
             <div className="space-y-2">
-              <Label htmlFor="category">카테고리 *</Label>
-              <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="카테고리를 선택해주세요" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="name">피어몰 이름 *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="피어몰 이름을 입력해주세요"
+                required
+              />
             </div>
 
             {/* 설명 */}
             <div className="space-y-2">
-              <Label htmlFor="description">피어몰 설명 *</Label>
+              <Label htmlFor="description">피어몰 소개글 *</Label>
               <Textarea
                 id="description"
                 value={formData.description}
@@ -226,20 +210,62 @@ const PeermallCreate = () => {
               )}
             </div>
 
-            {/* 제휴사 */}
+            
+            {/* 소유자의 이름 */}
             <div className="space-y-2">
-              <Label htmlFor="familyCompany">제휴사</Label>
+              <Label htmlFor="ownerName">소유자의 이름</Label>
               <Input
-                id="familyCompany"
-                value={formData.familyCompany}
-                onChange={(e) => setFormData(prev => ({ ...prev, familyCompany: e.target.value }))}
-                placeholder="제휴사명을 입력해주세요"
+                id="ownerName"
+                value={formData.ownerName}
+                onChange={(e) => setFormData(prev => ({ ...prev, ownerName: e.target.value }))}
+                placeholder="소유자의 이름을 입력해주세요"
+                required
               />
+            </div>
+            
+            {/* 소유자의 이메일 주소 */}
+            <div className="space-y-2">
+              <Label htmlFor="ownerEmail">소유자의 이메일 주소</Label>
+              <Input
+                id="ownerEmail"
+                value={formData.ownerEmail}
+                onChange={(e) => setFormData(prev => ({ ...prev, ownerEmail: e.target.value }))}
+                placeholder="소유자의 이메일 주소를 입력해주세요"
+                required
+              />
+            </div>
+            {/* 소유자의 번호 */}
+            <div className="space-y-2">
+              <Label htmlFor="ownerPhone">소유자의 번호</Label>
+              <Input
+                id="ownerPhone"
+                value={formData.ownerPhone}
+                onChange={(e) => setFormData(prev => ({ ...prev, ownerPhone: e.target.value }))}
+                placeholder="소유자의 번호를 입력해주세요"
+                required
+              />
+            </div>
+            
+            {/* 카테고리 */}
+            <div className="space-y-2">
+              <Label htmlFor="category">카테고리 *</Label>
+              <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="카테고리를 선택해주세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* 추천인 코드 */}
             <div className="space-y-2">
-              <Label htmlFor="referralCode">추천인 코드</Label>
+              <Label htmlFor="referralCode">추천인 코드 *</Label>
               <Input
                 id="referralCode"
                 value={formData.referrerCode || ''}
