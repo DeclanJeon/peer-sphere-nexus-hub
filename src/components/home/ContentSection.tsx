@@ -79,29 +79,32 @@ const ContentSection = ({ activeTab, selectedCategory, isMainPeermall = true }: 
       case 'new':
         return (
           <div className="space-y-12">
-            <Card className="shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-2xl">신규 피어몰</CardTitle>
-                  <CardDescription className="text-base">
-                    새롭게 오픈한 피어몰들을 만나보세요
-                    {selectedCategory !== 'all' && (
-                      <span className="text-primary ml-1">({selectedCategory} 카테고리)</span>
-                    )}
-                  </CardDescription>
-                </div>
-                <Button variant="outline" asChild>
-                  <Link to="/peermalls/new">전체보기</Link>
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {getFilteredPeermalls(newPeermalls).map((mall) => (
-                    <PeermallCard key={mall.id} peermall={mall} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {/* 메인 피어몰에서만 피어몰 카드 섹션 표시 */}
+            {isMainPeermall && (
+              <Card className="shadow-lg">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="text-2xl">신규 피어몰</CardTitle>
+                    <CardDescription className="text-base">
+                      새롭게 오픈한 피어몰들을 만나보세요
+                      {selectedCategory !== 'all' && (
+                        <span className="text-primary ml-1">({selectedCategory} 카테고리)</span>
+                      )}
+                    </CardDescription>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <Link to="/peermalls/new">전체보기</Link>
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {getFilteredPeermalls(newPeermalls).map((mall) => (
+                      <PeermallCard key={mall.id} peermall={mall} />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card className="shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
@@ -138,24 +141,27 @@ const ContentSection = ({ activeTab, selectedCategory, isMainPeermall = true }: 
       case 'best':
         return (
           <div className="space-y-12">
-            <Card className="shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-2xl">베스트 피어몰</CardTitle>
-                  <CardDescription className="text-base">인기 높은 베스트 피어몰들을 확인해보세요</CardDescription>
-                </div>
-                <Button variant="outline" asChild>
-                  <Link to="/peermalls/best">전체보기</Link>
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {getFilteredPeermalls(bestPeermalls).map((mall) => (
-                    <PeermallCard key={mall.id} peermall={mall} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {/* 메인 피어몰에서만 피어몰 카드 섹션 표시 */}
+            {isMainPeermall && (
+              <Card className="shadow-lg">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="text-2xl">베스트 피어몰</CardTitle>
+                    <CardDescription className="text-base">인기 높은 베스트 피어몰들을 확인해보세요</CardDescription>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <Link to="/peermalls/best">전체보기</Link>
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {getFilteredPeermalls(bestPeermalls).map((mall) => (
+                      <PeermallCard key={mall.id} peermall={mall} />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card className="shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
@@ -267,24 +273,27 @@ const ContentSection = ({ activeTab, selectedCategory, isMainPeermall = true }: 
       default: // 'all'
         return (
           <div className="space-y-12">
-            <Card className="shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-2xl">신규 피어몰</CardTitle>
-                  <CardDescription className="text-base">새롭게 오픈한 피어몰들을 만나보세요</CardDescription>
-                </div>
-                <Button variant="outline" asChild>
-                  <Link to="/peermalls/new">전체보기</Link>
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {getFilteredPeermalls(newPeermalls).slice(0, 3).map((mall) => (
-                    <PeermallCard key={mall.id} peermall={mall} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {/* 메인 피어몰에서만 피어몰 카드 섹션 표시 */}
+            {isMainPeermall && (
+              <Card className="shadow-lg">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="text-2xl">신규 피어몰</CardTitle>
+                    <CardDescription className="text-base">새롭게 오픈한 피어몰들을 만나보세요</CardDescription>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <Link to="/peermalls/new">전체보기</Link>
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {getFilteredPeermalls(newPeermalls).slice(0, 3).map((mall) => (
+                      <PeermallCard key={mall.id} peermall={mall} />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         );
     }
