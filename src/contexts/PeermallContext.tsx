@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Peermall, PeermallContextType, PeermallCreationData } from '@/types/peermall';
-import apiClient from '@/lib/api/clients';
+import { peermallService } from '@/lib/indexeddb/peermallService';
 
 const PeermallContext = createContext<PeermallContextType | undefined>(undefined);
 
@@ -27,10 +27,8 @@ export const PeermallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const fetchPeermalls = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/api/v1/peermalls');
-      if (response.data.success) {
-        setPeermalls(response.data.data);
-      }
+      const peermalls = await peermallService.getAllPeermalls();
+      setPeermalls(peermalls);
       setError(null);
     } catch (err) {
       setError('피어몰 목록을 불러오는데 실패했습니다.');
@@ -40,26 +38,22 @@ export const PeermallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, []);
 
-  const fetchPeermallByUrl = useCallback(async (url: string) => {
+  const fetchPeermallByUrl = useCallback(async (address: string) => {
     setLoading(true);
     setError(null);
     setCurrentPeermall(null);
     try {
-      const response = await apiClient.get(`/api/v1/peermalls/${url}`);
-
-      if (response.data.success) {
-        setCurrentPeermall(response.data.data);
+      const allPeermalls = await peermallService.getAllPeermalls();
+      const peermall = allPeermalls.find(p => p.address === address);
+      
+      if (peermall) {
+        setCurrentPeermall(peermall);
       } else {
-        // API 응답은 성공했으나, success 플래그가 false인 경우
-        setError('404'); 
+        setError('404');
       }
     } catch (err: any) {
-      if (err.response && err.response.status === 404) {
-        setError('404');
-      } else {
-        setError('피어몰 정보를 불러오는데 실패했습니다.');
-        console.error(err);
-      }
+      setError('피어몰 정보를 불러오는데 실패했습니다.');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -68,19 +62,15 @@ export const PeermallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const createPeermall = async (data: PeermallCreationData) => {
     setLoading(true);
     try {
-      const response = await apiClient.post('/api/v1/peermalls', data);
-      if (response.data.success) {
-        const newPeermall = response.data.data;
-        setPeermalls(prev => [...prev, newPeermall]);
-        setCurrentPeermall(newPeermall);
-        setError(null);
-        navigate(`/peermall/${newPeermall.url}`);
-        return newPeermall;
-      } else {
-        throw new Error(response.data.message || '피어몰 생성에 실패했습니다.');
-      }
+      const peermallData = { ...data, status: 'active' as const };
+      const newPeermall = await peermallService.createPeermall(peermallData);
+      setPeermalls(prev => [...prev, newPeermall]);
+      setCurrentPeermall(newPeermall);
+      setError(null);
+      navigate(`/peermall/${newPeermall.address}`);
+      return newPeermall;
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || '피어몰 생성 중 오류가 발생했습니다.';
+      const errorMessage = err.message || '피어몰 생성 중 오류가 발생했습니다.';
       setError(errorMessage);
       console.error(err);
       throw err;
@@ -92,8 +82,8 @@ export const PeermallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     const urlMatch = location.pathname.match(/^\/peermall\/([^\/]+)/);
     if (urlMatch) {
-      const peermallUrl = decodeURIComponent(urlMatch[1]);
-      fetchPeermallByUrl(peermallUrl);
+      const peermallAddress = decodeURIComponent(urlMatch[1]);
+      fetchPeermallByUrl(peermallAddress);
     } else {
       setCurrentPeermall(null);
     }

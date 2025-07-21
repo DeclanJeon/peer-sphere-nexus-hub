@@ -7,7 +7,7 @@ export class PeermallService {
       id: crypto.randomUUID(),
       rating: 0,
       sales: 0,
-      status: 'active', // Default status for new peermalls
+      status: peermallData.status || 'active', // Default status for new peermalls
       ...peermallData,
       createdAt: new Date(),
       updatedAt: new Date(),

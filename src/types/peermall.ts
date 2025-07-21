@@ -1,34 +1,33 @@
 
 export interface Peermall {
-  id: number;
-  url: string;
+  id: string;
   name: string;
+  address: string;
+  category: string;
   description: string;
-  image_url: string | null;
-  creator_name: string;
-  owner_email: string | null;
-  owner_phone: string | null;
-  family_company: string;
-  referrer_code: string | null;
+  image?: string;
+  ownerId: string;
+  ownerName: string;
+  familyCompany: string;
+  referralCode?: string;
   rating: number;
-  sales_volume: number;
-  follower_count: number;
-  created_at: string;
-  updated_at: string;
-  is_new?: 0 | 1;
-  score?: number;
+  sales: number;
+  status: 'active' | 'inactive';
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface PeermallCreationData {
-  url: string;
   name: string;
+  address: string;
+  category: string;
   description: string;
-  imageUrl?: string;
-  creatorName: string;
-  ownerEmail?: string;
-  ownerPhone?: string;
-  familyCompany?: string;
-  referrerCode?: string;
+  image?: string;
+  ownerId: string;
+  ownerName: string;
+  familyCompany: string;
+  referralCode?: string;
+  status?: 'active' | 'inactive';
 }
 
 export interface PeermallContextType {
@@ -38,7 +37,7 @@ export interface PeermallContextType {
   error: string | null;
   isMainPeermall: boolean;
   fetchPeermalls: () => Promise<void>;
-  fetchPeermallByUrl: (url: string) => Promise<void>;
+  fetchPeermallByUrl: (address: string) => Promise<void>;
   createPeermall: (data: PeermallCreationData) => Promise<Peermall | undefined>;
   setCurrentPeermall: (peermall: Peermall | null) => void;
 }
