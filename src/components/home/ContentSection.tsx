@@ -1,86 +1,59 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Star, QrCode, Share2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { peermallService, Peermall } from '@/lib/indexeddb';
+import PeermallCard from '@/components/shared/PeermallCard';
 
 interface ContentSectionProps {
   activeTab: string;
   selectedCategory: string;
+  isMainPeermall?: boolean; // 메인 피어몰인지 유저 피어몰인지 구분
 }
 
-const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) => {
-  const [showQRCode, setShowQRCode] = useState<number | null>(null);
+const ContentSection = ({ activeTab, selectedCategory, isMainPeermall = true }: ContentSectionProps) => {
+  const [newPeermalls, setNewPeermalls] = useState<Peermall[]>([]);
+  const [bestPeermalls, setBestPeermalls] = useState<Peermall[]>([]);
 
-  // QR코드 생성 함수 (실제 구현에서는 QR 라이브러리 사용)
-  const generateQRCodeURL = (mallId: number) => {
-    const mallURL = `${window.location.origin}/peermalls/${mallId}`;
-    // 실제로는 qrcode 라이브러리나 API를 사용하여 QR코드 생성
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mallURL)}`;
-  };
-
-  // 공유하기 함수
-  const handleShare = async (mall: any, event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const shareData = {
-      title: mall.name,
-      text: `${mall.name} - ${mall.category} 피어몰을 확인해보세요!`,
-      url: `${window.location.origin}/peermalls/${mall.id}`
-    };
-
-    try {
-      if (navigator.share && navigator.canShare(shareData)) {
-        await navigator.share(shareData);
+  useEffect(() => {
+    const fetchPeermalls = async () => {
+      try {
+        if (isMainPeermall) {
+          // 메인 피어몰에서는 모든 피어몰 보여주기
+          const newMalls = await peermallService.getNewPeermalls(6);
+          const allMalls = await peermallService.getAllPeermalls();
+          const bestMalls = allMalls.sort((a, b) => b.rating - a.rating).slice(0, 6);
+          
+          setNewPeermalls(newMalls);
+          setBestPeermalls(bestMalls);
+        } else {
+          // 유저 피어몰에서는 해당 유저의 피어몰만 보여주기는 필요시 구현
+          const allMalls = await peermallService.getAllPeermalls();
+          setNewPeermalls(allMalls.slice(0, 6));
+          setBestPeermalls(allMalls.slice(0, 6));
+        }
+      } catch (error) {
         toast({
-          title: "공유 완료",
-          description: "피어몰 정보가 성공적으로 공유되었습니다.",
-        });
-      } else {
-        // Web Share API를 지원하지 않는 경우 클립보드에 복사
-        await navigator.clipboard.writeText(shareData.url);
-        toast({
-          title: "링크 복사됨",
-          description: "피어몰 링크가 클립보드에 복사되었습니다.",
+          title: '오류',
+          description: '피어몰 목록을 불러오는데 실패했습니다.',
+          variant: 'destructive',
         });
       }
-    } catch (error) {
-      console.error('공유 실패:', error);
-      toast({
-        title: "공유 실패",
-        description: "공유 중 오류가 발생했습니다. 다시 시도해주세요.",
-        variant: "destructive",
-      });
-    }
-  };
+    };
 
-  // QR코드 토글 함수
-  const handleQRCode = (mallId: number, event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setShowQRCode(showQRCode === mallId ? null : mallId);
-  };
+    fetchPeermalls();
+  }, [isMainPeermall]);
 
-  // Sample data - in real implementation, this would come from IndexedDB
-  const newPeermalls = [
-    { id: 1, name: '코스메틱 파라다이스', category: '뷰티', rating: 4.8, image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=200&fit=crop' },
-    { id: 2, name: '스마트 라이프', category: '전자기기', rating: 4.9, image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop' },
-    { id: 3, name: '패션 스트리트', category: '패션', rating: 4.7, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=200&fit=crop' },
-  ];
+  const getFilteredPeermalls = (peermalls: Peermall[]) => {
+    if (selectedCategory === 'all') return peermalls;
+    return peermalls.filter(mall => mall.familyCompany === selectedCategory);
+  };
 
   const newProducts = [
     { id: 1, name: '프리미엄 스킨케어 세트', price: '89,000원', mall: '코스메틱 파라다이스', image: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=200&h=200&fit=crop' },
     { id: 2, name: '무선 이어폰 프로', price: '129,000원', mall: '스마트 라이프', image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200&h=200&fit=crop' },
     { id: 3, name: '캐주얼 맨투맨', price: '45,000원', mall: '패션 스트리트', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&h=200&fit=crop' },
-  ];
-
-  const bestPeermalls = [
-    { id: 1, name: '럭셔리 브랜드 하우스', category: '명품', rating: 4.9, sales: '1,234', image: 'https://images.unsplash.com/photo-1555529902-5261145633bf?w=300&h=200&fit=crop' },
-    { id: 2, name: '헬스 앤 라이프', category: '건강', rating: 4.8, sales: '987', image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop' },
-    { id: 3, name: '키즈 원더랜드', category: '유아용품', rating: 4.9, sales: '756', image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=300&h=200&fit=crop' },
   ];
 
   const bestProducts = [
@@ -100,94 +73,6 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
     { id: 2, title: '베스트 피어몰 선정', description: '월간 베스트 피어몰을 선정합니다', period: '2024.01.15 ~ 01.30', image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=200&fit=crop' },
     { id: 3, title: '리뷰 작성 이벤트', description: '리뷰 작성 시 포인트 적립', period: '상시 진행', image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=300&h=200&fit=crop' },
   ];
-
-  const getFilteredData = <T extends Record<string, unknown>>(data: T[], filterKey: keyof T) => {
-    if (selectedCategory === 'all') return data;
-    return data.filter(item => item[filterKey] === selectedCategory);
-  };
-
-  // 피어몰 카드 렌더링 함수
-  const renderPeermallCard = (mall: any, showSales = false) => (
-    <div key={mall.id} className="relative">
-      <Link to={`/peermalls/${mall.id}`}>
-        <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105">
-          <CardContent className="p-0">
-            <div className="relative aspect-video overflow-hidden rounded-t-lg">
-              <img src={mall.image} alt={mall.name} className="w-full h-full object-cover" />
-              
-              {/* QR코드와 공유하기 아이콘 */}
-              <div className="absolute top-3 left-3 flex gap-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-md"
-                  onClick={(e) => handleQRCode(mall.id, e)}
-                  title="QR코드 보기"
-                >
-                  <QrCode className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-md"
-                  onClick={(e) => handleShare(mall, e)}
-                  title="공유하기"
-                >
-                  <Share2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="p-4">
-              <h4 className="font-bold text-lg mb-2">{mall.name}</h4>
-              <div className="flex items-center justify-between mb-3">
-                <Badge variant="secondary">{mall.category}</Badge>
-                {showSales && (
-                  <span className="text-sm text-muted-foreground">판매 {mall.sales}건</span>
-                )}
-              </div>
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-semibold">{mall.rating}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </Link>
-      
-      {/* QR코드 모달 */}
-      {showQRCode === mall.id && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          onClick={() => setShowQRCode(null)}
-        >
-          <div 
-            className="bg-white p-6 rounded-lg shadow-xl max-w-sm mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="text-center">
-              <h3 className="text-lg font-bold mb-4">{mall.name}</h3>
-              <div className="bg-gray-100 p-4 rounded-lg mb-4">
-                <img 
-                  src={generateQRCodeURL(mall.id)} 
-                  alt="QR Code" 
-                  className="mx-auto"
-                />
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                QR코드를 스캔하여 피어몰에 바로 접속하세요
-              </p>
-              <Button 
-                onClick={() => setShowQRCode(null)}
-                className="w-full"
-              >
-                닫기
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
 
   const renderContent = () => {
     switch (activeTab) {
@@ -211,9 +96,9 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {getFilteredData(newPeermalls, 'category').map((mall) => 
-                    renderPeermallCard(mall)
-                  )}
+                  {getFilteredPeermalls(newPeermalls).map((mall) => (
+                    <PeermallCard key={mall.id} peermall={mall} />
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -265,9 +150,9 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {bestPeermalls.map((mall) => 
-                    renderPeermallCard(mall, true)
-                  )}
+                  {getFilteredPeermalls(bestPeermalls).map((mall) => (
+                    <PeermallCard key={mall.id} peermall={mall} />
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -296,7 +181,6 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
                           <div className="flex items-center justify-between">
                             <p className="text-xs text-muted-foreground">{product.mall}</p>
                             <div className="flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                               <span className="text-xs font-medium">{product.rating}</span>
                             </div>
                           </div>
@@ -369,7 +253,7 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
                         <div className="p-4">
                           <h4 className="font-bold text-lg mb-2">{event.title}</h4>
                           <p className="text-muted-foreground mb-3">{event.description}</p>
-                          <Badge variant="outline">{event.period}</Badge>
+                          <span className="text-sm bg-muted px-2 py-1 rounded">{event.period}</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -395,9 +279,9 @@ const ContentSection = ({ activeTab, selectedCategory }: ContentSectionProps) =>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {newPeermalls.slice(0, 3).map((mall) => 
-                    renderPeermallCard(mall)
-                  )}
+                  {getFilteredPeermalls(newPeermalls).slice(0, 3).map((mall) => (
+                    <PeermallCard key={mall.id} peermall={mall} />
+                  ))}
                 </div>
               </CardContent>
             </Card>

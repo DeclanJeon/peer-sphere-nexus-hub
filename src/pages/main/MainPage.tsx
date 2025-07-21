@@ -32,7 +32,7 @@ const MainPage = () => {
         selectedCategory={selectedCategory} 
         setSelectedCategory={setSelectedCategory} 
       />
-      <ContentSection activeTab={activeTab} selectedCategory={selectedCategory} />
+      <ContentSection activeTab={activeTab} selectedCategory={selectedCategory} isMainPeermall={true} />
     </div>
   );
 };
