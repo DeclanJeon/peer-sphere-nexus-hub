@@ -106,6 +106,61 @@ const Community = () => {
       likes: 63,
       isNotice: false,
       isPopular: false
+    },
+    {
+      id: 7,
+      number: 7,
+      title: '피어몰 운영 꿀팁 공유합니다!',
+      author: '성공피어몰러',
+      createdAt: '25/07/14',
+      views: 234,
+      likes: 45,
+      isNotice: false,
+      isPopular: false
+    },
+    {
+      id: 8,
+      number: 8,
+      title: '신규 상품 홍보 방법이 궁금해요',
+      author: '초보판매자',
+      createdAt: '25/07/13',
+      views: 156,
+      likes: 23,
+      isNotice: false,
+      isPopular: false
+    },
+    {
+      id: 9,
+      number: 9,
+      title: '올해 트렌드 분석 자료',
+      author: '마켓분석가',
+      createdAt: '25/07/12',
+      views: 789,
+      likes: 156,
+      isNotice: false,
+      isPopular: false
+    },
+    {
+      id: 10,
+      number: 10,
+      title: '고객 서비스 개선 방안',
+      author: '서비스기획자',
+      createdAt: '25/07/11',
+      views: 445,
+      likes: 89,
+      isNotice: false,
+      isPopular: false
+    },
+    {
+      id: 11,
+      number: 11,
+      title: '마케팅 전략 토론해요',
+      author: '마케터',
+      createdAt: '25/07/10',
+      views: 321,
+      likes: 67,
+      isNotice: false,
+      isPopular: false
     }
   ];
 
