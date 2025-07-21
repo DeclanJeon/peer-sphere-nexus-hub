@@ -125,32 +125,84 @@ const NavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) => {
               </NavigationMenuContent>
             </NavigationMenuItem>
 
-            {/* 커뮤니티 탭 */}
-            <NavigationMenuItem>
-              <button
-                onClick={() => setActiveTab('community')}
+            {/* 커뮤니티 탭 with 드롭다운 */}
+            <NavigationMenuItem className="relative">
+              <NavigationMenuTrigger 
                 className={cn(
-                  navigationMenuTriggerStyle(),
-                  "font-semibold hover:text-primary transition-colors",
-                  activeTab === 'community' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+                  "font-semibold",
+                  activeTab === 'community' ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
                 커뮤니티
-              </button>
+              </NavigationMenuTrigger>
+              <NavigationMenuContent className="left-0">
+                <ul className="grid w-[200px] gap-2 p-4">
+                  <li>
+                    <button
+                      onClick={() => setActiveTab('community')}
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground w-full text-left"
+                    >
+                      <div className="text-sm font-medium leading-none">메인에서 보기</div>
+                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        메인 페이지에서 커뮤니티 보기
+                      </p>
+                    </button>
+                  </li>
+                  <li>
+                    <NavigationMenuLink asChild>
+                      <Link 
+                        to="/community"
+                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      >
+                        <div className="text-sm font-medium leading-none">커뮤니티 페이지</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          전체 게시글 보기
+                        </p>
+                      </Link>
+                    </NavigationMenuLink>
+                  </li>
+                </ul>
+              </NavigationMenuContent>
             </NavigationMenuItem>
 
-            {/* 이벤트 탭 */}
-            <NavigationMenuItem>
-              <button
-                onClick={() => setActiveTab('events')}
+            {/* 이벤트 탭 with 드롭다운 */}
+            <NavigationMenuItem className="relative">
+              <NavigationMenuTrigger 
                 className={cn(
-                  navigationMenuTriggerStyle(),
-                  "font-semibold hover:text-primary transition-colors",
-                  activeTab === 'events' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+                  "font-semibold",
+                  activeTab === 'events' ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
                 이벤트
-              </button>
+              </NavigationMenuTrigger>
+              <NavigationMenuContent className="left-0">
+                <ul className="grid w-[200px] gap-2 p-4">
+                  <li>
+                    <button
+                      onClick={() => setActiveTab('events')}
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground w-full text-left"
+                    >
+                      <div className="text-sm font-medium leading-none">메인에서 보기</div>
+                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        메인 페이지에서 이벤트 보기
+                      </p>
+                    </button>
+                  </li>
+                  <li>
+                    <NavigationMenuLink asChild>
+                      <Link 
+                        to="/events"
+                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      >
+                        <div className="text-sm font-medium leading-none">이벤트 페이지</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          전체 이벤트 보기
+                        </p>
+                      </Link>
+                    </NavigationMenuLink>
+                  </li>
+                </ul>
+              </NavigationMenuContent>
             </NavigationMenuItem>
           </NavigationMenuList>
 

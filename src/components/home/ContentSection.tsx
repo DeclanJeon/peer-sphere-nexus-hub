@@ -27,6 +27,183 @@ const ContentSection = ({ activeTab, selectedCategory, isMainPeermall = true, pe
   const [communityPosts, setCommunityPosts] = useState<Post[]>([]);
   const [events, setEvents] = useState<Post[]>([]);
 
+  // ========== 목업 데이터 START ==========
+  // 실제 API 연동 시 제거 예정인 더미 데이터입니다.
+  const mockCommunityPosts: Post[] = [
+    {
+      id: '1',
+      title: '공짜로 물품을 구매할 수 있는 정보의 창고!!!!!!!!!',
+      content: '여러분! 정말 유용한 정보를 공유하고 싶어서 글 올려요. 다양한 할인 정보와 무료 샘플 받는 방법들을 모아두었어요.',
+      authorName: '윤하',
+      authorId: 'user1',
+      createdAt: new Date('2024-01-20'),
+      updatedAt: new Date('2024-01-20'),
+      likes: 256,
+      comments: 89,
+      type: 'community',
+      peermallId: 'main'
+    },
+    {
+      id: '2',
+      title: '소금 추천 좀',
+      content: '요리할 때 쓸 좋은 소금 추천해주세요~ 천일염이 좋을까요?',
+      authorName: '요리초보',
+      authorId: 'user2',
+      createdAt: new Date('2024-01-20'),
+      updatedAt: new Date('2024-01-20'),
+      likes: 25,
+      comments: 34,
+      type: 'community',
+      peermallId: 'main'
+    },
+    {
+      id: '3',
+      title: '피어몰 운영 꿀팁 공유합니다!',
+      content: '6개월간 피어몰을 운영하면서 얻은 노하우들을 공유해드릴게요.',
+      authorName: '성공피어몰러',
+      authorId: 'user3',
+      createdAt: new Date('2024-01-19'),
+      updatedAt: new Date('2024-01-19'),
+      likes: 156,
+      comments: 67,
+      type: 'community',
+      peermallId: 'main'
+    },
+    {
+      id: '4',
+      title: '신규 상품 홍보 방법이 궁금해요',
+      content: '새로운 상품을 등록했는데 어떻게 홍보해야 효과적일까요?',
+      authorName: '초보판매자',
+      authorId: 'user4',
+      createdAt: new Date('2024-01-18'),
+      updatedAt: new Date('2024-01-18'),
+      likes: 43,
+      comments: 28,
+      type: 'community',
+      peermallId: 'main'
+    },
+    {
+      id: '5',
+      title: '올해 트렌드 분석 자료',
+      content: '2024년 소비 트렌드 분석 자료를 공유합니다. 피어몰 운영에 도움이 되길!',
+      authorName: '마켓분석가',
+      authorId: 'user5',
+      createdAt: new Date('2024-01-17'),
+      updatedAt: new Date('2024-01-17'),
+      likes: 89,
+      comments: 45,
+      type: 'community',
+      peermallId: 'main'
+    },
+    {
+      id: '6',
+      title: '고객 서비스 개선 방안',
+      content: '더 나은 고객 서비스를 제공하는 방법들에 대해 이야기해볼까요?',
+      authorName: '서비스기획자',
+      authorId: 'user6',
+      createdAt: new Date('2024-01-16'),
+      updatedAt: new Date('2024-01-16'),
+      likes: 76,
+      comments: 52,
+      type: 'community',
+      peermallId: 'main'
+    }
+  ];
+
+  const mockEvents: Post[] = [
+    {
+      id: '7',
+      title: '신규 가입자 특별 혜택',
+      content: '새로 가입하시는 분들께 특별한 혜택을 드립니다! 첫 구매 시 30% 할인! 이벤트 기간: 2024.01.20 ~ 2024.02.29',
+      authorName: '피어몰 운영진',
+      authorId: 'admin1',
+      createdAt: new Date('2024-01-20'),
+      updatedAt: new Date('2024-01-20'),
+      likes: 234,
+      comments: 67,
+      type: 'event',
+      peermallId: 'main',
+      eventPeriod: '2024.01.20 ~ 2024.02.29',
+      image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=300&fit=crop'
+    },
+    {
+      id: '8',
+      title: '겨울 세일 대축제',
+      content: '모든 의류 상품 최대 50% 할인! 따뜻한 겨울 준비하세요. 이벤트 기간: 2024.01.15 ~ 2024.01.31',
+      authorName: '패션 스토어',
+      authorId: 'store1',
+      createdAt: new Date('2024-01-19'),
+      updatedAt: new Date('2024-01-19'),
+      likes: 189,
+      comments: 45,
+      type: 'event',
+      peermallId: 'main',
+      eventPeriod: '2024.01.15 ~ 2024.01.31',
+      image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=300&fit=crop'
+    },
+    {
+      id: '9',
+      title: '건강식품 체험단 모집',
+      content: '신제품 건강식품 체험단을 모집합니다. 무료 체험 후 리뷰만 작성해주세요! 이벤트 기간: 2024.01.18 ~ 2024.02.10',
+      authorName: '헬스 앤 뷰티',
+      authorId: 'store2',
+      createdAt: new Date('2024-01-18'),
+      updatedAt: new Date('2024-01-18'),
+      likes: 156,
+      comments: 89,
+      type: 'event',
+      peermallId: 'main',
+      eventPeriod: '2024.01.18 ~ 2024.02.10',
+      image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&h=300&fit=crop'
+    },
+    {
+      id: '10',
+      title: '반려동물 용품 특가전',
+      content: '사랑하는 반려동물을 위한 모든 용품이 특가! 지금 바로 확인하세요. 이벤트 기간: 2024.01.17 ~ 2024.01.30',
+      authorName: '펫 케어',
+      authorId: 'store3',
+      createdAt: new Date('2024-01-17'),
+      updatedAt: new Date('2024-01-17'),
+      likes: 123,
+      comments: 34,
+      type: 'event',
+      peermallId: 'main',
+      eventPeriod: '2024.01.17 ~ 2024.01.30',
+      image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop'
+    },
+    {
+      id: '11',
+      title: '홈 인테리어 컨테스트',
+      content: '여러분의 멋진 인테리어 사진을 공유하고 상품을 받아가세요! 이벤트 기간: 2024.01.16 ~ 2024.02.15',
+      authorName: '홈 데코',
+      authorId: 'store4',
+      createdAt: new Date('2024-01-16'),
+      updatedAt: new Date('2024-01-16'),
+      likes: 98,
+      comments: 56,
+      type: 'event',
+      peermallId: 'main',
+      eventPeriod: '2024.01.16 ~ 2024.02.15',
+      image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=300&fit=crop'
+    },
+    {
+      id: '12',
+      title: '스마트폰 액세서리 런칭 기념',
+      content: '새로운 스마트폰 액세서리 출시를 기념하여 특별가로 만나보세요! 이벤트 기간: 2024.01.15 ~ 2024.01.25',
+      authorName: '테크 이노베이션',
+      authorId: 'store5',
+      createdAt: new Date('2024-01-15'),
+      updatedAt: new Date('2024-01-15'),
+      likes: 87,
+      comments: 23,
+      type: 'event',
+      peermallId: 'main',
+      eventPeriod: '2024.01.15 ~ 2024.01.25',
+      image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=300&fit=crop'
+    }
+  ];
+  // ========== 목업 데이터 END ==========
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -46,11 +223,9 @@ const ContentSection = ({ activeTab, selectedCategory, isMainPeermall = true, pe
           setNewProducts(newProds);
           setBestProducts(bestProds);
 
-          // 메인에서는 모든 커뮤니티/이벤트 표시
-          const communityData = await communityService.getPopularPosts(6);
-          const eventData = await eventService.getRecentEvents(6);
-          setCommunityPosts(communityData);
-          setEvents(eventData);
+          // 메인에서는 모든 커뮤니티/이벤트 표시 (목업 데이터 사용)
+          setCommunityPosts(mockCommunityPosts);
+          setEvents(mockEvents);
         } else {
 
           // 유저 피어몰에서는 해당 피어몰의 데이터만 표시
@@ -80,7 +255,7 @@ const ContentSection = ({ activeTab, selectedCategory, isMainPeermall = true, pe
     };
 
     fetchData();
-  }, [isMainPeermall, currentPeermallId]);
+  }, [isMainPeermall, currentPeermallId, mockCommunityPosts, mockEvents]);
 
   const getFilteredPeermalls = (peermalls: Peermall[]) => {
     if (selectedCategory === 'all') return peermalls;
