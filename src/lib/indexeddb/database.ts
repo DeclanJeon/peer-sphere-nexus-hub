@@ -48,10 +48,13 @@ export interface Post {
   title: string;
   content: string;
   authorId: string;
+  authorName?: string; // 작성자 이름 (편의상 추가)
   peermallId?: string;
   type: 'community' | 'event';
   likes: number;
   comments: number;
+  image?: string; // 이벤트 이미지 등
+  eventPeriod?: string; // 이벤트 기간
   createdAt: Date;
   updatedAt: Date;
 }
