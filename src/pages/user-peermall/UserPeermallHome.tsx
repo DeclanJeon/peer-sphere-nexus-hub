@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import SearchSection from '@/components/home/SearchSection';
 import CategorySection from '@/components/home/CategorySection';
 import NavigationTabs from '@/components/home/NavigationTabs';
 import ContentSection from '@/components/home/ContentSection';
 
 const UserPeermallHome = () => {
+  const { peermallName } = useParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -28,7 +30,12 @@ const UserPeermallHome = () => {
         selectedCategory={selectedCategory} 
         setSelectedCategory={setSelectedCategory} 
       />
-      <ContentSection activeTab={activeTab} selectedCategory={selectedCategory} />
+      <ContentSection 
+        activeTab={activeTab} 
+        selectedCategory={selectedCategory} 
+        isMainPeermall={false}
+        peermallId={peermallName}
+      />
     </div>
   );
 };

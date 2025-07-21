@@ -3,6 +3,8 @@ export { dbManager } from './database';
 export { userService } from './userService';
 export { peermallService } from './peermallService';
 export { productService } from './productService';
+export { communityService } from './communityService';
+export { eventService } from './eventService';
 export { authService } from './authService';
 
 export type {
