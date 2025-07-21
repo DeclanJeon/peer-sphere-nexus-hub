@@ -1,31 +1,63 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, TrendingUp, Users, QrCode, Share } from 'lucide-react';
+import { Star, TrendingUp, QrCode, Share } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { peermallApi } from '@/services/peermall.api';
 import { Peermall } from '@/types/peermall';
 
 const BestPeermalls = () => {
-  const [bestPeermalls, setBestPeermalls] = useState<Peermall[]>([]);
+  // ========== 목업 데이터 START ==========
+  // 실제 API 연동 시 제거 예정인 더미 데이터입니다.
+  const mockBestPeermalls: Peermall[] = [
+    {
+      id: '1',
+      name: '럭셔리 브랜드 하우스',
+      description: '명품 브랜드와 고급 제품만을 취급하는 프리미엄 피어몰입니다.',
+      url: 'luxury-brand-house',
+      imageUrl: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=200&fit=crop',
+      rating: 4.9,
+      sales_volume: 2340,
+      created_at: '2023-06-15',
+      updated_at: '2024-01-20',
+      status: 'active',
+      referrerCode: 'BEST001',
+      creatorName: '김럭셔리',
+      image_url: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=200&fit=crop',
+      family_company: '럭셔리 그룹',
+      creator_name: '김럭셔리',
+      owner_email: 'luxury@example.com',
+      owner_phone: '010-1111-2222',
+      follower_count: 5234,
+      referrer_code: 'BEST001',
+      is_new: false
+    },
+    {
+      id: '2',
+      name: '글로벌 마켓플레이스',
+      description: '세계 각국의 특산품과 수입 제품을 만날 수 있는 곳입니다.',
+      url: 'global-marketplace',
+      imageUrl: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=300&h=200&fit=crop',
+      rating: 4.8,
+      sales_volume: 1890,
+      created_at: '2023-05-20',
+      updated_at: '2024-01-19',
+      status: 'active',
+      referrerCode: 'BEST002',
+      creatorName: '이글로벌',
+      image_url: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=300&h=200&fit=crop',
+      family_company: '글로벌 트레이드',
+      creator_name: '이글로벌',
+      owner_email: 'global@example.com',
+      owner_phone: '010-2222-3333',
+      follower_count: 4567,
+      referrer_code: 'BEST002',
+      is_new: false
+    }
+  ];
+  // ========== 목업 데이터 END ==========
 
-  useEffect(() => {
-    const fetchBestPeermalls = async () => {
-      try {
-        const malls = await peermallApi.getBestPeermalls(10);
-        setBestPeermalls(malls);
-      } catch (error) {
-        console.error('베스트 피어몰 로딩 오류:', error);
-        toast({
-          title: '오류',
-          description: '베스트 피어몰 목록을 불러오는데 실패했습니다.',
-          variant: 'destructive',
-        });
-      }
-    };
-    fetchBestPeermalls();
-  }, []);
+  const [bestPeermalls, setBestPeermalls] = useState<Peermall[]>(mockBestPeermalls);
 
   const truncateDescription = (description: string, maxLength: number = 80) => {
     if (description.length <= maxLength) return description;
