@@ -17,6 +17,7 @@ const PeermallCreate = () => {
   const { user } = useAuth();
   const [formData, setFormData] = useState<PeermallCreationData>({
     name: '',
+    url: '',
     address: '',
     category: '',
     description: '',
@@ -24,7 +25,7 @@ const PeermallCreate = () => {
     ownerId: user?.email || '',
     ownerName: user?.name || '',
     familyCompany: '',
-    referralCode: '',
+    referrerCode: '',
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isAddressValid, setIsAddressValid] = useState<boolean | null>(null);
@@ -116,7 +117,7 @@ const PeermallCreate = () => {
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value;
-    setFormData(prev => ({ ...prev, address }));
+    setFormData(prev => ({ ...prev, address, url: address }));
     setIsAddressValid(null);
   };
 
@@ -241,8 +242,8 @@ const PeermallCreate = () => {
               <Label htmlFor="referralCode">추천인 코드</Label>
               <Input
                 id="referralCode"
-                value={formData.referralCode || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, referralCode: e.target.value }))}
+                value={formData.referrerCode || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, referrerCode: e.target.value }))}
                 placeholder="추천인 코드를 입력해주세요"
               />
             </div>

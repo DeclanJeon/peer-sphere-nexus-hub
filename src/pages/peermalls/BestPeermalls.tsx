@@ -72,9 +72,9 @@ const BestPeermalls = () => {
             <Link to={`/peermall/${encodeURIComponent(mall.url || mall.name)}`}>
               <CardContent className="p-4">
                 <div className="aspect-video bg-muted rounded-lg mb-3 overflow-hidden flex items-center justify-center">
-                  {mall.imageUrl || mall.image ? (
+                  {mall.imageUrl || mall.image_url ? (
                     <img 
-                      src={mall.imageUrl || mall.image} 
+                      src={mall.imageUrl || mall.image_url}
                       alt={mall.name} 
                       className="w-full h-full object-cover" 
                       onError={(e) => {
@@ -91,13 +91,13 @@ const BestPeermalls = () => {
                 </div>
                 <h3 className="font-semibold mb-2">{mall.name}</h3>
                 <div className="flex items-center justify-between mb-2">
-                  {mall.category && <Badge variant="secondary">{mall.category}</Badge>}
+                  <Badge variant="secondary">피어몰</Badge>
                   <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     <span className="text-sm">{mall.rating}</span>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground mb-2">거래 {mall.sales || 0}건</p>
+                <p className="text-sm text-muted-foreground mb-2">거래 {mall.sales_volume || 0}건</p>
                 <p className="text-sm text-muted-foreground line-clamp-2">{truncateDescription(mall.description)}</p>
               </CardContent>
             </Link>

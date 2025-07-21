@@ -39,7 +39,7 @@ const UserPeermallLayout = ({ children }: UserPeermallLayoutProps) => {
     setIsMobileMenuOpen(false);
   };
 
-  const peermallAddress = currentPeermall?.address || '';
+  const peermallAddress = currentPeermall?.url || '';
   const navigation = [
     // { name: '홈', href: `/peermall/${peermallAddress}`, icon: Home },
     // { name: '제품', href: `/peermall/${peermallAddress}/products`, icon: ShoppingBag },
@@ -53,9 +53,9 @@ const UserPeermallLayout = ({ children }: UserPeermallLayoutProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center space-x-4">
-              <Link to={`/peermall/${currentPeermall?.address}`} className="flex-shrink-0">
-                {currentPeermall?.image ? (
-                  <img className="h-12 w-12 rounded-full object-cover" src={currentPeermall.image} alt={currentPeermall.name} />
+              <Link to={`/peermall/${currentPeermall?.url}`} className="flex-shrink-0">
+                {currentPeermall?.imageUrl || currentPeermall?.image_url ? (
+                  <img className="h-12 w-12 rounded-full object-cover" src={currentPeermall.imageUrl || currentPeermall.image_url} alt={currentPeermall.name} />
                 ) : (
                   <img className="h-10 w-auto" src="/logo.png" alt="PeerMall" />
                 )}
