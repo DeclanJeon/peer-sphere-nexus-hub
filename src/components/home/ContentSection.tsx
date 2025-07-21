@@ -3,8 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { peermallService, Peermall } from '@/lib/indexeddb';
+import { peermallApi } from '@/services/peermall.api';
 import PeermallCard from '@/components/shared/PeermallCard';
+import { Peermall } from '@/types/peermall';
 
 interface ContentSectionProps {
   activeTab: string;
@@ -20,20 +21,22 @@ const ContentSection = ({ activeTab, selectedCategory, isMainPeermall = true }: 
     const fetchPeermalls = async () => {
       try {
         if (isMainPeermall) {
-          // 메인 피어몰에서는 모든 피어몰 보여주기
-          const newMalls = await peermallService.getNewPeermalls(6);
-          const allMalls = await peermallService.getAllPeermalls();
-          const bestMalls = allMalls.sort((a, b) => b.rating - a.rating).slice(0, 6);
+          // 메인 피어몰에서는 신규 및 베스트 피어몰 가져오기
+          const [newMalls, bestMalls] = await Promise.all([
+            peermallApi.getNewPeermalls(6),
+            peermallApi.getBestPeermalls(6)
+          ]);
           
           setNewPeermalls(newMalls);
           setBestPeermalls(bestMalls);
         } else {
-          // 유저 피어몰에서는 해당 유저의 피어몰만 보여주기는 필요시 구현
-          const allMalls = await peermallService.getAllPeermalls();
+          // 유저 피어몰에서는 전체 피어몰에서 일부만 보여주기 (추후 유저별 필터링 추가 가능)
+          const allMalls = await peermallApi.getAllPeermalls();
           setNewPeermalls(allMalls.slice(0, 6));
-          setBestPeermalls(allMalls.slice(0, 6));
+          setBestPeermalls([...allMalls].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 6));
         }
       } catch (error) {
+        console.error('피어몰 로딩 오류:', error);
         toast({
           title: '오류',
           description: '피어몰 목록을 불러오는데 실패했습니다.',
@@ -47,7 +50,9 @@ const ContentSection = ({ activeTab, selectedCategory, isMainPeermall = true }: 
 
   const getFilteredPeermalls = (peermalls: Peermall[]) => {
     if (selectedCategory === 'all') return peermalls;
-    return peermalls.filter(mall => mall.familyCompany === selectedCategory);
+    return peermalls.filter(mall => 
+      (mall.familyCompany || '').toLowerCase() === selectedCategory.toLowerCase()
+    );
   };
 
   const newProducts = [
