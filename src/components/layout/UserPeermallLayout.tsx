@@ -41,10 +41,10 @@ const UserPeermallLayout = ({ children }: UserPeermallLayoutProps) => {
 
   const peermallAddress = currentPeermall?.url || '';
   const navigation = [
-    // { name: '홈', href: `/peermall/${peermallAddress}`, icon: Home },
-    // { name: '제품', href: `/peermall/${peermallAddress}/products`, icon: ShoppingBag },
-    // { name: '커뮤니티', href: `/peermall/${peermallAddress}/community`, icon: MessageCircle },
-    // { name: '이벤트', href: `/peermall/${peermallAddress}/events`, icon: Calendar },
+    // { name: '홈', href: `/home/${peermallAddress}`, icon: Home },
+    // { name: '제품', href: `/home/${peermallAddress}/products`, icon: ShoppingBag },
+    // { name: '커뮤니티', href: `/home/${peermallAddress}/community`, icon: MessageCircle },
+    // { name: '이벤트', href: `/home/${peermallAddress}/events`, icon: Calendar },
   ];
 
   return (
@@ -53,7 +53,7 @@ const UserPeermallLayout = ({ children }: UserPeermallLayoutProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center space-x-4">
-              <Link to={`/peermall/${currentPeermall?.url}`} className="flex-shrink-0">
+              <Link to={`/home/${currentPeermall?.url}`} className="flex-shrink-0">
                 {currentPeermall?.imageUrl || currentPeermall?.image_url ? (
                   <img className="h-12 w-12 rounded-full object-cover" src={currentPeermall.imageUrl || currentPeermall.image_url} alt={currentPeermall.name} />
                 ) : (

@@ -66,7 +66,7 @@ const BestPeermalls = () => {
 
   const handleShare = async (mallUrl: string, mallName: string) => {
     try {
-      const shareUrl = `${window.location.origin}/peermall/${encodeURIComponent(mallUrl)}`;
+      const shareUrl = `${window.location.origin}/home/${encodeURIComponent(mallUrl)}`;
       await navigator.clipboard.writeText(shareUrl);
       toast({
         title: '링크 복사 완료',
@@ -83,7 +83,7 @@ const BestPeermalls = () => {
   };
 
   const handleGenerateQR = (mallUrl: string, mallName: string) => {
-    const qrLink = `https://peermall.app/qr/peermall/${encodeURIComponent(mallUrl)}`;
+    const qrLink = `https://peermall.com/qr/home/${encodeURIComponent(mallUrl)}`;
     toast({
       title: 'QR 코드 생성',
       description: `'${mallName}' 피어몰 QR 코드 링크: ${qrLink}`, 
@@ -101,7 +101,7 @@ const BestPeermalls = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {bestPeermalls.map((mall, index) => (
           <Card key={mall.id} className="hover:shadow-lg transition-shadow cursor-pointer relative">
-            <Link to={`/peermall/${encodeURIComponent(mall.url || mall.name)}`}>
+            <Link to={`/home/${encodeURIComponent(mall.url || mall.name)}`}>
               <CardContent className="p-4">
                 <div className="aspect-video bg-muted rounded-lg mb-3 overflow-hidden flex items-center justify-center">
                   {mall.imageUrl || mall.image_url ? (

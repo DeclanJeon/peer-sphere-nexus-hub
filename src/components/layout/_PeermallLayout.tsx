@@ -74,10 +74,10 @@ const PeermallLayout = ({ children }: LayoutProps) => {
   };
 
   const navigation = [
-    { name: '홈', href: `/peermall/${url}`, icon: Home },
-    { name: '제품', href: `/peermall/${url}/products`, icon: ShoppingBag },
-    { name: '커뮤니티', href: `/peermall/${url}/community`, icon: MessageCircle },
-    { name: '이벤트', href: `/peermall/${url}/events`, icon: Calendar },
+    { name: '홈', href: `/home/${url}`, icon: Home },
+    { name: '제품', href: `/home/${url}/products`, icon: ShoppingBag },
+    { name: '커뮤니티', href: `/home/${url}/community`, icon: MessageCircle },
+    { name: '이벤트', href: `/home/${url}/events`, icon: Calendar },
   ];
 
   if (isLoading) {
@@ -94,7 +94,7 @@ const PeermallLayout = ({ children }: LayoutProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Link to={`/peermall/${url}`} className="text-2xl font-bold text-primary">
+              <Link to={`/home/${url}`} className="text-2xl font-bold text-primary">
                 {peermall ? peermall.name : '피어몰'}
               </Link>
             </div>

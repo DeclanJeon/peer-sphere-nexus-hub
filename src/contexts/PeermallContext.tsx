@@ -56,7 +56,7 @@ export const PeermallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isMainPeermall = !location.pathname.startsWith('/peermall/');
+  const isMainPeermall = !location.pathname.startsWith('/home/');
 
   const fetchPeermalls = useCallback(async () => {
     setLoading(true);
@@ -135,7 +135,7 @@ export const PeermallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setError(null);
       
       // 생성된 피어몰로 이동
-      navigate(`/peermall/${mappedPeermall.url}`);
+      navigate(`/home/${mappedPeermall.url}`);
       
       return mappedPeermall;
     } catch (err: any) {

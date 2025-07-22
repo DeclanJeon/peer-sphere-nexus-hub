@@ -98,7 +98,7 @@ const App = () => (
               <Route path="/peermalls/create" element={<ProtectedRoute><MainLayout><PeermallCreate /></MainLayout></ProtectedRoute>} />
               
               {/* User Peermall Routes */}
-              <Route path="/peermall/:url" element={<UserPeermallPage />}>
+              <Route path="/home/:url" element={<UserPeermallPage />}>
                 <Route index element={<UserPeermallHome />} />
                 {/* TODO: Add other peermall routes like products, community, events when they are created */}
               </Route>

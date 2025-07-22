@@ -45,7 +45,7 @@ const PeermallCard = ({ peermall }: PeermallCardProps) => {
       return;
     }
 
-    const shareUrl = `${window.location.origin}/peermall/${encodeURIComponent(peermall.url)}`;
+    const shareUrl = `${window.location.origin}/home/${encodeURIComponent(peermall.url)}`;
     
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(shareUrl).then(() => {
@@ -103,7 +103,7 @@ const PeermallCard = ({ peermall }: PeermallCardProps) => {
       return;
     }
 
-    const qrData = `${window.location.origin}/peermall/${encodeURIComponent(peermall.url)}`;
+    const qrData = `${window.location.origin}/home/${encodeURIComponent(peermall.url)}`;
     console.log('QR Code Data:', qrData);
     toast({
       title: 'QR 코드 생성',
@@ -145,7 +145,7 @@ const PeermallCard = ({ peermall }: PeermallCardProps) => {
         </Button>
       </div>
       
-      <Link to={`/peermall/${encodeURIComponent(peermall.url || '')}`}>
+      <Link to={`/home/${encodeURIComponent(peermall.url || '')}`}>
         <CardContent className="p-4">
           <div className="aspect-video bg-muted rounded-lg mb-3 overflow-hidden flex items-center justify-center">
             {peermall.image_url ? (
