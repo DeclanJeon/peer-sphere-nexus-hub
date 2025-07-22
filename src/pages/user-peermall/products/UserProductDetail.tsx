@@ -168,37 +168,20 @@ const UserProductDetail = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            뒤로가기
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{product.name}</h1>
-            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Eye className="h-4 w-4" />
-                조회 {(product.views || 0).toLocaleString()}
-              </span>
-              <span className="flex items-center gap-1">
-                <Heart className="h-4 w-4" />
-                좋아요 {product.likes || 0}
-              </span>
-              <span>등록일 {new Date(product.created_at).toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
-
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* 상단 네비게이션 */}
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          뒤로가기
+        </Button>
         {isOwner && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-auto">
             <Badge 
               variant={product.status === 'active' ? 'default' : 'secondary'}
               className="text-sm"
@@ -232,9 +215,9 @@ const UserProductDetail = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* 상품 이미지 */}
-        <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* 왼쪽: 상품 이미지 */}
+        <div className="lg:col-span-5">
           <div className="aspect-square overflow-hidden rounded-lg bg-muted">
             {product.image_url ? (
               <img 
@@ -253,10 +236,25 @@ const UserProductDetail = () => {
           </div>
         </div>
 
-        {/* 상품 정보 */}
-        <div className="space-y-6">
+        {/* 오른쪽: 상품 정보 및 테이블 */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* 상품 기본 정보 */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
+            <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+            
+            <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Eye className="h-4 w-4" />
+                조회 {(product.views || 0).toLocaleString()}
+              </span>
+              <span className="flex items-center gap-1">
+                <Heart className="h-4 w-4" />
+                좋아요 {product.likes || 0}
+              </span>
+              <span>등록일 {new Date(product.created_at).toLocaleDateString()}</span>
+            </div>
+
+            <div className="flex items-center gap-2 mb-4">
               {product.category && (
                 <Badge variant="outline">{product.category}</Badge>
               )}
@@ -268,7 +266,7 @@ const UserProductDetail = () => {
               )}
             </div>
             
-            <div className="mb-4">
+            <div className="mb-6">
               {product.price && product.price !== product.selling_price && (
                 <p className="text-lg text-muted-foreground line-through">
                   {Number(product.price).toLocaleString()}원
@@ -278,16 +276,48 @@ const UserProductDetail = () => {
                 {Number(product.selling_price || 0).toLocaleString()}원
               </p>
             </div>
-            
-            {product.description && (
-              <div 
-                className="text-muted-foreground leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: product.description }}
-              />
-            )}
           </div>
 
-          <Separator />
+          {/* 상품 정보 테이블 */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">상품 정보</h3>
+              <div className="space-y-3">
+                <div className="grid grid-cols-3 gap-4 py-2 border-b">
+                  <span className="font-medium text-muted-foreground">브랜드</span>
+                  <span className="col-span-2">{product.brand || '정보 없음'}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 py-2 border-b">
+                  <span className="font-medium text-muted-foreground">제조사</span>
+                  <span className="col-span-2">{product.manufacturer || '정보 없음'}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 py-2 border-b">
+                  <span className="font-medium text-muted-foreground">카테고리</span>
+                  <span className="col-span-2">{product.category || '정보 없음'}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 py-2 border-b">
+                  <span className="font-medium text-muted-foreground">상품 상태</span>
+                  <span className="col-span-2">
+                    <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
+                      {product.status === 'active' ? '판매중' : '판매중단'}
+                    </Badge>
+                  </span>
+                </div>
+                {product.cost_price && (
+                  <div className="grid grid-cols-3 gap-4 py-2 border-b">
+                    <span className="font-medium text-muted-foreground">원가</span>
+                    <span className="col-span-2">{Number(product.cost_price).toLocaleString()}원</span>
+                  </div>
+                )}
+                {product.shipping_fee && (
+                  <div className="grid grid-cols-3 gap-4 py-2">
+                    <span className="font-medium text-muted-foreground">배송비</span>
+                    <span className="col-span-2">{Number(product.shipping_fee).toLocaleString()}원</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* 액션 버튼 */}
           {isOwner ? (
@@ -347,8 +377,23 @@ const UserProductDetail = () => {
         </div>
       </div>
 
-      {/* 상세 정보 */}
+      {/* 하단: 상세 설명 */}
       <div className="mt-12 space-y-8">
+        {/* 상품 상세 설명 */}
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-xl font-semibold mb-4">상품 상세 설명</h3>
+            {product.description ? (
+              <div 
+                className="prose max-w-none text-muted-foreground leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
+            ) : (
+              <p className="text-muted-foreground">상세 설명이 없습니다.</p>
+            )}
+          </CardContent>
+        </Card>
+
         {/* 상품 특징 */}
         {product.features && product.features.length > 0 && (
           <Card>
@@ -384,6 +429,59 @@ const UserProductDetail = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* 추천 상품 섹션 */}
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-xl font-semibold mb-4">추천 상품</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((item) => (
+                <div key={item} className="space-y-2">
+                  <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
+                    <ShoppingBag className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <div className="text-sm">
+                    <p className="font-medium truncate">추천 상품 {item}</p>
+                    <p className="text-primary font-semibold">99,000원</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 상품 리뷰 섹션 */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold">상품 리뷰</h3>
+              <div className="flex items-center gap-2">
+                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                <span className="font-semibold">{product.rating || 0}</span>
+                <span className="text-muted-foreground">({product.likes || 0}개)</span>
+              </div>
+            </div>
+            <div className="space-y-4">
+              {[1, 2, 3].map((review) => (
+                <div key={review} className="border-b pb-4 last:border-b-0">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-muted rounded-full"></div>
+                      <span className="font-medium">사용자{review}</span>
+                      <div className="flex items-center">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                    </div>
+                    <span className="text-sm text-muted-foreground">2024.01.0{review}</span>
+                  </div>
+                  <p className="text-muted-foreground">정말 좋은 상품이에요! 품질도 만족스럽고 배송도 빨랐습니다.</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
