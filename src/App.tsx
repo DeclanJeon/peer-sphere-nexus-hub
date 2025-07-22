@@ -23,9 +23,7 @@ import UserPeermallHome from "@/pages/user-peermall/UserPeermallHome";
 
 // User Peermall Product Pages
 import UserProductList from "@/pages/user-peermall/products/UserProductList";
-import UserProductCreate from "@/pages/user-peermall/products/UserProductCreate";
 import UserProductDetail from "@/pages/user-peermall/products/UserProductDetail";
-import UserProductEdit from "@/pages/user-peermall/products/UserProductEdit";
 
 // Shared Pages (used by both main and user peermalls)
 import PeermallCreate from "@/pages/peermalls/PeermallCreate";
@@ -106,14 +104,18 @@ const App = () => (
               {/* User Peermall Routes */}
               <Route path="/home/:url" element={<UserPeermallPage />}>
                 <Route index element={<UserPeermallHome />} />
-                {/* TODO: Add other peermall routes like community, events when they are created */}
+                <Route path="products" element={<UserProductList />} />
+                <Route path="product/:id" element={<UserProductDetail />} />
+                <Route path="community" element={<Community />} />
+                <Route path="community/create" element={<BoardCreate />} />
+                <Route path="community/:id" element={<BoardDetail />} />
+                <Route path="events" element={<Events />} />
+                <Route path="events/create" element={<EventCreate />} />
+                <Route path="events/:id" element={<EventDetail />} />
               </Route>
 
               {/* User Peermall Product Routes - Requires authentication */}
-              <Route path="/:url/products" element={<ProtectedRoute><UserProductList /></ProtectedRoute>} />
-              <Route path="/:url/products/create" element={<ProtectedRoute><UserProductCreate /></ProtectedRoute>} />
-              <Route path="/:url/products/:productId" element={<ProtectedRoute><UserProductDetail /></ProtectedRoute>} />
-              <Route path="/:url/products/:productId/edit" element={<ProtectedRoute><UserProductEdit /></ProtectedRoute>} />
+              
 
               {/* MyPage Routes - 로그인 필요 */}
               <Route 

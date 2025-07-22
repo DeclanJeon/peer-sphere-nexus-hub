@@ -6,6 +6,7 @@ import { toast } from '@/hooks/use-toast';
 
 // 타입 정의
 interface User {
+  [x: string]: any;
   uid: string;
   email: string;
   name?: string;

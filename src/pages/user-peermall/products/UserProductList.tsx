@@ -1,127 +1,281 @@
+// UserProductList.tsx
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Star, Plus, Search, Filter } from 'lucide-react';
+import { Star, Plus, Search, Filter, Loader2, ShoppingBag } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { productApi } from '@/services/product.api';
+import { usePeermall } from '@/contexts/PeermallContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { Product } from '@/types/product';
 
-// 목업 데이터 - 실제 API 연동 시 제거
-const mockProducts = [
-  {
-    id: '1',
-    name: '프리미엄 스킨케어 세트',
-    price: 89000,
-    description: '자연 성분으로 만든 프리미엄 스킨케어 세트입니다.',
-    category: '뷰티',
-    image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400',
-    rating: 4.8,
-    status: 'active' as const,
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-15')
-  },
-  {
-    id: '2',
-    name: '무선 이어폰 프로',
-    price: 129000,
-    description: '고품질 사운드와 뛰어난 배터리 성능을 자랑하는 무선 이어폰입니다.',
-    category: '전자제품',
-    image: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=400',
-    rating: 4.9,
-    status: 'active' as const,
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-10')
-  },
-  {
-    id: '3',
-    name: '캐주얼 맨투맨',
-    price: 45000,
-    description: '부드러운 원단으로 제작된 편안한 캐주얼 맨투맨입니다.',
-    category: '패션',
-    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
-    rating: 4.7,
-    status: 'active' as const,
-    createdAt: new Date('2024-01-08'),
-    updatedAt: new Date('2024-01-08')
-  },
-  {
-    id: '4',
-    name: '홈 카페 머신',
-    price: 299000,
-    description: '집에서 즐기는 전문가급 커피를 위한 홈 카페 머신입니다.',
-    category: '가전제품',
-    image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400',
-    rating: 4.6,
-    status: 'active' as const,
-    createdAt: new Date('2024-01-05'),
-    updatedAt: new Date('2024-01-05')
-  }
-];
+interface UserProductListProps {
+  mode?: 'full' | 'preview'; // 전체보기 or 미리보기
+  filter?: 'all' | 'new' | 'best'; // 필터 타입
+  category?: string; // 카테고리 필터
+  limit?: number; // 미리보기 개수
+  onProductsLoaded?: (products: Product[]) => void; // 상품 로드 콜백
+}
 
-const UserProductList = () => {
+const UserProductList = ({ 
+  mode = 'full', 
+  filter = 'all',
+  category = 'all',
+  limit = 8,
+  onProductsLoaded
+}: UserProductListProps) => {
   const { url } = useParams<{ url: string }>();
-  const [products, setProducts] = useState(mockProducts); // 목업 데이터 사용
-  const [filteredProducts, setFilteredProducts] = useState(mockProducts);
+  const { currentPeermall } = usePeermall();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState(category);
   const [sortBy, setSortBy] = useState('latest');
+  const [loading, setLoading] = useState(true);
 
-  // 필터링 및 정렬 로직
+  // 피어몰 소유자인지 확인
+  const isOwner = currentPeermall?.ownerId === user?.email || 
+                  currentPeermall?.owner_id === user?.id;
+
+  // 상품 목록 가져오기
   useEffect(() => {
-    let filtered = products;
+    const fetchProducts = async () => {
+      if (!currentPeermall?.id) {
+        setLoading(false);
+        return;
+      }
 
-    // 검색어 필터링
-    if (searchQuery) {
-      filtered = filtered.filter(product => 
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase())
+      setLoading(true);
+      try {
+        const data = await productApi.getProductsByPeermall(currentPeermall.id);
+        
+        // 활성 상품만 필터링
+        const activeProducts = data.filter(p => p.status === 'active');
+        
+        // 필터에 따른 정렬
+        let sortedProducts = [...activeProducts];
+        
+        if (filter === 'new') {
+          sortedProducts.sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        } else if (filter === 'best') {
+          sortedProducts.sort((a, b) => (b.views || 0) - (a.views || 0));
+        }
+        
+        // 미리보기 모드일 경우 limit 적용
+        if (mode === 'preview') {
+          sortedProducts = sortedProducts.slice(0, limit);
+        }
+
+        console.log(sortedProducts)
+        
+        setProducts(sortedProducts);
+        setFilteredProducts(sortedProducts);
+        
+        // 콜백 실행
+        if (onProductsLoaded) {
+          onProductsLoaded(sortedProducts);
+        }
+      } catch (error) {
+        console.error('상품 목록 조회 실패:', error);
+        toast({
+          title: '오류',
+          description: '상품 목록을 불러오는데 실패했습니다.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [currentPeermall?.id, filter, mode, limit]);
+
+  // 카테고리 필터링
+  useEffect(() => {
+    if (selectedCategory === 'all') {
+      setFilteredProducts(products);
+    } else {
+      setFilteredProducts(products.filter(p => p.category === selectedCategory));
+    }
+  }, [selectedCategory, products]);
+
+  // 검색 및 정렬 (전체보기 모드에서만)
+  useEffect(() => {
+    if (mode === 'full') {
+      let filtered = [...products];
+
+      if (searchQuery) {
+        filtered = filtered.filter(product => 
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
+      }
+
+      switch (sortBy) {
+        case 'latest':
+          filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          break;
+        case 'price-low':
+          filtered.sort((a, b) => (a.sellingPrice || a.price) - (b.sellingPrice || b.price));
+          break;
+        case 'price-high':
+          filtered.sort((a, b) => (b.sellingPrice || b.price) - (a.sellingPrice || a.price));
+          break;
+      }
+
+      setFilteredProducts(filtered);
+    }
+  }, [products, searchQuery, sortBy, mode]);
+
+  // 상품 카드 컴포넌트
+  const ProductCard = ({ product }: { product: Product }) => (
+    <Link to={`/home/${url}/product/${product.id}`}>
+      <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 h-full">
+        <CardContent className="p-0 h-full flex flex-col">
+          <div className="aspect-square relative overflow-hidden rounded-t-lg">
+            {product.imageUrl ? (
+              <img 
+                src={product.imageUrl} 
+                alt={product.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = '/placeholder-product.png';
+                }}
+              />
+            ) : (
+              <div className="w-full h-full bg-muted flex items-center justify-center">
+                <ShoppingBag className="h-12 w-12 text-muted-foreground" />
+              </div>
+            )}
+            {product.status === 'active' && (
+              <Badge className="absolute top-2 right-2 bg-green-500">판매중</Badge>
+            )}
+          </div>
+          
+          <div className="p-4 flex-1 flex flex-col">
+            {product.category && (
+              <Badge variant="outline" className="w-fit text-xs mb-2">
+                {product.category}
+              </Badge>
+            )}
+            
+            <h4 className="font-semibold text-sm mb-2 line-clamp-2">
+              {product.name}
+            </h4>
+            
+            <div className="mt-auto">
+              {product.price && product.price !== product.sellingPrice && (
+                <p className="text-xs text-muted-foreground line-through">
+                  {Number(product.price).toLocaleString()}원
+                </p>
+              )}
+              <p className="text-primary font-bold">
+                {Number(product.sellingPrice || 0).toLocaleString()}원
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+
+  // 로딩 상태
+  if (loading) {
+    return mode === 'preview' ? (
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-0">
+              <Skeleton className="aspect-square w-full" />
+              <div className="p-4 space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-6 w-24" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    ) : (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-8">
+          <Skeleton className="h-10 w-48 mb-2" />
+          <Skeleton className="h-6 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-0">
+                <Skeleton className="aspect-square w-full" />
+                <div className="p-4 space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-6 w-24" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // 미리보기 모드
+  if (mode === 'preview') {
+    if (filteredProducts.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+          <p className="text-lg">
+            {selectedCategory !== 'all' 
+              ? `${selectedCategory} 카테고리에 등록된 상품이 없습니다.`
+              : '아직 등록된 상품이 없습니다.'}
+          </p>
+        </div>
       );
     }
 
-    // 카테고리 필터링
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => product.category === selectedCategory);
-    }
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
+        {filteredProducts.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+    );
+  }
 
-    // 정렬
-    switch (sortBy) {
-      case 'latest':
-        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        break;
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating);
-        break;
-    }
-
-    setFilteredProducts(filtered);
-  }, [products, searchQuery, selectedCategory, sortBy]);
-
-  // 카테고리 목록 생성
-  const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))];
-
+  // 전체보기 모드
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* 헤더 */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">내 상품 관리</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            {isOwner ? '내 상품 관리' : '상품 목록'}
+          </h1>
           <p className="text-muted-foreground mt-2">
             총 {filteredProducts.length}개의 상품
           </p>
         </div>
-        <Link to={`/${url}/products/create`}>
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            상품 등록
-          </Button>
-        </Link>
+        {isOwner && (
+          <Link to={`/home/${url}/products/create`}>
+            <Button className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              상품 등록
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* 필터 및 검색 */}
@@ -143,8 +297,8 @@ const UserProductList = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">전체 카테고리</SelectItem>
-            {categories.filter(cat => cat !== 'all').map(category => (
-              <SelectItem key={category} value={category}>{category}</SelectItem>
+            {Array.from(new Set(products.map(p => p.category).filter(Boolean))).map(cat => (
+              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -157,80 +311,47 @@ const UserProductList = () => {
             <SelectItem value="latest">최신순</SelectItem>
             <SelectItem value="price-low">가격 낮은순</SelectItem>
             <SelectItem value="price-high">가격 높은순</SelectItem>
-            <SelectItem value="rating">평점순</SelectItem>
           </SelectContent>
         </Select>
+
+        <Button
+          variant="outline"
+          onClick={() => window.location.reload()}
+          className="w-full md:w-auto"
+        >
+          <Loader2 className="h-4 w-4 mr-2" />
+          새로고침
+        </Button>
       </div>
 
       {/* 상품 목록 */}
       {filteredProducts.length === 0 ? (
         <div className="text-center py-16">
           <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-xl font-semibold mb-2">등록된 상품이 없습니다</h3>
+          <h3 className="text-xl font-semibold mb-2">
+            {searchQuery ? '검색 결과가 없습니다' : '등록된 상품이 없습니다'}
+          </h3>
           <p className="text-muted-foreground mb-6">
-            첫 번째 상품을 등록하여 판매를 시작해보세요!
+            {searchQuery 
+              ? '다른 검색어로 시도해보세요.' 
+              : isOwner 
+                ? '첫 번째 상품을 등록하여 판매를 시작해보세요!'
+                : '곧 새로운 상품이 등록될 예정입니다.'
+            }
           </p>
-          <Link to={`/${url}/products/create`}>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              상품 등록하기
-            </Button>
-          </Link>
+          {isOwner && !searchQuery && (
+            <Link to={`/home/${url}/products/create`}>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                상품 등록하기
+              </Button>
+            </Link>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
-            <Link key={product.id} to={`/${url}/products/${product.id}`}>
-              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                <CardContent className="p-0">
-                  <div className="aspect-square relative overflow-hidden rounded-t-lg">
-                    {product.image ? (
-                      <img 
-                        src={product.image} 
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-muted flex items-center justify-center">
-                        <span className="text-4xl">📦</span>
-                      </div>
-                    )}
-                    <Badge 
-                      variant={product.status === 'active' ? 'default' : 'secondary'}
-                      className="absolute top-3 right-3"
-                    >
-                      {product.status === 'active' ? '판매중' : '판매중단'}
-                    </Badge>
-                  </div>
-                  
-                  <div className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="text-xs">
-                        {product.category}
-                      </Badge>
-                    </div>
-                    
-                    <h3 className="font-semibold mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                      {product.name}
-                    </h3>
-                    
-                    <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <p className="text-primary font-bold text-lg">
-                        {product.price.toLocaleString()}원
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium">{product.rating}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}

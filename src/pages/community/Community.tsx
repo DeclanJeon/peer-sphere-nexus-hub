@@ -26,7 +26,6 @@ const Community = () => {
   const [activeCategory, setActiveCategory] = useState('전체글');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const tabs = ['신규', '베스트', '커뮤니티', '이벤트'];
   const categories = ['전체글', '추천글', '공지', '인기글'];
 
   const posts = [
@@ -192,20 +191,6 @@ const Community = () => {
             </Link>
           </Button>
         </div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="flex gap-2 mb-6">
-        {tabs.map((tab) => (
-          <Button
-            key={tab}
-            variant={activeTab === tab ? "default" : "outline"}
-            onClick={() => setActiveTab(tab)}
-            className={activeTab === tab ? "bg-yellow-400 text-black hover:bg-yellow-500" : ""}
-          >
-            {tab}
-          </Button>
-        ))}
       </div>
 
       {/* Category Buttons */}

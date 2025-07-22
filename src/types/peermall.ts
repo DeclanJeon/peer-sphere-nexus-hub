@@ -1,4 +1,5 @@
 export interface Peermall {
+  [x: string]: any;
   id: string;
   url: string; // Changed from address to url to match backend
   name: string;
@@ -50,6 +51,9 @@ export interface PeermallContextType {
   isMainPeermall: boolean;
   fetchPeermalls: () => Promise<void>;
   fetchPeermallByUrl: (address: string) => Promise<void>;
-  createPeermall: (data: PeermallCreationData, imageFile: File | null) => Promise<Peermall | undefined>;
+  createPeermall: (
+    data: PeermallCreationData,
+    imageFile: File | null
+  ) => Promise<Peermall | undefined>;
   setCurrentPeermall: (peermall: Peermall | null) => void;
 }
