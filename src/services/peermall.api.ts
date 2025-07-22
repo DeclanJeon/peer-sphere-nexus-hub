@@ -9,13 +9,12 @@ class PeermallApi {
   });
 
   // 피어몰 생성
-  async createPeermall(
-    peermallData: Omit<
-      Peermall,
-      'id' | 'rating' | 'sales' | 'createdAt' | 'updatedAt' | 'status'
-    >
-  ): Promise<Peermall> {
-    const response = await this.api.post('/', peermallData);
+  async createPeermall(peermallData: FormData): Promise<Peermall> {
+    const response = await this.api.post('/create', peermallData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data.data;
   }
 

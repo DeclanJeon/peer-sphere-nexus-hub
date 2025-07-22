@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/hooks/use-toast';
 import { PeermallCreationData } from '@/types/peermall';
 import { useAuth } from '@/hooks/useAuth';
+import { peermallApi } from '@/services/peermall.api';
 
 const PeermallCreate = () => {
   const navigate = useNavigate();
@@ -30,13 +31,6 @@ const PeermallCreate = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isAddressValid, setIsAddressValid] = useState<boolean | null>(null);
 
-  const checkAddressAvailability = useCallback(async (address: string) => {
-    // 간단한 주소 유효성 검사 (여기서는 로컬 검사만 수행)
-    if (address.length < 3) return false;
-    if (!/^[a-zA-Z0-9_-]+$/.test(address)) return false;
-    return true;
-  }, []);
-
   const handleAddressCheck = async () => {
     if (!formData.address) {
       toast({
@@ -47,7 +41,7 @@ const PeermallCreate = () => {
       return;
     }
 
-    const isValid = await checkAddressAvailability(formData.address);
+    const isValid = await peermallApi.checkUrlAvailability(formData.url);
     setIsAddressValid(isValid);
 
     if (isValid) {
@@ -76,6 +70,8 @@ const PeermallCreate = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log(formData)
+
     // 유효성 검사
     if (!formData.name || !formData.address || !formData.category || !formData.description) {
       toast({
@@ -95,17 +91,8 @@ const PeermallCreate = () => {
       return;
     }
 
-    if (!formData.ownerId) {
-      toast({
-        title: '오류',
-        description: '로그인이 필요합니다.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     try {
-      await createPeermall(formData);
+      await createPeermall(formData, imageFile);
       toast({
         title: '성공',
         description: '피어몰이 성공적으로 생성되었습니다.',

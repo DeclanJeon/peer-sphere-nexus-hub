@@ -50,6 +50,6 @@ export interface PeermallContextType {
   isMainPeermall: boolean;
   fetchPeermalls: () => Promise<void>;
   fetchPeermallByUrl: (address: string) => Promise<void>;
-  createPeermall: (data: PeermallCreationData) => Promise<Peermall | undefined>;
+  createPeermall: (data: PeermallCreationData, imageFile: File | null) => Promise<Peermall | undefined>;
   setCurrentPeermall: (peermall: Peermall | null) => void;
 }

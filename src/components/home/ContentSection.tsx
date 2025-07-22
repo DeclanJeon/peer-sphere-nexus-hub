@@ -255,7 +255,7 @@ const ContentSection = ({ activeTab, selectedCategory, isMainPeermall = true, pe
     };
 
     fetchData();
-  }, [isMainPeermall, currentPeermallId, mockCommunityPosts, mockEvents]);
+  }, [isMainPeermall, currentPeermallId]);
 
   const getFilteredPeermalls = (peermalls: Peermall[]) => {
     if (selectedCategory === 'all') return peermalls;

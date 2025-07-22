@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Peermall, PeermallContextType, PeermallCreationData } from '@/types/peermall';
@@ -92,33 +91,67 @@ export const PeermallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, []);
 
-  const createPeermall = async (data: PeermallCreationData) => {
+  const createPeermall = async (data: PeermallCreationData, imageFile: File | null) => {
     setLoading(true);
     try {
-      const newPeermall: PeermallCreationData = {
-        name: data.name,
-        description: data.description,
-        url: data.url, // Changed from address to url to match backend
-        imageUrl: data.imageUrl, // Changed from image to imageUrl to match backend
-        category: data.category,
-        creatorName: data.creatorName || data.ownerName || '익명',
-        ownerEmail: data.ownerEmail,
-        referrerCode: data.referrerCode, // Changed from referralCode to referrerCode
-        // Note: status is managed by the backend and should not be set by the client
-        // createdAt and updatedAt are automatically set by the backend
-      };
-      const apiData = mapToApiData(newPeermall);
-      const response = await peermallApi.createPeermall(apiData);
+      const formData = new FormData();
+      
+      // FormData에 텍스트 필드 추가
+      // image 필드는 제외하고 추가 (파일로 따로 추가할 것이므로)
+      Object.entries(data).forEach(([key, value]) => {
+        if (key !== 'image' && value !== null && value !== undefined && value !== '') {
+          formData.append(key, String(value));
+        }
+      });
+
+      // 이미지 파일 추가
+      if (imageFile) {
+        formData.append('image', imageFile, imageFile.name);
+        console.log('이미지 파일 추가됨:', {
+          name: imageFile.name,
+          size: imageFile.size,
+          type: imageFile.type
+        });
+      }
+
+      // FormData 내용 확인 (디버깅용)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('FormData 내용:');
+        for (let [key, value] of formData.entries()) {
+          if (value instanceof File) {
+            console.log(`${key}: [File] ${value.name} (${value.size} bytes)`);
+          } else {
+            console.log(`${key}: ${value}`);
+          }
+        }
+      }
+
+      const response = await peermallApi.createPeermall(formData);
       const mappedPeermall = mapApiToPeermall(response);
+      
+      // 상태 업데이트
       setPeermalls(prev => [...prev, mappedPeermall]);
       setCurrentPeermall(mappedPeermall);
       setError(null);
+      
+      // 생성된 피어몰로 이동
       navigate(`/peermall/${mappedPeermall.url}`);
+      
       return mappedPeermall;
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || '피어몰 생성 중 오류가 발생했습니다.';
       setError(errorMessage);
-      console.error(err);
+      console.error('피어몰 생성 실패:', err);
+      
+      // 에러 상세 정보 로깅 (개발 환경에서만)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('에러 상세:', {
+          status: err.response?.status,
+          data: err.response?.data,
+          headers: err.response?.headers
+        });
+      }
+      
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -144,7 +177,7 @@ export const PeermallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     fetchPeermalls,
     fetchPeermallByUrl,
     createPeermall,
-    setCurrentPeermall, // This might still be needed for other purposes
+    setCurrentPeermall,
   };
 
   return (
