@@ -7,7 +7,7 @@ import { peermallApi } from '@/services/peermall.api';
 import { Peermall } from '@/types/peermall';
 import { Plus } from 'lucide-react';
 import { productService, Product, communityService, eventService, Post } from '@/lib/indexeddb';
-import PeermallCard from '@/components/home/PeermallCard';
+import PeermallCard from '@/components/common/peermall/PeermallCard';
 
 interface ContentSectionProps {
   activeTab: string;

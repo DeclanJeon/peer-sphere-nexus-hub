@@ -1,6 +1,6 @@
 import { Calendar } from 'lucide-react';
 import { useState } from 'react';
-import PeermallCard from '@/components/home/PeermallCard';
+import PeermallCard from '@/components/common/peermall/PeermallCard';
 import { Peermall } from '@/types/peermall';
 
 const NewPeermalls = () => {

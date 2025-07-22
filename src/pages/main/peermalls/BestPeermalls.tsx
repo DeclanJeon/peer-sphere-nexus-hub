@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { Peermall } from '@/types/peermall';
-import PeermallCard from '@/components/home/PeermallCard';
+import PeermallCard from '@/components/common/peermall/PeermallCard';
 
 const BestPeermalls = () => {
   // ========== 목업 데이터 START ==========
