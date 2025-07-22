@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { productApi } from '@/services/product.api';
 import { usePeermall } from '@/contexts/PeermallContext';
@@ -39,6 +38,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ProductReviews } from './reviews/ProductReviews';
 
 const UserProductDetail = () => {
   // productId가 아닌 id로 수정
@@ -83,7 +83,7 @@ const UserProductDetail = () => {
     };
 
     fetchProduct();
-  }, [id]);
+  }, [id, toast]);
 
   const handleDelete = async () => {
     try {
@@ -154,7 +154,7 @@ const UserProductDetail = () => {
     );
   }
 
-  if (!product) {
+  if (!product || !id) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
@@ -451,37 +451,11 @@ const UserProductDetail = () => {
         </Card>
 
         {/* 상품 리뷰 섹션 */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold">상품 리뷰</h3>
-              <div className="flex items-center gap-2">
-                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                <span className="font-semibold">{product.rating || 0}</span>
-                <span className="text-muted-foreground">({product.likes || 0}개)</span>
-              </div>
-            </div>
-            <div className="space-y-4">
-              {[1, 2, 3].map((review) => (
-                <div key={review} className="border-b pb-4 last:border-b-0">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-muted rounded-full"></div>
-                      <span className="font-medium">사용자{review}</span>
-                      <div className="flex items-center">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        ))}
-                      </div>
-                    </div>
-                    <span className="text-sm text-muted-foreground">2024.01.0{review}</span>
-                  </div>
-                  <p className="text-muted-foreground">정말 좋은 상품이에요! 품질도 만족스럽고 배송도 빨랐습니다.</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <ProductReviews 
+          productId={id}
+          averageRating={product.rating || 0}
+          totalReviews={product.likes || 0} // 임시로 likes를 리뷰 수로 사용
+        />
       </div>
     </div>
   );

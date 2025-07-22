@@ -26,35 +26,36 @@ import UserProductList from "@/pages/user-peermall/products/UserProductList";
 import UserProductDetail from "@/pages/user-peermall/products/UserProductDetail";
 
 // Shared Pages (used by both main and user peermalls)
-import PeermallCreate from "@/pages/peermalls/PeermallCreate";
-import NewPeermalls from "@/pages/peermalls/NewPeermalls";
-import BestPeermalls from "@/pages/peermalls/BestPeermalls";
+// import PeermallCreate from "@/pages/peermalls/PeermallCreate";
+import BestPeermalls from "@/pages/main/peermalls/BestPeermalls";
+import NewPeermalls from "@/pages/main/peermalls/NewPeermalls";
+import PeermallList from "@/pages/main/peermalls/PeermallList";
 
 // Product pages
-import ProductList from "@/pages/products/ProductList";
-import ProductDetail from "@/pages/products/ProductDetail";
-import ProductCreate from "@/pages/products/ProductCreate";
-import NewProducts from "@/pages/products/NewProducts";
-import BestProducts from "@/pages/products/BestProducts";
+import ProductList from "@/pages/main/products/ProductList";
+import ProductDetail from "@/pages/main/products/ProductDetail";
+import ProductCreate from "@/pages/main/products/ProductCreate";
+import NewProducts from "@/pages/main/products/NewProducts";
+import BestProducts from "@/pages/main/products/BestProducts";
 
 // Community pages
-import Community from "@/pages/community/Community";
-import BoardCreate from "@/pages/community/BoardCreate";
-import BoardDetail from "@/pages/community/BoardDetail";
+import Community from "@/pages/main/community/Community";
+import BoardCreate from "@/pages/main/community/BoardCreate";
+import BoardDetail from "@/pages/main/community/BoardDetail";
 
 // Event pages
-import Events from "@/pages/events/Events";
-import EventCreate from "@/pages/events/EventCreate";
-import EventDetail from "@/pages/events/EventDetail";
+import Events from "@/pages/main/events/Events";
+import EventCreate from "@/pages/main/events/EventCreate";
+import EventDetail from "@/pages/main/events/EventDetail";
 
 // My pages
-import MyInfo from "@/pages/mypage/MyInfo";
-import MyPage from "@/pages/mypage/MyPage";
-import MyMall from "@/pages/mypage/MyMall";
-import MyMallInfo from "@/pages/mypage/MyMallInfo";
-import MyPosts from "@/pages/mypage/MyPosts";
-import MyProducts from "@/pages/mypage/MyProducts";
-import MyReviews from "@/pages/mypage/MyReviews";
+import MyInfo from "@/pages/main/mypage/MyInfo";
+import MyPage from "@/pages/main/mypage/MyPage";
+import MyMall from "@/pages/main/mypage/MyMall";
+import MyMallInfo from "@/pages/main/mypage/MyMallInfo";
+import MyPosts from "@/pages/main/mypage/MyPosts";
+import MyProducts from "@/pages/main/mypage/MyProducts";
+import MyReviews from "@/pages/main/mypage/MyReviews";
 
 // QR Code
 import QRCode from "@/pages/QRCode";
@@ -98,8 +99,8 @@ const App = () => (
               <Route path="/events/:id" element={<MainLayout><EventDetail /></MainLayout>} />
               
               {/* Peermall List and Creation */}
-              <Route path="/peermalls" element={<MainLayout><PeermallListMain /></MainLayout>} />
-              <Route path="/peermalls/create" element={<ProtectedRoute><MainLayout><PeermallCreate /></MainLayout></ProtectedRoute>} />
+              {/* <Route path="/peermalls" element={<MainLayout><PeermallListMain /></MainLayout>} /> */}
+              {/* <Route path="/peermalls/create" element={<ProtectedRoute><MainLayout><PeermallCreate /></MainLayout></ProtectedRoute>} /> */}
               
               {/* User Peermall Routes */}
               <Route path="/home/:url" element={<UserPeermallPage />}>

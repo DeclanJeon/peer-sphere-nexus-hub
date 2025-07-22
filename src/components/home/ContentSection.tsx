@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { peermallApi } from '@/services/peermall.api';
-import PeermallCard from '@/components/shared/PeermallCard';
 import { Peermall } from '@/types/peermall';
 import { Plus } from 'lucide-react';
 import { productService, Product, communityService, eventService, Post } from '@/lib/indexeddb';
+import PeermallCard from '@/components/home/PeermallCard';
 
 interface ContentSectionProps {
   activeTab: string;
