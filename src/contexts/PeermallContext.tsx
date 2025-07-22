@@ -158,15 +158,7 @@ export const PeermallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  useEffect(() => {
-    const urlMatch = location.pathname.match(/^\/peermall\/([^\/]+)/);
-    if (urlMatch) {
-      const peermallUrl = decodeURIComponent(urlMatch[1]);
-      fetchPeermallByUrl(peermallUrl);
-    } else {
-      setCurrentPeermall(null);
-    }
-  }, [location.pathname, fetchPeermallByUrl]);
+  
 
   const value = {
     peermalls,

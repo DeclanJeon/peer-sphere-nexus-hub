@@ -106,11 +106,12 @@ const App = () => (
                 <Route index element={<UserPeermallHome />} />
                 <Route path="products" element={<UserProductList />} />
                 <Route path="product/:id" element={<UserProductDetail />} />
+                
                 <Route path="community" element={<Community />} />
-                <Route path="community/create" element={<BoardCreate />} />
+                <Route path="community/create" element={<ProtectedRoute><BoardCreate /></ProtectedRoute>} />
                 <Route path="community/:id" element={<BoardDetail />} />
                 <Route path="events" element={<Events />} />
-                <Route path="events/create" element={<EventCreate />} />
+                <Route path="events/create" element={<ProtectedRoute><EventCreate /></ProtectedRoute>} />
                 <Route path="events/:id" element={<EventDetail />} />
               </Route>
 

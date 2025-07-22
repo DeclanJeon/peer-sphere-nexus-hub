@@ -52,7 +52,9 @@ const UserProductDetail = () => {
 
   // 피어몰 소유자인지 확인
   const isOwner = currentPeermall?.ownerId === user?.email || 
-                  currentPeermall?.owner_id === user?.id;
+    currentPeermall?.owner_id === user?.id;
+  
+  console.log(currentPeermall)
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -64,6 +66,9 @@ const UserProductDetail = () => {
       setLoading(true);
       try {
         const data = await productApi.getProductById(id);
+
+        console.log("상품 상세 조회 : ", data)
+
         setProduct(data);
       } catch (error) {
         console.error('상품 조회 실패:', error);
@@ -187,7 +192,7 @@ const UserProductDetail = () => {
                 <Heart className="h-4 w-4" />
                 좋아요 {product.likes || 0}
               </span>
-              <span>등록일 {new Date(product.createdAt).toLocaleDateString()}</span>
+              <span>등록일 {new Date(product.created_at).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
@@ -217,6 +222,10 @@ const UserProductDetail = () => {
                     수정
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDelete}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  삭제
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -227,9 +236,9 @@ const UserProductDetail = () => {
         {/* 상품 이미지 */}
         <div className="space-y-4">
           <div className="aspect-square overflow-hidden rounded-lg bg-muted">
-            {product.imageUrl ? (
+            {product.image_url ? (
               <img 
-                src={product.imageUrl} 
+                src={product.image_url} 
                 alt={product.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -260,13 +269,13 @@ const UserProductDetail = () => {
             </div>
             
             <div className="mb-4">
-              {product.price && product.price !== product.sellingPrice && (
+              {product.price && product.price !== product.selling_price && (
                 <p className="text-lg text-muted-foreground line-through">
                   {Number(product.price).toLocaleString()}원
                 </p>
               )}
               <p className="text-3xl font-bold text-primary">
-                {Number(product.sellingPrice || 0).toLocaleString()}원
+                {Number(product.selling_price || 0).toLocaleString()}원
               </p>
             </div>
             

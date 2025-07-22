@@ -34,7 +34,7 @@ class ProductApi {
 
   // 제품 상세 조회
   async getProductById(id: string): Promise<Product> {
-    const response = await this.api.get(`/peermall/${id}`);
+    const response = await this.api.get(`/${id}`);
     return response.data.data;
   }
 
