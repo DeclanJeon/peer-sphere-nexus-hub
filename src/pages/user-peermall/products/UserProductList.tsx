@@ -143,9 +143,9 @@ const UserProductList = ({
       <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 h-full">
         <CardContent className="p-0 h-full flex flex-col">
           <div className="aspect-square relative overflow-hidden rounded-t-lg">
-            {product.imageUrl ? (
+            {product.image_url ? (
               <img 
-                src={product.imageUrl} 
+                src={product.image_url} 
                 alt={product.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {

@@ -1,5 +1,6 @@
 // src/types/product.ts
 export interface Product {
+  [x: string]: any;
   id: string;
   peermallId: string;
   name: string;
