@@ -21,6 +21,12 @@ import PeermallListMain from "@/pages/main/peermalls/PeermallList";
 import UserPeermallPage from "@/pages/user-peermall/UserPeermallPage";
 import UserPeermallHome from "@/pages/user-peermall/UserPeermallHome";
 
+// User Peermall Product Pages
+import UserProductList from "@/pages/user-peermall/products/UserProductList";
+import UserProductCreate from "@/pages/user-peermall/products/UserProductCreate";
+import UserProductDetail from "@/pages/user-peermall/products/UserProductDetail";
+import UserProductEdit from "@/pages/user-peermall/products/UserProductEdit";
+
 // Shared Pages (used by both main and user peermalls)
 import PeermallCreate from "@/pages/peermalls/PeermallCreate";
 import NewPeermalls from "@/pages/peermalls/NewPeermalls";
@@ -100,8 +106,14 @@ const App = () => (
               {/* User Peermall Routes */}
               <Route path="/home/:url" element={<UserPeermallPage />}>
                 <Route index element={<UserPeermallHome />} />
-                {/* TODO: Add other peermall routes like products, community, events when they are created */}
+                {/* TODO: Add other peermall routes like community, events when they are created */}
               </Route>
+
+              {/* User Peermall Product Routes - Requires authentication */}
+              <Route path="/:url/products" element={<ProtectedRoute><UserProductList /></ProtectedRoute>} />
+              <Route path="/:url/products/create" element={<ProtectedRoute><UserProductCreate /></ProtectedRoute>} />
+              <Route path="/:url/products/:productId" element={<ProtectedRoute><UserProductDetail /></ProtectedRoute>} />
+              <Route path="/:url/products/:productId/edit" element={<ProtectedRoute><UserProductEdit /></ProtectedRoute>} />
 
               {/* MyPage Routes - 로그인 필요 */}
               <Route 
