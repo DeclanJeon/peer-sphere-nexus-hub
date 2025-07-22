@@ -1,6 +1,7 @@
 import { Calendar } from 'lucide-react';
 import { useState } from 'react';
 import PeermallCard from '@/components/common/peermall/PeermallCard';
+import QRCodeDialog from '@/components/common/QRCodeDialog';
 import { Peermall } from '@/types/peermall';
 
 const NewPeermalls = () => {
@@ -143,6 +144,13 @@ const NewPeermalls = () => {
   // ========== 목업 데이터 END ==========
 
   const [newPeermalls, setNewPeermalls] = useState<Peermall[]>(mockNewPeermalls);
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [selectedPeermall, setSelectedPeermall] = useState<Peermall | null>(null);
+
+  const handleQRClick = (peermall: Peermall) => {
+    setSelectedPeermall(peermall);
+    setQrDialogOpen(true);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -155,7 +163,7 @@ const NewPeermalls = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {newPeermalls && newPeermalls.length > 0 ? (
           newPeermalls.map((peermall) => (
-            <PeermallCard key={peermall.id} peermall={peermall} />
+            <PeermallCard key={peermall.id} peermall={peermall} onQRClick={handleQRClick} />
           ))
         ) : (
           <div className="col-span-full text-center py-8 text-muted-foreground">
@@ -163,6 +171,13 @@ const NewPeermalls = () => {
           </div>
         )}
       </div>
+
+      {/* QR 코드 다이얼로그 */}
+      <QRCodeDialog
+        open={qrDialogOpen}
+        onOpenChange={setQrDialogOpen}
+        peermall={selectedPeermall}
+      />
     </div>
   );
 };
