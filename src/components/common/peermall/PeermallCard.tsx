@@ -1,193 +1,107 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Star, QrCode, Share } from 'lucide-react';
+import { QrCode, Share2, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
 import { Peermall } from '@/types/peermall';
+import { toast } from '@/hooks/use-toast';
 
 interface PeermallCardProps {
   peermall: Peermall;
+  onQRClick: (peermall: Peermall) => void;
 }
 
-const PeermallCard = ({ peermall }: PeermallCardProps) => {
-
-  console.log(peermall)
-
-  const truncateDescription = (description: string, maxLength: number = 80) => {
-    if (!description) return '설명이 없습니다.';
-    if (description.length <= maxLength) return description;
-    return description.substring(0, maxLength) + '...';
-  };
-
-  const formatRating = (rating: number | string | null | undefined): string => {
-    if (rating === null || rating === undefined) return '0.0';
-    const numRating = typeof rating === 'string' ? parseFloat(rating) : rating;
-    return isNaN(numRating) ? '0.0' : numRating.toFixed(1);
-  };
-
-  const formatSalesVolume = (salesVolume: number | string | null | undefined): string => {
-    if (salesVolume === null || salesVolume === undefined) return '0';
-    const numSales = typeof salesVolume === 'string' ? parseInt(salesVolume) : salesVolume;
-    return isNaN(numSales) ? '0' : numSales.toLocaleString();
-  };
-
-  const handleShare = (e: React.MouseEvent) => {
+const PeermallCard = ({ peermall, onQRClick }: PeermallCardProps) => {
+  const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
+    const shareUrl = `${window.location.origin}/home/${peermall.url}`;
     
-    if (!peermall.url) {
-      toast({
-        title: '오류',
-        description: '공유할 수 있는 주소 정보가 없습니다.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const shareUrl = `${window.location.origin}/home/${encodeURIComponent(peermall.url)}`;
-    
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(shareUrl).then(() => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: peermall.name,
+          text: peermall.description || `${peermall.name} 피어몰에 방문해보세요!`,
+          url: shareUrl,
+        });
+      } catch (error) {
+        console.log('공유 취소 또는 오류:', error);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
         toast({
           title: '링크 복사 완료',
-          description: `'${peermall.name || '피어몰'}' 링크가 클립보드에 복사되었습니다.`,
+          description: '피어몰 링크가 클립보드에 복사되었습니다.',
         });
-      }).catch(() => {
-        // 클립보드 복사 실패 시 대체 방법
-        fallbackCopyTextToClipboard(shareUrl);
-      });
-    } else {
-      // 클립보드 API를 지원하지 않는 경우 대체 방법
-      fallbackCopyTextToClipboard(shareUrl);
+      } catch (error) {
+        console.error('클립보드 복사 실패:', error);
+      }
     }
   };
 
-  const fallbackCopyTextToClipboard = (text: string) => {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.top = '0';
-    textArea.style.left = '0';
-    textArea.style.position = 'fixed';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-
-    try {
-      document.execCommand('copy');
-      toast({
-        title: '링크 복사 완료',
-        description: `'${peermall.name || '피어몰'}' 링크가 복사되었습니다.`,
-      });
-    } catch (err) {
-      toast({
-        title: '복사 실패',
-        description: '링크 복사에 실패했습니다. 수동으로 복사해주세요.',
-        variant: 'destructive',
-      });
-    }
-
-    document.body.removeChild(textArea);
-  };
-
-  const handleGenerateQR = (e: React.MouseEvent) => {
+  const handleQRCode = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    
-    if (!peermall.url) {
-      toast({
-        title: '오류',
-        description: 'QR 코드를 생성할 주소 정보가 없습니다.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const qrData = `${window.location.origin}/home/${encodeURIComponent(peermall.url)}`;
-    console.log('QR Code Data:', qrData);
-    toast({
-      title: 'QR 코드 생성',
-      description: `'${peermall.name || '피어몰'}' QR 코드가 생성되었습니다.`,
-    });
+    onQRClick(peermall);
   };
-
-  // 필수 데이터 검증
-  if (!peermall) {
-    return (
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardContent className="p-4">
-          <div className="text-center text-muted-foreground">
-            데이터를 불러올 수 없습니다.
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer relative group">
-      <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-        <Button
-          size="sm"
-          variant="secondary"
-          className="p-2 h-8 w-8 rounded-full bg-white/90 hover:bg-white shadow-sm"
-          onClick={handleGenerateQR}
-        >
-          <QrCode className="h-4 w-4 text-gray-600" />
-        </Button>
-        <Button
-          size="sm"
-          variant="secondary"
-          className="p-2 h-8 w-8 rounded-full bg-white/90 hover:bg-white shadow-sm"
-          onClick={handleShare}
-        >
-          <Share className="h-4 w-4 text-gray-600" />
-        </Button>
-      </div>
-      
-      <Link to={`/home/${encodeURIComponent(peermall.url || '')}`}>
-        <CardContent className="p-4">
-          <div className="aspect-video bg-muted rounded-lg mb-3 overflow-hidden flex items-center justify-center">
-            {peermall.image_url ? (
-              <img 
-                src={peermall.image_url} 
-                alt={peermall.name || '피어몰 이미지'} 
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  target.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-            ) : null}
-            <div className={`text-muted-foreground ${peermall.image_url ? 'hidden' : ''}`}>
-              이미지 없음
+    <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden group">
+      <CardContent className="p-0">
+        {/* 상단 아이콘들 */}
+        <div className="absolute top-2 left-2 z-10 flex gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+            onClick={handleQRCode}
+          >
+            <QrCode className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+            onClick={handleShare}
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* 대표 이미지 */}
+        <div className="aspect-[4/3] overflow-hidden bg-muted relative">
+          {peermall.image_url ? (
+            <img 
+              src={peermall.image_url} 
+              alt={peermall.name}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+              <span className="text-lg font-medium">{peermall.name}</span>
             </div>
+          )}
+          
+          {/* 입장하기 버튼 */}
+          <div className="absolute bottom-2 right-2">
+            <Link to={`/home/${peermall.url}`}>
+              <Button 
+                size="sm" 
+                className="bg-primary hover:bg-primary/90 text-white shadow-lg"
+              >
+                <LogIn className="h-4 w-4 mr-1" />
+                입장하기
+              </Button>
+            </Link>
           </div>
-          
-          <h3 className="font-semibold mb-2 line-clamp-1">
-            {peermall.name || '이름 없음'}
-          </h3>
-          
-          <div className="flex items-center justify-between mb-2">
-            <Badge variant="secondary">
-              {peermall.family_company || '미분류'}
-            </Badge>
-            <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm">{formatRating(peermall.rating)}</span>
-            </div>
-          </div>
-          
-          <p className="text-sm text-muted-foreground mb-2">
-            거래 {formatSalesVolume(peermall.sales_volume)}건
+        </div>
+
+        {/* 피어몰 정보 */}
+        <div className="p-4">
+          <h3 className="font-bold text-lg mb-1">{peermall.name}</h3>
+          <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
+            {peermall.description || '다양한 상품과 서비스를 만나보세요. 특별한 경험이 기다리고 있습니다.'}
           </p>
-          
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {truncateDescription(peermall.description)}
-          </p>
-        </CardContent>
-      </Link>
+        </div>
+      </CardContent>
     </Card>
   );
 };

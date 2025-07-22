@@ -4,18 +4,8 @@ import CommunityList from '@/components/common/community/CommunityList';
 import CommunityTabs from '@/components/common/community/CommunityTabs';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { Post } from '@/types/post';
 
-interface Post {
-  id: number;
-  title: string;
-  author: string;
-  date: string;
-  views: number;
-  likes: number;
-  category: string;
-  isNotice?: boolean;
-  isPopular?: boolean;
-}
 
 const CommunityPage = () => {
   const location = useLocation();

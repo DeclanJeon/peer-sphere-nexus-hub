@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import ProductGrid from '@/components/common/product/ProductGrid';
 import ProductList from '@/components/common/product/ProductList';
 
 

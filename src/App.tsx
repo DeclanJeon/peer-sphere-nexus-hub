@@ -15,21 +15,18 @@ import NotFound from "@/pages/NotFound";
 // Main Layout & Pages
 import MainLayout from "@/components/layout/MainLayout";
 import MainPage from "@/pages/main/MainPage";
-import PeermallListMain from "@/pages/main/peermalls/PeermallList";
 
 // User Peermall Layout & Pages
 import UserPeermallPage from "@/pages/user-peermall/UserPeermallPage";
 import UserPeermallHome from "@/pages/user-peermall/UserPeermallHome";
 
 // User Peermall Product Pages
-import UserProductList from "@/pages/user-peermall/products/UserProductList";
 import UserProductDetail from "@/pages/user-peermall/products/UserProductDetail";
 
 // Shared Pages (used by both main and user peermalls)
-// import PeermallCreate from "@/pages/peermalls/PeermallCreate";
+
 import BestPeermalls from "@/pages/main/peermalls/BestPeermalls";
 import NewPeermalls from "@/pages/main/peermalls/NewPeermalls";
-import PeermallList from "@/pages/main/peermalls/PeermallList";
 
 // Product pages
 import ProductList from "@/pages/main/products/ProductList";
@@ -60,6 +57,8 @@ import MyReviews from "@/pages/main/mypage/MyReviews";
 // QR Code
 import QRCode from "@/pages/QRCode";
 import ProductPage from "./pages/common/ProductPage";
+import CommunityPage from "./pages/common/CommunityPage";
+import PeermallCreate from "./components/common/peermall/PeermallCreate";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +86,9 @@ const App = () => (
               <Route path="/" element={<MainLayout><MainPage /></MainLayout>} />
               <Route path="/peermalls/new" element={<MainLayout><NewPeermalls /></MainLayout>} />
               <Route path="/peermalls/best" element={<MainLayout><BestPeermalls /></MainLayout>} />
+              
+              <Route path="/peermalls/create" element={<ProtectedRoute><PeermallCreate /></ProtectedRoute>} />
+
               <Route path="/products" element={<MainLayout><ProductList /></MainLayout>} />
               <Route path="/products/new" element={<MainLayout><NewProducts /></MainLayout>} />
               <Route path="/products/best" element={<MainLayout><BestProducts /></MainLayout>} />
@@ -109,7 +111,7 @@ const App = () => (
                 <Route path="products" element={<ProductPage />} />
                 <Route path="product/:id" element={<UserProductDetail />} />
                 
-                <Route path="community" element={<Community />} />
+                <Route path="community" element={<CommunityPage />} />
                 <Route path="community/create" element={<ProtectedRoute><BoardCreate /></ProtectedRoute>} />
                 <Route path="community/:id" element={<BoardDetail />} />
                 <Route path="events" element={<Events />} />
