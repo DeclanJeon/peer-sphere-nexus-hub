@@ -1,114 +1,83 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import ProductGrid from '@/components/common/product/ProductGrid';
+import ProductList from '@/components/common/product/ProductList';
+
+
 import ProductTabs from '@/components/common/product/ProductTabs';
 import ProductFilters from '@/components/common/product/ProductFilters';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image_url: string;
-  category: string;
-  isNew?: boolean;
-  isBest?: boolean;
-  discount?: number;
-  rating?: number;
-  reviewCount?: number;
-}
+import { Plus, Loader2 } from 'lucide-react';
+import { Product } from '@/types/product';
+import { productApi } from '@/services/product.api';
+import { usePeermall } from '@/contexts/PeermallContext';
+import { useToast } from '@/hooks/use-toast';
 
 const ProductPage = () => {
   const location = useLocation();
   const params = useParams();
+  const { currentPeermall } = usePeermall();
+  const { toast } = useToast();
+  
   const [activeTab, setActiveTab] = useState('전체');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [sortBy, setSortBy] = useState('최신순');
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 현재 경로가 메인 피어몰인지 유저 피어몰인지 판단
   const isUserPeermall = location.pathname.startsWith('/home/');
   const peermallUrl = params.url;
 
-  // 목업 데이터
-  const mockProducts: Product[] = [
-    {
-      id: 1,
-      name: '프리미엄 무선 이어폰',
-      price: 89000,
-      originalPrice: 120000,
-      image_url: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=300&h=300&fit=crop',
-      category: '전자기기',
-      isNew: true,
-      isBest: true,
-      discount: 26,
-      rating: 4.8,
-      reviewCount: 324
-    },
-    {
-      id: 2,
-      name: '스마트 워치 시리즈 X',
-      price: 299000,
-      image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=300&h=300&fit=crop',
-      category: '전자기기',
-      isBest: true,
-      rating: 4.6,
-      reviewCount: 156
-    },
-    {
-      id: 3,
-      name: '미니멀 백팩',
-      price: 45000,
-      originalPrice: 65000,
-      image_url: 'https://images.unsplash.com/photo-1473091534298-04dcbce3278c?w=300&h=300&fit=crop',
-      category: '패션',
-      isNew: true,
-      discount: 31,
-      rating: 4.4,
-      reviewCount: 89
-    },
-    {
-      id: 4,
-      name: '홈카페 원두',
-      price: 12000,
-      image_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=300&fit=crop',
-      category: '식품',
-      rating: 4.7,
-      reviewCount: 234
-    },
-    {
-      id: 5,
-      name: '아로마 디퓨저',
-      price: 35000,
-      originalPrice: 50000,
-      image_url: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=300&h=300&fit=crop',
-      category: '생활용품',
-      discount: 30,
-      rating: 4.5,
-      reviewCount: 78
-    },
-    {
-      id: 6,
-      name: '운동화 스니커즈',
-      price: 78000,
-      image_url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&h=300&fit=crop',
-      category: '패션',
-      isNew: true,
-      rating: 4.3,
-      reviewCount: 145
-    }
-  ];
-
   useEffect(() => {
-    // 실제로는 API 호출로 데이터를 가져올 것
-    // isUserPeermall과 peermallUrl에 따라 다른 데이터 로드
-    setProducts(mockProducts);
-  }, [isUserPeermall, peermallUrl, activeTab]);
+    const fetchProducts = async () => {
+      // 피어몰 ID가 없으면 종료
+      if (!currentPeermall?.id && isUserPeermall) {
+        setLoading(false);
+        setError('피어몰 정보를 찾을 수 없습니다.');
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      
+      try {
+        let response: Product[] = [];
+        
+        if (isUserPeermall && currentPeermall?.id) {
+          // 유저 피어몰인 경우 currentPeermall.id 사용
+          response = await productApi.getProductsByPeermall(currentPeermall.id);
+        } else {
+          // 메인 페이지인 경우 전체 상품 조회 (API가 있다면)
+          // response = await productApi.getAllProducts();
+          // 또는 특정 피어몰 ID로 조회
+        //   console.log('메인 페이지 상품 조회');
+        }
+        
+        // 활성 상품만 필터링
+        const activeProducts = response.filter(p => p.status === 'active');
+        setProducts(activeProducts);
+        
+      } catch (error) {
+        console.error('상품 목록 조회 실패:', error);
+        setError('상품 목록을 불러오는데 실패했습니다.');
+        toast({
+          title: '오류',
+          description: '상품 목록을 불러오는데 실패했습니다.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [currentPeermall?.id, isUserPeermall, peermallUrl, toast]);
+
+  // 카테고리 목록 추출
+  const categories = ['전체', ...new Set(products.map(p => p.category).filter(Boolean))];
 
   const filteredProducts = products.filter(product => {
-    // 탭 필터
     let tabFilter = true;
     switch (activeTab) {
       case '신상품':
@@ -122,44 +91,74 @@ const ProductPage = () => {
         break;
     }
 
-    // 카테고리 필터
     const categoryFilter = selectedCategory === '전체' || product.category === selectedCategory;
-
     return tabFilter && categoryFilter;
   });
 
-  // 정렬
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
       case '가격낮은순':
-        return a.price - b.price;
+        return (a.sellingPrice || 0) - (b.sellingPrice || 0);
       case '가격높은순':
-        return b.price - a.price;
+        return (b.sellingPrice || 0) - (a.sellingPrice || 0);
       case '인기순':
-        return (b.reviewCount || 0) - (a.reviewCount || 0);
+        return (b.views || 0) - (a.views || 0); // reviewCount 대신 views 사용
       case '평점순':
         return (b.rating || 0) - (a.rating || 0);
       default: // 최신순
-        return b.id - a.id;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     }
   });
+
+  // 로딩 상태
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 에러 상태
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-6">
+          <div className="text-center py-16">
+            <h3 className="text-xl font-semibold mb-2">오류가 발생했습니다</h3>
+            <p className="text-muted-foreground">{error}</p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="mt-4"
+              variant="outline"
+            >
+              새로고침
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6">
-        {/* 헤더 */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-foreground">상품</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            상품 {filteredProducts.length > 0 && `(${filteredProducts.length})`}
+          </h1>
           <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-2" />
             상품 등록
           </Button>
         </div>
 
-        {/* 탭 */}
         <ProductTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* 필터 및 정렬 */}
         <ProductFilters
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
@@ -167,8 +166,20 @@ const ProductPage = () => {
           onSortChange={setSortBy}
         />
 
-        {/* 상품 그리드 */}
-        <ProductGrid products={sortedProducts} />
+        {sortedProducts.length === 0 ? (
+          <div className="text-center py-16">
+            <h3 className="text-xl font-semibold mb-2">
+              {activeTab !== '전체' 
+                ? `${activeTab} 상품이 없습니다` 
+                : '등록된 상품이 없습니다'}
+            </h3>
+            <p className="text-muted-foreground">
+              {isUserPeermall ? '첫 번째 상품을 등록해보세요!' : '곧 새로운 상품이 등록될 예정입니다.'}
+            </p>
+          </div>
+        ) : (
+          <ProductList />
+        )}
       </div>
     </div>
   );

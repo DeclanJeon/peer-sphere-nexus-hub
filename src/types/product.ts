@@ -10,6 +10,10 @@ export interface Product {
   shippingFee?: number;
   description: string;
   category: string;
+  isNew?: boolean;
+  isBest?: boolean;
+  discount?: number;
+  reviewCount?: number;
   imageUrl?: string;
   images?: string[];
   brand?: string;

@@ -13,6 +13,7 @@ import { usePeermall } from '@/contexts/PeermallContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Product } from '@/types/product';
+import ProductCard from './ProductCard';
 
 interface UserProductListProps {
   mode?: 'full' | 'preview'; // 전체보기 or 미리보기
@@ -22,7 +23,7 @@ interface UserProductListProps {
   onProductsLoaded?: (products: Product[]) => void; // 상품 로드 콜백
 }
 
-const UserProductList = ({ 
+const ProductList = ({ 
   mode = 'full', 
   filter = 'all',
   category = 'all',
@@ -126,68 +127,16 @@ const UserProductList = ({
           filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           break;
         case 'price-low':
-          filtered.sort((a, b) => (a.sellingPrice || a.price) - (b.sellingPrice || b.price));
+          filtered.sort((a, b) => (a.selling_price || a.price) - (b.selling_price || b.price));
           break;
         case 'price-high':
-          filtered.sort((a, b) => (b.sellingPrice || b.price) - (a.sellingPrice || a.price));
+          filtered.sort((a, b) => (b.selling_price || b.price) - (a.selling_price || a.price));
           break;
       }
 
       setFilteredProducts(filtered);
     }
   }, [products, searchQuery, sortBy, mode]);
-
-  // 상품 카드 컴포넌트
-  const ProductCard = ({ product }: { product: Product }) => (
-    <Link to={`/home/${url}/product/${product.id}`}>
-      <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 h-full">
-        <CardContent className="p-0 h-full flex flex-col">
-          <div className="aspect-square relative overflow-hidden rounded-t-lg">
-            {product.image_url ? (
-              <img 
-                src={product.image_url} 
-                alt={product.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = '/placeholder-product.png';
-                }}
-              />
-            ) : (
-              <div className="w-full h-full bg-muted flex items-center justify-center">
-                <ShoppingBag className="h-12 w-12 text-muted-foreground" />
-              </div>
-            )}
-            {product.status === 'active' && (
-              <Badge className="absolute top-2 right-2 bg-green-500">판매중</Badge>
-            )}
-          </div>
-          
-          <div className="p-4 flex-1 flex flex-col">
-            {product.category && (
-              <Badge variant="outline" className="w-fit text-xs mb-2">
-                {product.category}
-              </Badge>
-            )}
-            
-            <h4 className="font-semibold text-sm mb-2 line-clamp-2">
-              {product.name}
-            </h4>
-            
-            <div className="mt-auto">
-              {product.price && product.price !== product.sellingPrice && (
-                <p className="text-xs text-muted-foreground line-through">
-                  {Number(product.price).toLocaleString()}원
-                </p>
-              )}
-              <p className="text-primary font-bold">
-                {Number(product.sellingPrice || 0).toLocaleString()}원
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
-  );
 
   // 로딩 상태
   if (loading) {
@@ -359,4 +308,4 @@ const UserProductList = ({
   );
 };
 
-export default UserProductList;
+export default ProductList;

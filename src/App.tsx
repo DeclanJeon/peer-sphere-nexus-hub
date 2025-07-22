@@ -59,6 +59,7 @@ import MyReviews from "@/pages/main/mypage/MyReviews";
 
 // QR Code
 import QRCode from "@/pages/QRCode";
+import ProductPage from "./pages/common/ProductPage";
 
 const queryClient = new QueryClient();
 
@@ -105,7 +106,7 @@ const App = () => (
               {/* User Peermall Routes */}
               <Route path="/home/:url" element={<UserPeermallPage />}>
                 <Route index element={<UserPeermallHome />} />
-                <Route path="products" element={<UserProductList />} />
+                <Route path="products" element={<ProductPage />} />
                 <Route path="product/:id" element={<UserProductDetail />} />
                 
                 <Route path="community" element={<Community />} />

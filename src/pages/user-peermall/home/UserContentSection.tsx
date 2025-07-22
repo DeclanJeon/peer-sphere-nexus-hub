@@ -8,7 +8,7 @@ import { usePeermall } from '@/contexts/PeermallContext';
 import { Plus } from 'lucide-react';
 import { communityService, eventService, Post } from '@/lib/indexeddb';
 import { Skeleton } from '@/components/ui/skeleton';
-import UserProductList from '../products/UserProductList';
+import ProductList from '@/components/common/product/ProductList';
 
 interface UserContentSectionProps {
   activeTab: string;
@@ -84,7 +84,7 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
               </Button>
             </CardHeader>
             <CardContent>
-              <UserProductList 
+              <ProductList 
                 mode="preview"
                 filter="new"
                 category={selectedCategory}
@@ -110,7 +110,7 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
               </Button>
             </CardHeader>
             <CardContent>
-              <UserProductList 
+              <ProductList 
                 mode="preview"
                 filter="best"
                 category={selectedCategory}
