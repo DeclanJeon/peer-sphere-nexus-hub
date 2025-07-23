@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { usePeermall } from '@/contexts/PeermallContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Plus } from 'lucide-react';
 import ProductList from '@/components/common/product/ProductList';
 import BoardList from '@/components/common/community/BoardList';
@@ -119,6 +120,13 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
         );
 
       case 'events':
+        // 권한 체크: 피어몰 소유주이며 로그인한 유저만 이벤트 등록 버튼 표시
+        const { user } = useAuth();
+        const userDatas = user ? Object.values(user) : [];
+        const userUid = userDatas.length > 1 ? Object.values(userDatas[1])[0] : null;
+        const isPeermallOwner = userUid === currentPeermall?.owner_uid;
+        const canCreateEvent = user && isPeermallOwner;
+
         return (
           <Card className="shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -127,11 +135,16 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
                 <CardDescription className="text-base">다양한 혜택과 이벤트를 확인해보세요</CardDescription>
               </div>
               <div className="flex gap-2">
-                <Button variant="default" asChild>
-                  <Link to={`/home/${params.url}/events/create`}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    이벤트 등록
-                  </Link>
+                {canCreateEvent && (
+                  <Button variant="default" asChild>
+                    <Link to={`/home/${params.url}/events/create`}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      이벤트 등록
+                    </Link>
+                  </Button>
+                )}
+                <Button variant="outline" asChild>
+                  <Link to={`/home/${params.url}/events`}>전체보기</Link>
                 </Button>
               </div>
             </CardHeader>

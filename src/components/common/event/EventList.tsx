@@ -17,8 +17,41 @@ const EventList = ({ peermallId }: EventListProps) => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const data = await eventApi.getEventsByPeermallId(peermallId);
-        setEvents(data);
+        // TODO: API 연동 시 실제 이벤트 조회 API 호출
+        // const data = await eventApi.getEventsByPeermallId(peermallId);
+        
+        // 더미 데이터
+        const mockEvents: Event[] = [
+          {
+            id: '1',
+            title: '신년 맞이 특가 이벤트',
+            content: '신년을 맞아 전 상품 20% 할인! 많은 참여 부탁드립니다.',
+            eventStartDate: '2024-01-01',
+            eventEndDate: '2024-01-31',
+            image: '/placeholder.svg',
+            category: '할인',
+          },
+          {
+            id: '2',
+            title: '첫 구매 고객 무료배송',
+            content: '첫 구매 고객을 위한 특별 혜택! 무료배송과 추가 할인까지!',
+            eventStartDate: '2024-01-15',
+            eventEndDate: '2024-02-15',
+            image: '/placeholder.svg',
+            category: '프로모션',
+          },
+          {
+            id: '3',
+            title: '봄맞이 신상품 출시',
+            content: '봄 시즌을 위한 새로운 상품들이 출시되었습니다.',
+            eventStartDate: '2024-03-01',
+            eventEndDate: '2024-03-31',
+            image: '/placeholder.svg',
+            category: '신상품',
+          },
+        ];
+        
+        setEvents(mockEvents);
       } catch (err) {
         setError('이벤트를 불러오는데 실패했습니다.');
       } finally {
@@ -79,7 +112,11 @@ const EventList = ({ peermallId }: EventListProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {events.map((event) => (
-        <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+        <Card 
+          key={event.id} 
+          className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+          onClick={() => window.location.href = `/home/${peermallId}/events/${event.id}`}
+        >
           <div className="relative">
             <img
               src={event.image || '/placeholder.svg'}
