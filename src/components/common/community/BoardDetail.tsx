@@ -1,31 +1,38 @@
-import { useParams, useNavigate } from 'react-router-dom';
+// src/pages/BoardDetail.tsx
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Heart, Clock, User, Trash2, Edit } from 'lucide-react';
+import { Eye, Heart, Clock, User, Trash2, Edit, ArrowLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Post } from '@/types/post';
 import { Comment } from '@/types/comment';
 import { communityApi } from '@/services/community.api';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import BoardForm from './BoardForm';
-import CommentSection from './CommentSection';
+import { usePeermall } from '@/contexts/PeermallContext';
+import BoardForm from '@/components/common/community/BoardForm';
+import CommentSection from '@/components/common/community/CommentSection';
 
 const BoardDetail = () => {
   const { url, id } = useParams<{ url: string; id: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [getPost, setPost] = useState<Post | null>(null);
+  const { currentPeermall } = usePeermall();
+  const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const [isEditMode, setIsEditMode] = useState(false);
 
+  // 메인 피어몰인지 확인
+  const isMainPeermall = location.pathname.startsWith('/community/');
+
   const fetchPostAndComments = async () => {
-    if (!url || !id) {
-      setError('피어몰 정보 또는 게시글 정보가 없습니다.');
+    if (!id) {
+      setError('게시글 정보가 없습니다.');
       setLoading(false);
       return;
     }
@@ -33,6 +40,8 @@ const BoardDetail = () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // API 호출
       const postData = await communityApi.getPostById(id);
       setPost(postData);
       
@@ -53,17 +62,13 @@ const BoardDetail = () => {
 
   useEffect(() => {
     fetchPostAndComments();
-  }, [url, id]);
+  }, [id]);
 
-  if (!user) return null;
-
-  const userDatas = Object.values(user);
-  const userUid = Object.values(userDatas[1])[0];
-  
-  const isAuthor = userUid === getPost?.user_uid;
-  const isPeermallOwner = userUid === getPost?.peermall_owner_uid;
+  // 사용자 권한 확인
+  const isAuthor = user?.user_uid === post?.user_uid;
+  const isPeermallOwner = !isMainPeermall && user?.user_uid === currentPeermall?.owner_uid;
   const canDeletePost = user && (isAuthor || isPeermallOwner);
-  const canEditPost = user && isAuthor;
+  const canEditPost = user && isAuthor && !isMainPeermall; // 메인 피어몰에서는 수정 불가
 
   const handleEditSubmit = async (formData: {
     title: string;
@@ -71,10 +76,10 @@ const BoardDetail = () => {
     content: string;
     is_notice?: boolean;
   }) => {
-    if (!getPost || !canEditPost) return;
+    if (!post || !canEditPost) return;
 
     try {
-      await communityApi.updatePost(getPost.id.toString(), formData);
+      await communityApi.updatePost(post.id.toString(), formData);
       
       toast({
         title: '수정 완료',
@@ -97,10 +102,19 @@ const BoardDetail = () => {
   };
 
   const handleCommentSubmit = async (content: string) => {
-    if (!getPost) return;
+    if (!post || isMainPeermall) {
+      if (isMainPeermall) {
+        toast({
+          title: '알림',
+          description: '메인 페이지에서는 댓글을 작성할 수 없습니다.',
+          variant: 'default',
+        });
+      }
+      return;
+    }
 
     try {
-      await communityApi.createComment(getPost.id.toString(), content);
+      await communityApi.createComment(post.id.toString(), content);
       toast({
         title: '댓글 작성 완료',
         description: '댓글이 성공적으로 작성되었습니다.',
@@ -112,7 +126,7 @@ const BoardDetail = () => {
         description: '댓글 작성에 실패했습니다.',
         variant: 'destructive',
       });
-      throw error; // CommentSection에서 처리하도록 에러 전파
+      throw error;
     }
   };
 
@@ -135,9 +149,19 @@ const BoardDetail = () => {
   };
 
   const handleLike = async () => {
-    if (!getPost || isEditMode) return;
+    if (!post || isEditMode || isMainPeermall) {
+      if (isMainPeermall) {
+        toast({
+          title: '알림',
+          description: '메인 페이지에서는 추천할 수 없습니다.',
+          variant: 'default',
+        });
+      }
+      return;
+    }
+    
     try {
-      const result = await communityApi.toggleLike(getPost.id.toString());
+      const result = await communityApi.toggleLike(post.id.toString());
       setPost(prev => prev ? { ...prev, likes: result.likes } : null);
       toast({
         title: '추천 완료',
@@ -153,16 +177,22 @@ const BoardDetail = () => {
   };
 
   const handleDeletePost = async () => {
-    if (!getPost || !canDeletePost) return;
+    if (!post || !canDeletePost) return;
 
     if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
       try {
-        await communityApi.deletePost(getPost.id.toString());
+        await communityApi.deletePost(post.id.toString());
         toast({
           title: '게시글 삭제 완료',
           description: '게시글이 성공적으로 삭제되었습니다.',
         });
-        navigate(`/home/${url}/community`);
+        
+        // 삭제 후 이동
+        if (isMainPeermall) {
+          navigate('/community');
+        } else {
+          navigate(`/home/${url}/community`);
+        }
       } catch (error) {
         toast({
           title: '오류',
@@ -170,6 +200,14 @@ const BoardDetail = () => {
           variant: 'destructive',
         });
       }
+    }
+  };
+
+  const handleBackClick = () => {
+    if (isMainPeermall) {
+      navigate('/community');
+    } else {
+      navigate(`/home/${url}/community`);
     }
   };
 
@@ -200,28 +238,43 @@ const BoardDetail = () => {
   }
 
   // 에러 상태
-  if (error || !getPost) {
+  if (error || !post) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Card className="mb-8">
           <CardContent className="p-8 text-center">
-            <p className="text-destructive">{error || '게시글을 찾을 수 없습니다.'}</p>
+            <p className="text-destructive mb-4">{error || '게시글을 찾을 수 없습니다.'}</p>
+            <Button onClick={handleBackClick}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              목록으로 돌아가기
+            </Button>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  const authorName = getPost.author_display_name || getPost.author_name;
+  const authorName = post.author_display_name || post.author_name;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
+      {/* 뒤로가기 버튼 */}
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        onClick={handleBackClick}
+        className="mb-4"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        목록으로
+      </Button>
+
       {isEditMode ? (
         <>
           <h1 className="text-3xl font-bold mb-8">게시글 수정</h1>
           <BoardForm
             mode="edit"
-            initialData={getPost}
+            initialData={post}
             onSubmit={handleEditSubmit}
             onCancel={handleCancelEdit}
             loading={loading}
@@ -234,38 +287,43 @@ const BoardDetail = () => {
             <CardHeader className="border-b">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline">{getPost.category}</Badge>
+                  {isMainPeermall && post.peermall_name && (
+                    <Badge variant="secondary">{post.peermall_name}</Badge>
+                  )}
+                  <Badge variant="outline">{post.category}</Badge>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <User className="h-3 w-3" />
                     <span>{authorName}</span>
                   </div>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Clock className="h-3 w-3" />
-                    <span>{new Date(getPost.created_at).toLocaleDateString('ko-KR')}</span>
+                    <span>{new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
-                    <span>{getPost.views}</span>
+                    <span>{post.views}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Heart className="h-4 w-4" />
-                    <span>{getPost.likes}</span>
+                    <span>{post.likes}</span>
                   </div>
                 </div>
               </div>
-              <h1 className="text-2xl font-bold">{getPost.title}</h1>
+              <h1 className="text-2xl font-bold">{post.title}</h1>
             </CardHeader>
             <CardContent className="p-6">
               <div className="prose max-w-none">
-                <div className="whitespace-pre-wrap">{getPost.content}</div>
+                <div className="whitespace-pre-wrap">{post.content}</div>
               </div>
               <div className="flex gap-2 mt-6">
-                <Button variant="outline" size="sm" onClick={handleLike}>
-                  <Heart className="h-4 w-4 mr-2" />
-                  좋아요 ({getPost.likes})
-                </Button>
+                {!isMainPeermall && (
+                  <Button variant="outline" size="sm" onClick={handleLike}>
+                    <Heart className="h-4 w-4 mr-2" />
+                    좋아요 ({post.likes})
+                  </Button>
+                )}
                 <Button variant="outline" size="sm">
                   공유하기
                 </Button>
@@ -275,7 +333,7 @@ const BoardDetail = () => {
                     수정
                   </Button>
                 )}
-                {canDeletePost && (
+                {canDeletePost && !isMainPeermall && (
                   <Button variant="destructive" size="sm" onClick={handleDeletePost}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     삭제
@@ -285,9 +343,9 @@ const BoardDetail = () => {
             </CardContent>
           </Card>
 
-          {/* Comments Section - 분리된 컴포넌트 사용 */}
+          {/* Comments Section */}
           <CommentSection
-            postId={getPost.id.toString()}
+            postId={post.id.toString()}
             comments={comments}
             onCommentSubmit={handleCommentSubmit}
             onCommentDelete={handleCommentDelete}

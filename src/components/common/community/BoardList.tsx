@@ -9,9 +9,10 @@ interface BoardListProps {
   peermallId?: number | string;
   posts?: Post[];
   onPostClick?: (postId: number) => void;
+  isMainPeermall?: boolean;
 }
 
-const BoardList = ({ peermallId, posts: propsPosts, onPostClick }: BoardListProps) => {
+const BoardList = ({ peermallId, posts: propsPosts, onPostClick, isMainPeermall = false }: BoardListProps) => {
   const [posts, setPosts] = useState<Post[]>(propsPosts || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +31,6 @@ const BoardList = ({ peermallId, posts: propsPosts, onPostClick }: BoardListProp
               sortBy: 'latest'
             }
           );
-
-          console.log(response)
 
           setPosts(response.data || []);
         } catch (err) {
@@ -63,6 +62,19 @@ const BoardList = ({ peermallId, posts: propsPosts, onPostClick }: BoardListProp
       month: '2-digit',
       day: '2-digit'
     }).replace(/\. /g, '.').replace(/\.$/, '');
+  };
+
+  // 클릭 핸들러 - 이벤트 전파 방지 추가
+  const handleRowClick = (e: React.MouseEvent, postId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // onPostClick이 있는지 확인
+    if (onPostClick && typeof onPostClick === 'function') {
+      onPostClick(postId);
+    } else {
+      console.error('onPostClick is not defined or not a function');
+    }
   };
 
   // 로딩 상태
@@ -105,8 +117,9 @@ const BoardList = ({ peermallId, posts: propsPosts, onPostClick }: BoardListProp
     return (
       <TableRow
         key={post.id}
-        className="cursor-pointer hover:bg-muted/50"
-        onClick={() => onPostClick?.(post.id)}
+        className="cursor-pointer hover:bg-muted/50 transition-colors"
+        onClick={(e) => handleRowClick(e, post.id)}
+        style={{ cursor: 'pointer' }} // 명시적으로 커서 스타일 추가
       >
         <TableCell className="text-center text-sm">
           {post.is_notice ? (
@@ -115,6 +128,14 @@ const BoardList = ({ peermallId, posts: propsPosts, onPostClick }: BoardListProp
             post.id
           )}
         </TableCell>
+        {/* 메인 피어몰에서는 피어몰명 표시 */}
+        {isMainPeermall && (
+          <TableCell className="text-sm">
+            <Badge variant="secondary">
+              {post.peermall_name || post.peermall_url || '피어몰'}
+            </Badge>
+          </TableCell>
+        )}
         <TableCell className="text-sm">
           <Badge variant={post.is_notice ? 'secondary' : 'outline'}>
             {post.category}
@@ -122,7 +143,7 @@ const BoardList = ({ peermallId, posts: propsPosts, onPostClick }: BoardListProp
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
-            <span className="font-medium">{post.title}</span>
+            <span className="font-medium hover:text-primary transition-colors">{post.title}</span>
             {post.is_new && (
               <Badge variant="secondary" className="text-xs">NEW</Badge>
             )}
@@ -156,11 +177,12 @@ const BoardList = ({ peermallId, posts: propsPosts, onPostClick }: BoardListProp
   };
 
   return (
-    <div className="bg-card rounded-lg border">
+    <div className="bg-card rounded-lg border overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="border-b">
+          <TableRow className="border-b bg-muted/50">
             <TableHead className="w-16 text-center">번호</TableHead>
+            {isMainPeermall && <TableHead className="w-32">피어몰</TableHead>}
             <TableHead className="w-24">카테고리</TableHead>
             <TableHead>제목</TableHead>
             <TableHead className="w-24 text-center">글쓴이</TableHead>

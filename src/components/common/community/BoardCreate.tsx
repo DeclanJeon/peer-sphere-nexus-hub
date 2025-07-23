@@ -45,6 +45,8 @@ const BoardCreate = () => {
       
       const newPost: Post = {
         id: 0,
+        peermall_name: currentPeermall.name,
+        peermall_url: params.url,
         peermall_id: Number(currentPeermall.id),
         peermall_owner_uid: '',
         user_uid: userUid,

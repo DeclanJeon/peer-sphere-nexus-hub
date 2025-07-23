@@ -2,6 +2,7 @@
 export interface Post {
   id: number;
   peermall_id: number; // string에서 number로 변경 (DB 스키마에 맞춤)
+  peermall_name: string;
   user_uid: string;
   peermall_owner_uid: string;
   author_name: string;
@@ -19,6 +20,7 @@ export interface Post {
   created_at: string;
   updated_at: string;
   deleted_at?: string;
+  peermall_url?: string;
 }
 
 export interface PostItem {

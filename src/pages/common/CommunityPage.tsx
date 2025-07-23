@@ -37,29 +37,53 @@ const CommunityPage = () => {
   });
 
   const peermallUrl = params.url;
+  
+  // 메인 피어몰인지 확인
+  const isMainPeermall = location.pathname === '/community' || location.pathname === '/home/community';
+  const isUserPeermall = location.pathname.startsWith('/home/') && peermallUrl;
 
   // 게시글 데이터 가져오기
   const fetchPosts = useCallback(async () => {
-    if (!currentPeermall?.id) return;
+    // 메인 피어몰이 아니고 유저 피어몰인데 currentPeermall이 없으면 대기
+    if (!isMainPeermall && isUserPeermall && !currentPeermall?.id) {
+      setLoading(true);
+      return;
+    }
     
     setLoading(true);
     try {
-      const response = await communityApi.getPostsByPeermallId(
-        currentPeermall.id.toString(),
-        {
-          page: pagination.page,
-          limit: pagination.limit,
-          sortBy,
-          category: category === 'all' ? undefined : category
-        }
-      );
-
-      if (response.success) {
-        setPosts(response.data || []);
+      let response = null;
+      
+      // 메인 피어몰이면 전체 게시글 호출
+      if (isMainPeermall) {
+        response = await communityApi.getAllPosts();
+        // getAllPosts는 data만 반환하므로 적절한 형태로 변환
+        setPosts(response || []);
+        // 페이지네이션 정보가 없으므로 임시로 설정
         setPagination(prev => ({
           ...prev,
-          ...response.pagination
+          total: response?.length || 0,
+          totalPages: Math.ceil((response?.length || 0) / prev.limit)
         }));
+      } else if (currentPeermall?.id) {
+        // 유저 피어몰이면 해당 피어몰의 게시글만 호출
+        response = await communityApi.getPostsByPeermallId(
+          currentPeermall.id.toString(),
+          {
+            page: pagination.page,
+            limit: pagination.limit,
+            sortBy,
+            category: category === 'all' ? undefined : category
+          }
+        );
+        
+        if (response.success) {
+          setPosts(response.data || []);
+          setPagination(prev => ({
+            ...prev,
+            ...response.pagination
+          }));
+        }
       }
     } catch (error) {
       console.error('게시글 로딩 오류:', error);
@@ -72,7 +96,7 @@ const CommunityPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPeermall?.id, pagination.page, pagination.limit, sortBy, category]);
+  }, [currentPeermall?.id, pagination.page, pagination.limit, sortBy, category, isMainPeermall, isUserPeermall]);
 
   useEffect(() => {
     fetchPosts();
@@ -102,11 +126,41 @@ const CommunityPage = () => {
       navigate('/login');
       return;
     }
+    
+    // 메인 피어몰에서는 글쓰기 불가
+    if (isMainPeermall) {
+      toast({
+        title: '알림',
+        description: '메인 페이지에서는 글을 작성할 수 없습니다. 피어몰을 선택해주세요.',
+        variant: 'default',
+      });
+      return;
+    }
+    
     navigate(`/home/${peermallUrl}/community/create`);
   };
 
   const handlePostClick = (postId: number) => {
-    navigate(`/home/${peermallUrl}/community/${postId}`);
+    console.log('Post clicked:', postId); // 디버깅용
+    
+    // 메인 피어몰에서는 게시글의 피어몰로 이동
+    const post = posts.find(p => p.id === postId);
+
+    console.log(post)
+
+    if (isMainPeermall) {
+      if (post?.peermall_url) {
+        
+        // 해당 피어몰의 게시글 상세 페이지로 이동
+        navigate(`/home/${post?.peermall_url}/community/${postId}`);
+      } else {
+        // peermall_url이 없는 경우 메인에서 보기
+        navigate(`/community/${postId}`);
+      }
+    } else {
+      // 유저 피어몰에서는 현재 피어몰 내에서 이동
+      navigate(`/home/${post?.peermall_url}/community/${postId}`);
+    }
   };
 
   const handlePageChange = (newPage: number) => {
@@ -123,24 +177,43 @@ const CommunityPage = () => {
     { value: '자유', label: '자유' },
   ];
 
+  // 페이지 제목 결정
+  const getPageTitle = () => {
+    if (isMainPeermall) {
+      return '전체 커뮤니티';
+    }
+    return currentPeermall?.name ? `${currentPeermall.name} 커뮤니티` : '커뮤니티';
+  };
+
+  // 페이지 설명 결정
+  const getPageDescription = () => {
+    if (isMainPeermall) {
+      return '피어몰 전체 커뮤니티의 다양한 이야기를 확인해보세요';
+    }
+    return '커뮤니티에서 다양한 이야기를 나눠보세요';
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* 헤더 */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">커뮤니티</h1>
+            <h1 className="text-2xl font-bold text-foreground">{getPageTitle()}</h1>
             <p className="text-muted-foreground mt-1">
-              {currentPeermall?.name || '피어몰'} 커뮤니티에서 다양한 이야기를 나눠보세요
+              {getPageDescription()}
             </p>
           </div>
-          <Button 
-            onClick={handleWriteClick}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            글쓰기
-          </Button>
+          {/* 메인 피어몰이 아닐 때만 글쓰기 버튼 표시 */}
+          {!isMainPeermall && (
+            <Button 
+              onClick={handleWriteClick}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              글쓰기
+            </Button>
+          )}
         </div>
 
         {/* 필터 및 정렬 */}
@@ -185,10 +258,11 @@ const CommunityPage = () => {
             <BoardList
               posts={filteredPosts}
               onPostClick={handlePostClick}
+              isMainPeermall={isMainPeermall}
             />
             
-            {/* 페이지네이션 */}
-            {pagination.totalPages > 1 && (
+            {/* 페이지네이션 - 유저 피어몰에서만 표시 */}
+            {!isMainPeermall && pagination.totalPages > 1 && (
               <div className="mt-6 flex justify-center gap-2">
                 <Button
                   variant="outline"
@@ -244,7 +318,7 @@ const CommunityPage = () => {
                 ? '아직 작성된 게시글이 없습니다.' 
                 : `${activeTab}이 없습니다.`}
             </p>
-            {isAuthenticated && (
+            {isAuthenticated && !isMainPeermall && (
               <Button onClick={handleWriteClick}>
                 첫 번째 글 작성하기
               </Button>
@@ -256,8 +330,10 @@ const CommunityPage = () => {
         {!loading && posts.length > 0 && (
           <div className="mt-8 p-4 bg-muted/50 rounded-lg">
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>전체 게시글: {pagination.total}개</span>
-              <span>페이지: {pagination.page} / {pagination.totalPages}</span>
+              <span>전체 게시글: {isMainPeermall ? posts.length : pagination.total}개</span>
+              {!isMainPeermall && (
+                <span>페이지: {pagination.page} / {pagination.totalPages}</span>
+              )}
             </div>
           </div>
         )}

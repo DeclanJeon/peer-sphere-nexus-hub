@@ -93,7 +93,7 @@ const App = () => (
               <Route path="/products/new" element={<MainLayout><NewProducts /></MainLayout>} />
               <Route path="/products/best" element={<MainLayout><BestProducts /></MainLayout>} />
               
-              <Route path="/community" element={<MainLayout><Community /></MainLayout>} />
+              <Route path="/community" element={<MainLayout><CommunityPage /></MainLayout>} />
               <Route path="/events" element={<MainLayout><EventPage /></MainLayout>} />
               
               {/* Peermall List and Creation */}

@@ -6,6 +6,11 @@ import { Comment } from '@/types/comment';
 class CommunityApi {
   private basePath = '/community';
 
+  async getAllPosts() {
+    const response = await apiClient.get(`${this.basePath}/all`);
+    return response.data.data;
+  }
+
   async getPostsByPeermallId(
     peermallId: string,
     options?: {
