@@ -5,6 +5,7 @@
  * 데이터베이스 스키마와 일치합니다.
  */
 export interface EventBase {
+  peermall_url: string;
   id: string; // 데이터베이스에서는 INT지만, API 통신 시 문자열로 변환될 수 있으므로 string으로 통일
   peermall_id: string;
   user_uid?: string;

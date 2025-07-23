@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import EventTabs from '@/components/common/event/EventTabs';
 import EventList from '@/components/common/event/EventList';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 
 const EventPage = () => {
   const { url } = useParams<{ url: string }>();
+  const location = useLocation();
   const { currentPeermall } = usePeermall();
   const { user } = useAuth();
 
@@ -21,9 +22,14 @@ const EventPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 메인 피어몰인지 확인 (유저 피어몰이 아닌 경우)
+  const isMainPeermall = location.pathname === '/events' || location.pathname === '/home/events';
+  const isUserPeermall = location.pathname.startsWith('/home/') && url;
+
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!currentPeermall?.id) {
+      // 메인 피어몰이 아니고 유저 피어몰인데 currentPeermall이 없으면 대기
+      if (!isMainPeermall && isUserPeermall && !currentPeermall?.id) {
         setLoading(true);
         return;
       }
@@ -32,9 +38,18 @@ const EventPage = () => {
       setError(null);
       
       try {
-        const rawEvents: EventBase[] = await eventApi.getEventsByPeermallId(currentPeermall.id);
-        const processedEvents = rawEvents.map(processEventData);
+        let rawEvents: EventBase[] = [];
         
+        // 메인 피어몰이면 전체 이벤트 호출
+        if (isMainPeermall) {
+          rawEvents = await eventApi.getAllEvents();
+        } else if (currentPeermall?.id) {
+          // 유저 피어몰이면 해당 피어몰의 이벤트만 호출
+          rawEvents = await eventApi.getEventsByPeermallId(currentPeermall.id);
+        }
+
+        const processedEvents = rawEvents.map(processEventData);
+
         // 최신순으로 정렬
         processedEvents.sort((a, b) => {
           const dateA = new Date(a.created_at || a.event_start_date).getTime();
@@ -52,10 +67,10 @@ const EventPage = () => {
     };
 
     fetchEvents();
-  }, [currentPeermall?.id]);
+  }, [currentPeermall?.id, isMainPeermall, isUserPeermall]);
 
-  // 피어몰 소유주인지 확인
-  const isPeermallOwner = user?.user_uid === currentPeermall?.owner_uid;
+  // 피어몰 소유주인지 확인 (메인 피어몰에서는 false)
+  const isPeermallOwner = !isMainPeermall && user?.user_uid === currentPeermall?.owner_uid;
 
   // 탭에 따른 이벤트 필터링
   const filteredEvents = events.filter(event => {
@@ -94,6 +109,22 @@ const EventPage = () => {
     }
   };
 
+  // 페이지 제목 결정
+  const getPageTitle = () => {
+    if (isMainPeermall) {
+      return '전체 이벤트';
+    }
+    return currentPeermall?.name ? `${currentPeermall.name}의 이벤트` : '이벤트';
+  };
+
+  // 페이지 설명 결정
+  const getPageDescription = () => {
+    if (isMainPeermall) {
+      return '피어몰에서 진행중인 모든 이벤트를 확인해보세요';
+    }
+    return '다양한 이벤트와 특별 혜택을 확인해보세요';
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6">
@@ -103,14 +134,14 @@ const EventPage = () => {
             <div>
               <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
                 <Calendar className="h-8 w-8" />
-                이벤트
+                {getPageTitle()}
               </h1>
               <p className="text-muted-foreground mt-1">
-                {currentPeermall?.name ? `${currentPeermall.name}의 ` : ''}
-                다양한 이벤트와 특별 혜택을 확인해보세요
+                {getPageDescription()}
               </p>
             </div>
-            {isPeermallOwner && (
+            {/* 유저 피어몰에서만 이벤트 등록 버튼 표시 */}
+            {isPeermallOwner && !isMainPeermall && (
               <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 <Link to={`/home/${url}/events/create`}>
                   <Plus className="w-5 h-5 mr-2" />
@@ -159,6 +190,7 @@ const EventPage = () => {
           events={filteredEvents}
           showLoading={loading}
           emptyMessage={getEmptyMessage()}
+          isMainPeermall={isMainPeermall}
         />
       </div>
     </div>

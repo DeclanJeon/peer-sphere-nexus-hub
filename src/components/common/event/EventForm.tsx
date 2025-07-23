@@ -1,5 +1,5 @@
 // src/components/common/event/EventForm.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,12 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { RichEditor } from '@/components/ui/rich-editor';
 import { EventBase, CreateEventPayload, UpdateEventPayload } from '@/types/event';
 import { toast } from '@/hooks/use-toast';
-import { Calendar, Clock, MapPin, Tag } from 'lucide-react';
+import { Calendar, Clock, MapPin, Tag, Image as ImageIcon } from 'lucide-react';
 
 interface EventFormProps {
   mode: 'create' | 'edit';
   initialData?: Partial<EventBase>;
-  onSubmit: (data: any) => Promise<void>; // Use 'any' to accommodate both payload types
+  onSubmit: (data: FormData) => Promise<void>; // Use FormData for image upload
   onCancel: () => void;
   loading?: boolean;
 }
@@ -25,9 +25,10 @@ const EventForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: E
     content: '',
     event_start_date: '',
     event_end_date: '',
-    image_url: '',
     category: '',
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -36,9 +37,11 @@ const EventForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: E
         content: initialData.content || '',
         event_start_date: initialData.event_start_date?.split('T')[0] || '', // 날짜 형식에 맞게 파싱
         event_end_date: initialData.event_end_date?.split('T')[0] || '',
-        image_url: initialData.image_url || '',
         category: initialData.category || '',
       });
+      if (initialData.image_url) {
+        setImagePreviewUrl(initialData.image_url);
+      }
     }
   }, [initialData]);
 
@@ -49,6 +52,17 @@ const EventForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: E
 
   const handleSelectChange = (value: string) => {
     setFormData(prev => ({ ...prev, category: value }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      setImagePreviewUrl(URL.createObjectURL(file));
+    } else {
+      setImageFile(null);
+      setImagePreviewUrl(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,17 +78,17 @@ const EventForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: E
       return;
     }
     
-    // onSubmit에 전달할 데이터 정제
-    const payload = {
-      ...formData,
-      image_url: formData.image_url || undefined,
-      category: formData.category || undefined,
-      content: formData.content || undefined,
-      event_start_date: formData.event_start_date || undefined,
-      event_end_date: formData.event_end_date || undefined,
-    };
-    
-    await onSubmit(payload);
+    const data = new FormData();
+    data.append('title', formData.title);
+    data.append('content', formData.content);
+    data.append('event_start_date', formData.event_start_date);
+    data.append('event_end_date', formData.event_end_date);
+    data.append('category', formData.category);
+    if (imageFile) {
+      data.append('image', imageFile);
+    }
+
+    await onSubmit(data);
   };
 
   const categories = ['할인', '신상품', '이벤트', '프로모션', '특가', '기타'];
@@ -168,22 +182,22 @@ const EventForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: E
 
             {/* Image Section */}
             <div className="space-y-3">
-              <Label htmlFor="image_url" className="text-base font-semibold flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
+              <Label htmlFor="image" className="text-base font-semibold flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
                 대표 이미지
               </Label>
               <Input 
-                id="image_url" 
-                value={formData.image_url} 
-                onChange={handleChange} 
+                id="image" 
+                type="file" 
+                accept="image/*" 
+                onChange={handleImageChange} 
                 disabled={loading} 
-                placeholder="https://example.com/image.jpg"
-                className="py-6"
+                className="py-6 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
               />
-              {formData.image_url && (
+              {imagePreviewUrl && (
                 <div className="mt-4 rounded-lg overflow-hidden border bg-muted/30">
                   <img 
-                    src={formData.image_url} 
+                    src={imagePreviewUrl} 
                     alt="미리보기" 
                     className="w-full h-48 object-cover"
                     onError={(e) => {

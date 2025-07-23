@@ -12,19 +12,31 @@ interface EventListProps {
   events?: Event[];  // 외부에서 이벤트 목록을 전달할 수 있도록 추가
   showLoading?: boolean;  // 외부에서 로딩 상태를 제어할 수 있도록 추가
   emptyMessage?: string;  // 빈 상태 메시지 커스터마이징
+  isMainPeermall?: boolean; // 메인 피어몰 여부
 }
 
 const EventList = ({ 
   peermallId, 
   events: propEvents, 
   showLoading = false,
-  emptyMessage = '진행중인 이벤트가 없습니다.'
+  emptyMessage = '진행중인 이벤트가 없습니다.',
+  isMainPeermall = false // 추가
 }: EventListProps) => {
   const [internalEvents, setInternalEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { url } = useParams<{ url: string }>();
+
+  const handleEventClick = (event: Event) => {
+
+  // 메인 피어몰에서는 이벤트의 피어몰 URL로 이동
+    if (isMainPeermall && event.peermall_url) {
+      navigate(`/home/${event.peermall_url}/event/${event.id}`);
+    } else {
+      navigate(`/home/${url || peermallId}/event/${event.id}`);
+    }
+  };
 
   // props로 events가 전달되면 그것을 사용, 아니면 내부적으로 fetch
   const events = propEvents || internalEvents;
@@ -69,10 +81,6 @@ const EventList = ({
     </Badge>;
   };
 
-  const handleEventClick = (eventId: string) => {
-    navigate(`/home/${url || peermallId}/event/${eventId}`);
-  };
-
   // 외부에서 로딩 상태를 제어하는 경우
   if (showLoading || (!isControlled && loading)) {
     return (
@@ -105,7 +113,7 @@ const EventList = ({
         <Card 
           key={event.id} 
           className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col group"
-          onClick={() => handleEventClick(event.id)}
+          onClick={() => handleEventClick(event)}
         >
           <div className="relative aspect-video overflow-hidden">
             <img

@@ -5,7 +5,6 @@ import { toast } from '@/hooks/use-toast';
 import { eventApi } from '@/services/event.api';
 import { usePeermall } from '@/contexts/PeermallContext';
 import { useAuth } from '@/hooks/useAuth';
-import { CreateEventPayload } from '@/types/event';
 import EventForm from '@/components/common/event/EventForm';
 
 const EventCreate = () => {
@@ -15,7 +14,7 @@ const EventCreate = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (formData: CreateEventPayload) => {
+  const handleSubmit = async (formData: FormData) => {
     if (!currentPeermall?.id) {
       toast({
         title: '오류',
@@ -37,13 +36,20 @@ const EventCreate = () => {
     setLoading(true);
 
     try {
-      const payload: CreateEventPayload = {
-        ...formData,
-        peermall_id: currentPeermall.id,
-      };
+      // 새로운 FormData 객체 생성
+      const payload = new FormData();
+      
+      // 기존 FormData의 모든 필드를 복사
+      formData.forEach((value, key) => {
+        payload.append(key, value);
+      });
+      
+      // peermall_id 추가
+      payload.append('peermall_id', currentPeermall.id);
+      payload.append('url', url);
 
       const result = await eventApi.createEvent(payload);
-      console.log(result);
+      console.log('Event created:', result);
 
       toast({
         title: '이벤트 생성 완료',
@@ -52,11 +58,15 @@ const EventCreate = () => {
       
       navigate(`/home/${url}/events`);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('이벤트 생성 오류:', error);
+      
+      // 에러 메시지 개선
+      const errorMessage = error.response?.data?.message || '이벤트 생성에 실패했습니다. 입력 내용을 확인해주세요.';
+      
       toast({
         title: '오류',
-        description: '이벤트 생성에 실패했습니다. 입력 내용을 확인해주세요.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

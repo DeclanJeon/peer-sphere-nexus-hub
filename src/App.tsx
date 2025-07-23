@@ -38,7 +38,7 @@ import Community from "@/pages/main/community/Community";
 import BoardDetail from "@/components/common/community/BoardDetail";
 
 // Event pages
-import Events from "@/pages/main/events/Events";
+// import Events from "@/pages/main/events/Events";
 
 // My pages
 import MyInfo from "@/pages/main/mypage/MyInfo";
@@ -58,6 +58,7 @@ import PeermallPage from "./pages/main/peermalls/PeermallPage";
 import BoardCreate from "./components/common/community/BoardCreate";
 import EventDetail from "./components/common/event/EventDetail";
 import EventCreate from "./components/common/event/EventCreate";
+import EventPage from "./pages/common/EventPage";
 
 const queryClient = new QueryClient();
 
@@ -93,7 +94,7 @@ const App = () => (
               <Route path="/products/best" element={<MainLayout><BestProducts /></MainLayout>} />
               
               <Route path="/community" element={<MainLayout><Community /></MainLayout>} />
-              <Route path="/events" element={<MainLayout><Events /></MainLayout>} />
+              <Route path="/events" element={<MainLayout><EventPage /></MainLayout>} />
               
               {/* Peermall List and Creation */}
               {/* <Route path="/peermalls" element={<MainLayout><PeermallListMain /></MainLayout>} /> */}
@@ -108,7 +109,7 @@ const App = () => (
                 <Route path="community" element={<CommunityPage />} />
                 <Route path="community/create" element={<ProtectedRoute><BoardCreate /></ProtectedRoute>} />
                 <Route path="community/:id" element={<BoardDetail />} />
-                <Route path="events" element={<Events />} />
+                <Route path="events" element={<EventPage />} />
                 <Route path="event/create" element={<ProtectedRoute><EventCreate /></ProtectedRoute>} />
                 <Route path="event/:id" element={<EventDetail />} />
               </Route>

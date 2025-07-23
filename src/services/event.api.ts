@@ -9,6 +9,11 @@ import {
 class EventApi {
   private basePath = '/events';
 
+  async getAllEvents(): Promise<EventBase[]> {
+    const response = await apiClient.get(`${this.basePath}/all`);
+    return response.data.data;
+  }
+
   async getEventsByPeermallId(peermallId: string): Promise<EventBase[]> {
     const response = await apiClient.get(
       `${this.basePath}/peermall/${peermallId}`
@@ -16,8 +21,21 @@ class EventApi {
     return response.data.data;
   }
 
-  async createEvent(eventData: CreateEventPayload): Promise<EventBase> {
-    const response = await apiClient.post(`${this.basePath}/create`, eventData);
+  async createEvent(eventData: FormData): Promise<EventBase> {
+    const isFormData = eventData instanceof FormData;
+    const response = await apiClient.post(
+      `${this.basePath}/create`,
+      eventData,
+      {
+        headers: isFormData
+          ? {
+              'Content-Type': 'multipart/form-data',
+            }
+          : {
+              'Content-Type': 'application/json',
+            },
+      }
+    );
 
     console.log(response);
 
