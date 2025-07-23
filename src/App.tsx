@@ -20,18 +20,7 @@ import MainPage from "@/pages/main/MainPage";
 import UserPeermallPage from "@/pages/user-peermall/UserPeermallPage";
 import UserPeermallHome from "@/pages/user-peermall/UserPeermallHome";
 
-// User Peermall Product Pages
-import UserProductDetail from "@/pages/user-peermall/products/UserProductDetail";
-
 // Shared Pages (used by both main and user peermalls)
-
-import BestPeermalls from "@/pages/main/peermalls/BestPeermalls";
-import NewPeermalls from "@/pages/main/peermalls/NewPeermalls";
-
-// Product pages
-import ProductList from "@/pages/main/products/ProductList";
-import NewProducts from "@/pages/main/products/NewProducts";
-import BestProducts from "@/pages/main/products/BestProducts";
 
 // Community pages
 import Community from "@/pages/main/community/Community";
@@ -51,14 +40,15 @@ import MyReviews from "@/pages/main/mypage/MyReviews";
 
 // QR Code
 import QRCode from "@/pages/QRCode";
-import ProductPage from "./pages/common/ProductPage";
-import CommunityPage from "./pages/common/CommunityPage";
-import PeermallCreate from "./components/common/peermall/PeermallCreate";
-import PeermallPage from "./pages/main/peermalls/PeermallPage";
-import BoardCreate from "./components/common/community/BoardCreate";
-import EventDetail from "./components/common/event/EventDetail";
-import EventCreate from "./components/common/event/EventCreate";
-import EventPage from "./pages/common/EventPage";
+import ProductPage from "@/pages/common/ProductPage";
+import CommunityPage from "@/pages/common/CommunityPage";
+import PeermallCreate from "@/components/common/peermall/PeermallCreate";
+import PeermallPage from "@/pages/main/peermalls/PeermallPage";
+import BoardCreate from "@/components/common/community/BoardCreate";
+import EventDetail from "@/components/common/event/EventDetail";
+import EventCreate from "@/components/common/event/EventCreate";
+import EventPage from "@/pages/common/EventPage";
+import ProductDetail from "./components/common/product/ProductDetail";
 
 const queryClient = new QueryClient();
 
@@ -85,26 +75,17 @@ const App = () => (
               {/* Main Routes */}
               <Route path="/" element={<MainLayout><MainPage /></MainLayout>} />
               <Route path="/peermalls" element={<MainLayout><PeermallPage /></MainLayout>} />
-              <Route path="/peermalls/new" element={<MainLayout><NewPeermalls /></MainLayout>} />
-              <Route path="/peermalls/best" element={<MainLayout><BestPeermalls /></MainLayout>} />
               <Route path="/peermalls/create" element={<ProtectedRoute><PeermallCreate /></ProtectedRoute>} />
 
-              <Route path="/products" element={<MainLayout><ProductList /></MainLayout>} />
-              <Route path="/products/new" element={<MainLayout><NewProducts /></MainLayout>} />
-              <Route path="/products/best" element={<MainLayout><BestProducts /></MainLayout>} />
-              
+              <Route path="/products" element={<MainLayout><ProductPage /></MainLayout>} />
               <Route path="/community" element={<MainLayout><CommunityPage /></MainLayout>} />
               <Route path="/events" element={<MainLayout><EventPage /></MainLayout>} />
-              
-              {/* Peermall List and Creation */}
-              {/* <Route path="/peermalls" element={<MainLayout><PeermallListMain /></MainLayout>} /> */}
-              {/* <Route path="/peermalls/create" element={<ProtectedRoute><MainLayout><PeermallCreate /></MainLayout></ProtectedRoute>} /> */}
               
               {/* User Peermall Routes */}
               <Route path="/home/:url" element={<UserPeermallPage />}>
                 <Route index element={<UserPeermallHome />} />
                 <Route path="products" element={<ProductPage />} />
-                <Route path="product/:id" element={<UserProductDetail />} />
+                <Route path="product/:id" element={<ProductDetail />} />
                 
                 <Route path="community" element={<CommunityPage />} />
                 <Route path="community/create" element={<ProtectedRoute><BoardCreate /></ProtectedRoute>} />

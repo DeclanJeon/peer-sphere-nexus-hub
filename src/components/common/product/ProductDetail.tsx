@@ -39,9 +39,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ProductReviews } from './reviews/ProductReviews';
 
-const UserProductDetail = () => {
+const ProductDetail = () => {
   const { url, id } = useParams<{ url: string; id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -584,16 +583,9 @@ const UserProductDetail = () => {
             </CardContent>
           </Card>
         )}
-
-        {/* 상품 리뷰 섹션 */}
-        <ProductReviews 
-          productId={id}
-          averageRating={product.rating || 0}
-          totalReviews={product.likes || 0}
-        />
       </div>
     </div>
   );
 };
 
-export default UserProductDetail;
+export default ProductDetail;

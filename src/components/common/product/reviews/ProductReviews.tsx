@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 import { ReviewList } from './ReviewList';
 import { ReviewForm } from './ReviewForm';
-import { Review } from './types';
+import { Review } from '@/types/review';
 
 // Mock data for demonstration
 const mockReviews: Review[] = [
@@ -13,7 +13,7 @@ const mockReviews: Review[] = [
     avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
     rating: 5,
     content: '정말 좋은 상품이에요! 품질도 만족스럽고 배송도 빨랐습니다. 강력 추천합니다!',
-    createdAt: '2024-07-20T10:00:00Z',
+    createdAt: '2024-07-20T10:00:00Z',  
     images: ['/placeholder-product.png', '/placeholder-product.png'],
     comments: [
       {
