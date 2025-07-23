@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Trash2, Edit, Share } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Calendar, Trash2, Edit, Share, Clock, MapPin, Users, Eye, ArrowLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Event, EventBase } from '@/types/event';
 import { eventApi } from '@/services/event.api';
@@ -129,10 +130,17 @@ const EventDetail = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-5xl">
       {isEditMode ? (
-        <>
-          <h1 className="text-3xl font-bold mb-8">이벤트 수정</h1>
+        <div className="space-y-6">
+          <Button 
+            variant="ghost" 
+            onClick={handleCancelEdit} 
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            돌아가기
+          </Button>
           <EventForm
             mode="edit"
             initialData={event}
@@ -140,59 +148,157 @@ const EventDetail = () => {
             onCancel={handleCancelEdit}
             loading={loading}
           />
-        </>
+        </div>
       ) : (
-        <Card className="mb-8">
-          <CardHeader className="border-b">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                {event.category && <Badge variant="outline">{event.category}</Badge>}
-                {getDDayBadge(event)}
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Calendar className="h-3 w-3" />
-                  <span>
-                    {new Date(event.event_start_date).toLocaleDateString('ko-KR')} ~ {new Date(event.event_end_date).toLocaleDateString('ko-KR')}
-                  </span>
+        <div className="space-y-6">
+          {/* Back Button */}
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(-1)} 
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            이벤트 목록으로
+          </Button>
+
+          {/* Main Event Card */}
+          <Card className="border-0 shadow-xl overflow-hidden">
+            {/* Hero Image */}
+            {event.image_url && (
+              <div className="relative h-80 lg:h-96 overflow-hidden">
+                <img
+                  src={event.image_url}
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    {event.category && (
+                      <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                        {event.category}
+                      </Badge>
+                    )}
+                    {getDDayBadge(event)}
+                  </div>
                 </div>
               </div>
-            </div>
-            <h1 className="text-2xl font-bold">{event.title}</h1>
-          </CardHeader>
-          
-          {event.image_url && (
-            <div className="relative">
-              <img
-                src={event.image_url}
-                alt={event.title}
-                className="w-full h-auto max-h-96 object-cover"
-              />
-            </div>
-          )}
-          
-          <CardContent className="p-6">
-            <div className="prose max-w-none">
-              <div className="whitespace-pre-wrap">{event.content}</div>
-            </div>
-            <div className="flex gap-2 mt-6">
-              <Button variant="outline" size="sm">
-                <Share className="h-4 w-4 mr-2" />
-                공유하기
-              </Button>
-              {canEditOrDelete && (
-                <>
-                  <Button variant="outline" size="sm" onClick={() => setIsEditMode(true)}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    수정
+            )}
+
+            <CardHeader className="space-y-4">
+              {/* Title and Status */}
+              <div className="space-y-4">
+                {!event.image_url && (
+                  <div className="flex items-center gap-3 mb-4">
+                    {event.category && <Badge variant="outline">{event.category}</Badge>}
+                    {getDDayBadge(event)}
+                  </div>
+                )}
+                <h1 className="text-3xl lg:text-4xl font-bold leading-tight">{event.title}</h1>
+              </div>
+
+              {/* Event Info Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 bg-muted/30 rounded-lg p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+                    <Calendar className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">이벤트 기간</p>
+                    <p className="font-semibold">
+                      {new Date(event.event_start_date).toLocaleDateString('ko-KR', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      ~ {new Date(event.event_end_date).toLocaleDateString('ko-KR', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-secondary/20 flex items-center justify-center">
+                    <Clock className="h-5 w-5 text-secondary-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">상태</p>
+                    <p className="font-semibold capitalize">
+                      {event.status === 'ongoing' && '진행중'}
+                      {event.status === 'upcoming' && '진행 예정'}
+                      {event.status === 'ended' && '종료됨'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-accent/20 flex items-center justify-center">
+                    <Eye className="h-5 w-5 text-accent-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">조회수</p>
+                    <p className="font-semibold">{event.views?.toLocaleString() || 0}</p>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-8">
+              {/* Event Content */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  이벤트 상세 정보
+                </h2>
+                <Separator />
+                <div 
+                  className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-a:text-primary"
+                  dangerouslySetInnerHTML={{ __html: event.content }}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between pt-6 border-t">
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Share className="h-4 w-4" />
+                    공유하기
                   </Button>
-                  <Button variant="destructive" size="sm" onClick={handleDeleteEvent}>
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    삭제
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    참여하기
                   </Button>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+                
+                {canEditOrDelete && (
+                  <div className="flex gap-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setIsEditMode(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <Edit className="h-4 w-4" />
+                      수정
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      onClick={handleDeleteEvent}
+                      className="flex items-center gap-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      삭제
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );
