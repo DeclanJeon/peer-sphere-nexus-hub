@@ -61,7 +61,10 @@ class CommunityApi {
   }
 
   async createComment(postId: string, content: string): Promise<Comment> {
-    const response = await apiClient.post(`${this.basePath}/${postId}/comments`, { content });
+    const response = await apiClient.post(
+      `${this.basePath}/${postId}/comments`,
+      { content }
+    );
     return response.data.data;
   }
 

@@ -351,43 +351,6 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // 테스트용 이메일인 경우 하드코딩된 OTP 검증
-      if (email === 'peermall@example.com') {
-        if (otp === '123456') {
-          // 테스트용 사용자 데이터
-          const testUser = {
-            uid: 'test-user-id',
-            email: 'peermall@example.com',
-            name: '피어몰 관리자',
-            phone: '010-1234-5678',
-            profile_image: '',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-
-          const testSession = {
-            session_id: 'test-session-id',
-            csrf_token: 'test-csrf-token',
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24시간 후
-          };
-
-          // AuthContext의 login 함수 호출
-          login(testSession, testUser);
-          
-          // 원래 가려던 페이지로 리다이렉트
-          const state = location.state as LocationState;
-          const from = state?.from?.pathname || '/';
-          navigate(from, { replace: true });
-          setIsLoading(false);
-          return;
-        } else {
-          setError('올바르지 않은 인증번호입니다.');
-          setOtp('');
-          setIsLoading(false);
-          return;
-        }
-      }
-
       const deviceInfo = getDeviceInfo();
       
       const response = await apiClient.post('/users/login', {

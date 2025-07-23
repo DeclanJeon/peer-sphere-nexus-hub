@@ -35,12 +35,10 @@ import BestProducts from "@/pages/main/products/BestProducts";
 
 // Community pages
 import Community from "@/pages/main/community/Community";
-import BoardCreate from "@/components/common/community/BoardCreate";
 import BoardDetail from "@/components/common/community/BoardDetail";
 
 // Event pages
 import Events from "@/pages/main/events/Events";
-import EventCreate from "@/pages/main/events/EventCreate";
 import EventDetail from "@/pages/main/events/EventDetail";
 
 // My pages
@@ -58,6 +56,7 @@ import ProductPage from "./pages/common/ProductPage";
 import CommunityPage from "./pages/common/CommunityPage";
 import PeermallCreate from "./components/common/peermall/PeermallCreate";
 import PeermallPage from "./pages/main/peermalls/PeermallPage";
+import BoardCreate from "./components/common/community/BoardCreate";
 
 const queryClient = new QueryClient();
 
@@ -109,7 +108,6 @@ const App = () => (
                 <Route path="community/create" element={<ProtectedRoute><BoardCreate /></ProtectedRoute>} />
                 <Route path="community/:id" element={<BoardDetail />} />
                 <Route path="events" element={<Events />} />
-                <Route path="events/create" element={<ProtectedRoute><EventCreate /></ProtectedRoute>} />
                 <Route path="events/:id" element={<EventDetail />} />
               </Route>
 
