@@ -1,36 +1,47 @@
 // src/services/event.api.ts
-import { API_BASE_URL } from '@/lib/api/clients';
-import axios from 'axios';
-import { Event } from '@/types/event';
+import apiClient from '@/lib/api/clients';
+import {
+  EventBase,
+  CreateEventPayload,
+  UpdateEventPayload,
+} from '@/types/event';
 
 class EventApi {
-  private api = axios.create({
-    baseURL: `${API_BASE_URL}/api/v1/events`,
-    withCredentials: true,
-  });
+  private basePath = '/events';
 
-  async getEventsByPeermallId(peermallId: string): Promise<Event[]> {
-    const response = await this.api.get(`/peermall/${peermallId}`);
+  async getEventsByPeermallId(peermallId: string): Promise<EventBase[]> {
+    const response = await apiClient.get(
+      `${this.basePath}/peermall/${peermallId}`
+    );
     return response.data.data;
   }
 
-  async createEvent(eventData: Omit<Event, 'id'>): Promise<Event> {
-    const response = await this.api.post('/create', eventData);
+  async createEvent(eventData: CreateEventPayload): Promise<EventBase> {
+    const response = await apiClient.post(`${this.basePath}/create`, eventData);
+
+    console.log(response);
+
     return response.data.data;
   }
 
-  async getEventById(id: string): Promise<Event> {
-    const response = await this.api.get(`/${id}`);
+  async getEventById(eventId: string): Promise<EventBase> {
+    const response = await apiClient.get(`${this.basePath}/${eventId}`);
     return response.data.data;
   }
 
-  async updateEvent(id: string, eventData: Partial<Event>): Promise<Event> {
-    const response = await this.api.patch(`/${id}`, eventData);
+  async updateEvent(
+    eventId: string,
+    eventData: UpdateEventPayload
+  ): Promise<EventBase> {
+    const response = await apiClient.patch(
+      `${this.basePath}/${eventId}`,
+      eventData
+    );
     return response.data.data;
   }
 
-  async deleteEvent(id: string): Promise<void> {
-    await this.api.delete(`/${id}`);
+  async deleteEvent(eventId: string): Promise<void> {
+    await apiClient.delete(`${this.basePath}/${eventId}`);
   }
 }
 

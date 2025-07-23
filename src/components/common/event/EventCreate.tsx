@@ -1,27 +1,21 @@
+// src/pages/EventCreate.tsx
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { eventApi } from '@/services/event.api';
 import { usePeermall } from '@/contexts/PeermallContext';
 import { useAuth } from '@/hooks/useAuth';
-import { Event } from '@/types/event';
-import EventForm from './EventForm';
+import { CreateEventPayload } from '@/types/event';
+import EventForm from '@/components/common/event/EventForm';
 
 const EventCreate = () => {
   const navigate = useNavigate();
-  const params = useParams();
+  const { url } = useParams<{ url: string }>();
   const { currentPeermall } = usePeermall();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (formData: {
-    title: string;
-    content?: string;
-    eventStartDate?: string;
-    eventEndDate?: string;
-    image?: string;
-    category?: string;
-  }) => {
+  const handleSubmit = async (formData: CreateEventPayload) => {
     if (!currentPeermall?.id) {
       toast({
         title: '오류',
@@ -43,33 +37,26 @@ const EventCreate = () => {
     setLoading(true);
 
     try {
-      // TODO: API 연동 시 실제 이벤트 생성 API 호출
-      const newEvent: Omit<Event, 'id'> = {
-        title: formData.title,
-        content: formData.content,
-        eventStartDate: formData.eventStartDate,
-        eventEndDate: formData.eventEndDate,
-        image: formData.image,
-        category: formData.category,
+      const payload: CreateEventPayload = {
+        ...formData,
+        peermall_id: currentPeermall.id,
       };
 
-      // 더미 데이터로 성공 시뮬레이션
-      console.log('Creating event:', newEvent);
-      
-      // await eventApi.createEvent(newEvent);
+      const result = await eventApi.createEvent(payload);
+      console.log(result);
 
       toast({
         title: '이벤트 생성 완료',
         description: '새로운 이벤트가 성공적으로 등록되었습니다!',
       });
       
-      navigate(`/home/${params.url}/events`);
+      navigate(`/home/${url}/events`);
       
     } catch (error) {
       console.error('이벤트 생성 오류:', error);
       toast({
         title: '오류',
-        description: '이벤트 생성에 실패했습니다.',
+        description: '이벤트 생성에 실패했습니다. 입력 내용을 확인해주세요.',
         variant: 'destructive',
       });
     } finally {

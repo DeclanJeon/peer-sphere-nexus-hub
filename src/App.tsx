@@ -39,7 +39,6 @@ import BoardDetail from "@/components/common/community/BoardDetail";
 
 // Event pages
 import Events from "@/pages/main/events/Events";
-import EventDetail from "@/pages/main/events/EventDetail";
 
 // My pages
 import MyInfo from "@/pages/main/mypage/MyInfo";
@@ -57,6 +56,8 @@ import CommunityPage from "./pages/common/CommunityPage";
 import PeermallCreate from "./components/common/peermall/PeermallCreate";
 import PeermallPage from "./pages/main/peermalls/PeermallPage";
 import BoardCreate from "./components/common/community/BoardCreate";
+import EventDetail from "./components/common/event/EventDetail";
+import EventCreate from "./components/common/event/EventCreate";
 
 const queryClient = new QueryClient();
 
@@ -108,7 +109,8 @@ const App = () => (
                 <Route path="community/create" element={<ProtectedRoute><BoardCreate /></ProtectedRoute>} />
                 <Route path="community/:id" element={<BoardDetail />} />
                 <Route path="events" element={<Events />} />
-                <Route path="events/:id" element={<EventDetail />} />
+                <Route path="event/create" element={<ProtectedRoute><EventCreate /></ProtectedRoute>} />
+                <Route path="event/:id" element={<EventDetail />} />
               </Route>
 
               {/* MyPage Routes - 로그인 필요 */}

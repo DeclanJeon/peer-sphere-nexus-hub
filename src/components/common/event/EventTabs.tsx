@@ -1,4 +1,6 @@
+// src/components/common/event/EventTabs.tsx
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface EventTabsProps {
   activeTab: string;
@@ -9,18 +11,16 @@ const EventTabs = ({ activeTab, onTabChange }: EventTabsProps) => {
   const tabs = ['전체', '진행중', '종료', '예정'];
 
   return (
-    <div className="flex gap-2 mb-6">
+    <div className="flex border-b mb-6">
       {tabs.map((tab) => (
         <Button
           key={tab}
-          variant={activeTab === tab ? 'default' : 'outline'}
+          variant="ghost"
           onClick={() => onTabChange(tab)}
-          className={`
-            ${activeTab === tab 
-              ? 'bg-primary text-primary-foreground' 
-              : 'bg-background text-foreground border-border hover:bg-muted'
-            }
-          `}
+          className={cn(
+            'rounded-none border-b-2 border-transparent -mb-px pt-3 pb-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground',
+            { 'border-primary text-primary': activeTab === tab }
+          )}
         >
           {tab}
         </Button>

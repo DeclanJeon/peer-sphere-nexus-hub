@@ -1,4 +1,5 @@
-import { Link, useParams } from 'react-router-dom';
+// src/components/common/layout/UserContentSection.tsx
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { usePeermall } from '@/contexts/PeermallContext';
@@ -7,9 +8,6 @@ import { Plus } from 'lucide-react';
 import ProductList from '@/components/common/product/ProductList';
 import BoardList from '@/components/common/community/BoardList';
 import EventList from '@/components/common/event/EventList';
-import { communityApi } from '@/services/community.api';
-import { eventApi } from '@/services/event.api';
-import { useNavigate } from 'react-router-dom';
 
 interface UserContentSectionProps {
   activeTab: string;
@@ -17,10 +15,16 @@ interface UserContentSectionProps {
 }
 
 const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionProps) => {
-  const params = useParams();
-  const { currentPeermall } = usePeermall();
-  const currentPeermallId = currentPeermall?.id;
+  const params = useParams<{ url: string }>();
   const navigate = useNavigate();
+  const { currentPeermall } = usePeermall();
+  const { user } = useAuth();
+  
+  const currentPeermallId = currentPeermall?.id;
+
+  // 권한 체크: 피어몰 소유주이며 로그인한 유저만 버튼 표시
+  const isPeermallOwner = user?.user_uid === currentPeermall?.owner_uid;
+  const canCreateEvent = user && isPeermallOwner;
 
   // 상품 섹션 렌더링
   const renderProductSection = () => {
@@ -29,7 +33,7 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
     }
 
     return (
-      <div className="space-y-8 mb-8">
+      <div className="space-y-8">
         {/* 신규 상품 섹션 */}
         {(activeTab === 'all' || activeTab === 'new') && (
           <Card className="shadow-lg">
@@ -86,14 +90,19 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
   };
 
   const renderContent = () => {
-    if (!currentPeermallId) return null;
+    if (!currentPeermallId) {
+      // 피어몰 정보 로딩 중 표시
+      return (
+        <Card className="shadow-lg">
+          <CardContent className="p-8 text-center text-muted-foreground">
+            <p>피어몰 정보를 불러오는 중입니다...</p>
+          </CardContent>
+        </Card>
+      );
+    }
 
     switch (activeTab) {
       case 'community':
-        function handlePostClick(postId: number): void {
-          navigate(`/home/${params.url}/community/${postId}`);
-        }
-
         return (
           <Card className="shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -112,21 +121,14 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
             </CardHeader>
             <CardContent>
               <BoardList 
-                peermallId={currentPeermall?.id}
-                onPostClick={handlePostClick}
+                peermallId={currentPeermallId}
+                onPostClick={(postId) => navigate(`/home/${params.url}/community/${postId}`)}
               />
             </CardContent>
           </Card>
         );
 
       case 'events':
-        // 권한 체크: 피어몰 소유주이며 로그인한 유저만 이벤트 등록 버튼 표시
-        const { user } = useAuth();
-        const userDatas = user ? Object.values(user) : [];
-        const userUid = userDatas.length > 1 ? Object.values(userDatas[1])[0] : null;
-        const isPeermallOwner = userUid === currentPeermall?.owner_uid;
-        const canCreateEvent = user && isPeermallOwner;
-
         return (
           <Card className="shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -137,7 +139,7 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
               <div className="flex gap-2">
                 {canCreateEvent && (
                   <Button variant="default" asChild>
-                    <Link to={`/home/${params.url}/events/create`}>
+                    <Link to={`/home/${params.url}/event/create`}>
                       <Plus className="h-4 w-4 mr-2" />
                       이벤트 등록
                     </Link>
@@ -155,24 +157,15 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
         );
 
       default:
-        return null;
+        // 'all', 'new', 'best' 탭에서는 상품 섹션을 렌더링
+        return renderProductSection();
     }
   };
 
   return (
     <section className="py-12 bg-muted/30">
       <div className="container mx-auto px-4">
-        {/* 상품 섹션 */}
-        {currentPeermallId && renderProductSection()}
-        
-        {/* 선택된 탭에 따른 컨텐츠 */}
-        {currentPeermallId ? renderContent() : (
-          <Card className="shadow-lg">
-            <CardContent className="p-8 text-center text-muted-foreground">
-              <p>피어몰 정보를 불러오는 중입니다...</p>
-            </CardContent>
-          </Card>
-        )}
+        {renderContent()}
       </div>
     </section>
   );

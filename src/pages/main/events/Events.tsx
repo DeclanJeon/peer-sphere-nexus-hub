@@ -105,7 +105,7 @@ const Events = () => {
           <p className="text-muted-foreground">다양한 이벤트와 특별 혜택을 확인해보세요</p>
         </div>
         <Button asChild>
-          <Link to="/events/create">
+          <Link to="/event/create">
             <Plus className="h-4 w-4 mr-2" />
             이벤트 등록
           </Link>

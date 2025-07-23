@@ -1,12 +1,4 @@
-import { 
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu';
+// src/components/common/layout/UserNavigationTabs.tsx
 import { cn } from '@/lib/utils';
 
 interface NavigationTabsProps {
@@ -15,112 +7,33 @@ interface NavigationTabsProps {
 }
 
 const UserNavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) => {
+  const tabs = [
+    { id: 'all', label: '전체' },
+    { id: 'new', label: '신규' },
+    { id: 'best', label: '베스트' },
+    { id: 'community', label: '커뮤니티' },
+    { id: 'events', label: '이벤트' },
+  ];
+
   return (
     <section className="bg-white border-b sticky top-16 z-40">
       <div className="container mx-auto px-4">
-        <NavigationMenu className="justify-start">
-          <NavigationMenuList className="flex justify-start space-x-2">
-            {/* 전체 탭 */}
-            <NavigationMenuItem>
-              <button
-                onClick={() => setActiveTab('all')}
-                className={cn(
-                  navigationMenuTriggerStyle(),
-                  "font-semibold hover:text-primary transition-colors",
-                  activeTab === 'all' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
-                )}
-              >
-                전체
-              </button>
-            </NavigationMenuItem>
-            
-            {/* 신규 탭 with 드롭다운 */}
-            <NavigationMenuItem className="relative">
-              <NavigationMenuTrigger 
-                className={cn(
-                  "font-semibold",
-                  activeTab === 'new' ? 'text-primary' : 'text-muted-foreground'
-                )}
-              >
-                신규
-              </NavigationMenuTrigger>
-              <NavigationMenuContent className="left-0">
-                <ul className="grid w-[200px] gap-2 p-4">
-                  <li>
-                    <NavigationMenuLink asChild>
-                      <button
-                        onClick={() => setActiveTab('new')}
-                        className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer"
-                      >
-                        <div className="text-sm font-medium leading-none">신규 제품</div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          새로 등록된 제품들
-                        </p>
-                      </button>
-                    </NavigationMenuLink>
-                  </li>
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-
-            {/* 베스트 탭 with 드롭다운 */}
-            <NavigationMenuItem className="relative">
-              <NavigationMenuTrigger 
-                className={cn(
-                  "font-semibold",
-                  activeTab === 'best' ? 'text-primary' : 'text-muted-foreground'
-                )}
-              >
-                베스트
-              </NavigationMenuTrigger>
-              <NavigationMenuContent className="left-0">
-                <ul className="grid w-[200px] gap-2 p-4">
-                  <li>
-                    <NavigationMenuLink asChild>
-                      <button
-                        onClick={() => setActiveTab('best')}
-                        className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer"
-                      >
-                        <div className="text-sm font-medium leading-none">베스트 제품</div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          인기 높은 제품들
-                        </p>
-                      </button>
-                    </NavigationMenuLink>
-                  </li>
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-
-            {/* 커뮤니티 탭 - onClick 이벤트로 변경 */}
-            <NavigationMenuItem>
-              <button
-                onClick={() => setActiveTab('community')}
-                className={cn(
-                  navigationMenuTriggerStyle(),
-                  "font-semibold hover:text-primary transition-colors",
-                  activeTab === 'community' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
-                )}
-              >
-                커뮤니티
-              </button>
-            </NavigationMenuItem>
-
-            {/* 이벤트 탭 - onClick 이벤트로 변경 */}
-            <NavigationMenuItem>
-              <button
-                onClick={() => setActiveTab('events')}
-                className={cn(
-                  navigationMenuTriggerStyle(),
-                  "font-semibold hover:text-primary transition-colors",
-                  activeTab === 'events' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
-                )}
-              >
-                이벤트
-              </button>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+        <nav className="flex space-x-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'py-3 px-4 font-semibold hover:text-primary transition-colors text-muted-foreground border-b-2',
+                activeTab === tab.id
+                  ? 'border-primary text-primary'
+                  : 'border-transparent'
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
       </div>
     </section>
   );
