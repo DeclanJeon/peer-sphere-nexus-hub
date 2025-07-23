@@ -44,6 +44,7 @@ export interface Product {
 }
 
 export interface Post {
+  [x: string]: string | number | Date;
   id: string;
   title: string;
   content: string;
@@ -95,15 +96,21 @@ class IndexedDBManager {
 
         // Peermalls store
         if (!db.objectStoreNames.contains('peermalls')) {
-          const peermallStore = db.createObjectStore('peermalls', { keyPath: 'id' });
+          const peermallStore = db.createObjectStore('peermalls', {
+            keyPath: 'id',
+          });
           peermallStore.createIndex('ownerId', 'ownerId', { unique: false });
           peermallStore.createIndex('category', 'category', { unique: false });
         }
 
         // Products store
         if (!db.objectStoreNames.contains('products')) {
-          const productStore = db.createObjectStore('products', { keyPath: 'id' });
-          productStore.createIndex('peermallId', 'peermallId', { unique: false });
+          const productStore = db.createObjectStore('products', {
+            keyPath: 'id',
+          });
+          productStore.createIndex('peermallId', 'peermallId', {
+            unique: false,
+          });
           productStore.createIndex('ownerId', 'ownerId', { unique: false });
           productStore.createIndex('category', 'category', { unique: false });
         }
@@ -118,7 +125,9 @@ class IndexedDBManager {
 
         // Reviews store
         if (!db.objectStoreNames.contains('reviews')) {
-          const reviewStore = db.createObjectStore('reviews', { keyPath: 'id' });
+          const reviewStore = db.createObjectStore('reviews', {
+            keyPath: 'id',
+          });
           reviewStore.createIndex('productId', 'productId', { unique: false });
           reviewStore.createIndex('authorId', 'authorId', { unique: false });
         }
@@ -126,7 +135,10 @@ class IndexedDBManager {
     });
   }
 
-  async getStore(storeName: string, mode: IDBTransactionMode = 'readonly'): Promise<IDBObjectStore> {
+  async getStore(
+    storeName: string,
+    mode: IDBTransactionMode = 'readonly'
+  ): Promise<IDBObjectStore> {
     if (!this.db) {
       await this.init();
     }

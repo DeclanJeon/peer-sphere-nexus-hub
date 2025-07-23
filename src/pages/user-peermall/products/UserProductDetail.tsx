@@ -18,7 +18,8 @@ import {
   Share2,
   MessageCircle,
   MoreVertical,
-  ShoppingBag
+  ShoppingBag,
+  Lock
 } from 'lucide-react';
 import { 
   AlertDialog,
@@ -41,20 +42,33 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ProductReviews } from './reviews/ProductReviews';
 
 const UserProductDetail = () => {
-  // productId가 아닌 id로 수정
   const { url, id } = useParams<{ url: string; id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { currentPeermall } = usePeermall();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 피어몰 소유자인지 확인
-  const isOwner = currentPeermall?.ownerId === user?.email || 
-    currentPeermall?.owner_id === user?.id;
-  
-  console.log(currentPeermall)
+  // 로그인 여부 확인
+  const isLoggedIn = isAuthenticated && user;
+
+  // 상품 등록자인지 확인 (피어몰 소유자 또는 상품 등록자)
+  const isProductOwner = () => {
+    if (!isLoggedIn || !product) return false;
+    
+    // 상품의 등록자 ID와 현재 사용자 ID 비교
+    const isCreator = product.createdBy === user.id || 
+                     product.created_by === user.id ||
+                     product.userId === user.id ||
+                     product.user_id === user.id;
+    
+    // 피어몰 소유자인지 확인
+    const isPeermallOwner = currentPeermall?.ownerId === user?.email || 
+                           currentPeermall?.owner_id === user?.id;
+    
+    return isCreator || isPeermallOwner;
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -66,9 +80,7 @@ const UserProductDetail = () => {
       setLoading(true);
       try {
         const data = await productApi.getProductById(id);
-
-        console.log("상품 상세 조회 : ", data)
-
+        console.log("상품 상세 조회 : ", data);
         setProduct(data);
       } catch (error) {
         console.error('상품 조회 실패:', error);
@@ -86,6 +98,27 @@ const UserProductDetail = () => {
   }, [id, toast]);
 
   const handleDelete = async () => {
+    // 로그인 확인
+    if (!isLoggedIn) {
+      toast({
+        title: "로그인 필요",
+        description: "상품을 삭제하려면 로그인이 필요합니다.",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+
+    // 권한 확인
+    if (!isProductOwner()) {
+      toast({
+        title: "권한 없음",
+        description: "본인이 등록한 상품만 삭제할 수 있습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       if (!id) return;
       
@@ -107,8 +140,54 @@ const UserProductDetail = () => {
     }
   };
 
+  const handleEdit = () => {
+    // 로그인 확인
+    if (!isLoggedIn) {
+      toast({
+        title: "로그인 필요",
+        description: "상품을 수정하려면 로그인이 필요합니다.",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+
+    // 권한 확인
+    if (!isProductOwner()) {
+      toast({
+        title: "권한 없음",
+        description: "본인이 등록한 상품만 수정할 수 있습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    navigate(`/home/${url}/products/${product?.id}/edit`);
+  };
+
   const handleStatusToggle = async () => {
     if (!product || !id) return;
+
+    // 로그인 확인
+    if (!isLoggedIn) {
+      toast({
+        title: "로그인 필요",
+        description: "상품 상태를 변경하려면 로그인이 필요합니다.",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+
+    // 권한 확인
+    if (!isProductOwner()) {
+      toast({
+        title: "권한 없음",
+        description: "본인이 등록한 상품만 상태를 변경할 수 있습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       const newStatus = product.status === 'active' ? 'inactive' : 'active';
@@ -131,6 +210,32 @@ const UserProductDetail = () => {
         title: "상태 변경 실패",
         description: "상품 상태 변경 중 오류가 발생했습니다."
       });
+    }
+  };
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/home/${url}/product/${id}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product?.name,
+          text: `${product?.name} - ${currentPeermall?.name}`,
+          url: shareUrl,
+        });
+      } catch (error) {
+        console.log('공유 취소 또는 오류:', error);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast({
+          title: '링크 복사 완료',
+          description: '상품 링크가 클립보드에 복사되었습니다.',
+        });
+      } catch (error) {
+        console.error('클립보드 복사 실패:', error);
+      }
     }
   };
 
@@ -180,7 +285,9 @@ const UserProductDetail = () => {
           <ArrowLeft className="h-4 w-4" />
           뒤로가기
         </Button>
-        {isOwner && (
+        
+        {/* 로그인한 사용자이고 상품 등록자인 경우에만 관리 메뉴 표시 */}
+        {isLoggedIn && isProductOwner() && (
           <div className="flex items-center gap-2 ml-auto">
             <Badge 
               variant={product.status === 'active' ? 'default' : 'secondary'}
@@ -199,13 +306,14 @@ const UserProductDetail = () => {
                 <DropdownMenuItem onClick={handleStatusToggle}>
                   {product.status === 'active' ? '판매 중단' : '판매 재개'}
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to={`/home/${url}/products/${product.id}/edit`}>
-                    <Edit3 className="h-4 w-4 mr-2" />
-                    수정
-                  </Link>
+                <DropdownMenuItem onClick={handleEdit}>
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  수정
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDelete}>
+                <DropdownMenuItem 
+                  onClick={handleDelete}
+                  className="text-destructive focus:text-destructive"
+                >
                   <Trash2 className="h-4 w-4 mr-2" />
                   삭제
                 </DropdownMenuItem>
@@ -303,12 +411,6 @@ const UserProductDetail = () => {
                     </Badge>
                   </span>
                 </div>
-                {product.cost_price && (
-                  <div className="grid grid-cols-3 gap-4 py-2 border-b">
-                    <span className="font-medium text-muted-foreground">원가</span>
-                    <span className="col-span-2">{Number(product.cost_price).toLocaleString()}원</span>
-                  </div>
-                )}
                 {product.shipping_fee && (
                   <div className="grid grid-cols-3 gap-4 py-2">
                     <span className="font-medium text-muted-foreground">배송비</span>
@@ -320,14 +422,16 @@ const UserProductDetail = () => {
           </Card>
 
           {/* 액션 버튼 */}
-          {isOwner ? (
+          {isLoggedIn && isProductOwner() ? (
             <div className="flex gap-3">
-              <Link to={`/home/${url}/products/${product.id}/edit`} className="flex-1">
-                <Button className="w-full" variant="outline">
-                  <Edit3 className="h-4 w-4 mr-2" />
-                  수정
-                </Button>
-              </Link>
+              <Button 
+                className="flex-1" 
+                variant="outline"
+                onClick={handleEdit}
+              >
+                <Edit3 className="h-4 w-4 mr-2" />
+                수정
+              </Button>
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -356,20 +460,71 @@ const UserProductDetail = () => {
               </AlertDialog>
             </div>
           ) : (
-            <div className="flex gap-3">
-              <Button className="flex-1">
-                <Heart className="h-4 w-4 mr-2" />
-                찜하기
-              </Button>
-              <Button className="flex-1" variant="outline">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                문의하기
-              </Button>
+            <div className="space-y-3">
+              {/* 로그인하지 않은 경우 */}
+              {!isLoggedIn && (
+                <div className="bg-muted/50 border rounded-lg p-4 text-center">
+                  <Lock className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mb-3">
+                    더 많은 기능을 이용하려면 로그인하세요
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate('/login')}
+                  >
+                    로그인
+                  </Button>
+                </div>
+              )}
+              
+              <div className="flex gap-3">
+                <Button 
+                  className="flex-1"
+                  disabled={!isLoggedIn}
+                  onClick={() => {
+                    if (!isLoggedIn) {
+                      toast({
+                        title: "로그인 필요",
+                        description: "찜하기 기능은 로그인 후 이용 가능합니다.",
+                      });
+                      return;
+                    }
+                    // 찜하기 로직
+                  }}
+                >
+                  <Heart className="h-4 w-4 mr-2" />
+                  찜하기
+                </Button>
+                <Button 
+                  className="flex-1" 
+                  variant="outline"
+                  disabled={!isLoggedIn}
+                  onClick={() => {
+                    if (!isLoggedIn) {
+                      toast({
+                        title: "로그인 필요",
+                        description: "문의하기 기능은 로그인 후 이용 가능합니다.",
+                      });
+                      return;
+                    }
+                    // 문의하기 로직
+                  }}
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  문의하기
+                </Button>
+              </div>
             </div>
           )}
 
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="flex-1">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1"
+              onClick={handleShare}
+            >
               <Share2 className="h-4 w-4 mr-2" />
               공유
             </Button>
@@ -430,31 +585,11 @@ const UserProductDetail = () => {
           </Card>
         )}
 
-        {/* 추천 상품 섹션 */}
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-xl font-semibold mb-4">추천 상품</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((item) => (
-                <div key={item} className="space-y-2">
-                  <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
-                    <ShoppingBag className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <div className="text-sm">
-                    <p className="font-medium truncate">추천 상품 {item}</p>
-                    <p className="text-primary font-semibold">99,000원</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
         {/* 상품 리뷰 섹션 */}
         <ProductReviews 
           productId={id}
           averageRating={product.rating || 0}
-          totalReviews={product.likes || 0} // 임시로 likes를 리뷰 수로 사용
+          totalReviews={product.likes || 0}
         />
       </div>
     </div>

@@ -1,16 +1,10 @@
-import { API_BASE_URL } from '@/lib/api/clients';
-import axios from 'axios';
+import { apiClient } from '@/lib/api/clients';
 import { Peermall } from '@/types/peermall';
 
 class PeermallApi {
-  private api = axios.create({
-    baseURL: `${API_BASE_URL}/api/v1/peermalls`,
-    withCredentials: true,
-  });
-
   // 피어몰 생성
   async createPeermall(peermallData: FormData): Promise<Peermall> {
-    const response = await this.api.post('/create', peermallData, {
+    const response = await apiClient.post('/peermalls/create', peermallData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -20,43 +14,47 @@ class PeermallApi {
 
   // URL로 피어몰 조회
   async getPeermallByUrl(url: string): Promise<Peermall> {
-    const response = await this.api.get(`/${url}`);
+    const response = await apiClient.get(`/peermalls/${url}`);
     return response.data.data;
   }
 
   // ID로 피어몰 조회
   async getPeermallById(id: string): Promise<Peermall> {
-    const response = await this.api.get(`/${id}`);
+    const response = await apiClient.get(`/peermalls/${id}`);
     return response.data.data;
   }
 
   // 사용자의 피어몰 목록 조회
   async getPeermallsByOwner(ownerId: string): Promise<Peermall[]> {
-    const response = await this.api.get(`/owner/${ownerId}`);
+    const response = await apiClient.get(`/peermalls/owner/${ownerId}`);
     return response.data.data;
   }
 
   // 모든 피어몰 조회
   async getAllPeermalls(): Promise<Peermall[]> {
-    const response = await this.api.get('/');
+    const response = await apiClient.get('/peermalls');
     return response.data.data;
   }
 
   // 카테고리별 피어몰 조회
   async getPeermallsByCategory(category: string): Promise<Peermall[]> {
-    const response = await this.api.get(`/category/${category}`);
+    const response = await apiClient.get(`/peermalls/category/${category}`);
     return response.data.data;
   }
 
   // 신규 피어몰 조회
   async getNewPeermalls(limit: number = 10): Promise<Peermall[]> {
-    const response = await this.api.get('/new', { params: { limit } });
+    const response = await apiClient.get('/peermalls/new', {
+      params: { limit },
+    });
     return response.data.data;
   }
 
   // 베스트 피어몰 조회
   async getBestPeermalls(limit: number = 10): Promise<Peermall[]> {
-    const response = await this.api.get('/best', { params: { limit } });
+    const response = await apiClient.get('/peermalls/best', {
+      params: { limit },
+    });
     return response.data.data;
   }
 
@@ -65,19 +63,21 @@ class PeermallApi {
     id: string,
     updates: Partial<Peermall>
   ): Promise<Peermall> {
-    const response = await this.api.patch(`/${id}`, updates);
+    const response = await apiClient.patch(`/peermalls/${id}`, updates);
     return response.data.data;
   }
 
   // 피어몰 삭제
   async deletePeermall(id: string): Promise<void> {
-    await this.api.delete(`/${id}`);
+    await apiClient.delete(`/peermalls/${id}`);
   }
 
   // URL 사용 가능 여부 확인
   async checkUrlAvailability(url: string): Promise<boolean> {
     try {
-      const response = await this.api.get('/check-url', { params: { url } });
+      const response = await apiClient.get('/peermalls/check-url', {
+        params: { url },
+      });
       return response.data.available;
     } catch (error) {
       if (error.response?.status === 400) {

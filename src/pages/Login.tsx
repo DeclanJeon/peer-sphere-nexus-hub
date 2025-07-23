@@ -274,7 +274,7 @@ const Login = () => {
             if (response.code) {
               try {
                 // 백엔드에 인증 코드 전송
-                await apiClient.post('/api/v1/users/google-drive-token', {
+                await apiClient.post('/users/google-drive-token', {
                   authCode: response.code
                 });
                 
@@ -322,7 +322,7 @@ const Login = () => {
 
       const deviceInfo = getDeviceInfo();
       
-      const response = await apiClient.post('/api/v1/users/login', {
+      const response = await apiClient.post('/users/login', {
         email,
         step: 'send-otp',
         deviceInfo
@@ -390,7 +390,7 @@ const Login = () => {
 
       const deviceInfo = getDeviceInfo();
       
-      const response = await apiClient.post('/api/v1/users/login', {
+      const response = await apiClient.post('/users/login', {
         email,
         otp,
         step: 'verify-otp',
@@ -436,7 +436,7 @@ const Login = () => {
       const deviceInfo = getDeviceInfo();
       
       // 백엔드의 resend-otp 엔드포인트 호출
-      const response = await apiClient.post('/api/v1/users/resend-otp', {
+      const response = await apiClient.post('/users/resend-otp', {
         email,
         deviceInfo,
         purpose: 'login' // 로그인 목적임을 명시

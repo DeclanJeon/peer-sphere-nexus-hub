@@ -9,6 +9,11 @@ class ProductApi {
     withCredentials: true,
   });
 
+  async getProducts(): Promise<Product[]> {
+    const response = await this.api.get('/all');
+    return response.data.data;
+  }
+
   // 피어몰별 제품 목록 조회
   async getProductsByPeermall(
     peermallId: string,

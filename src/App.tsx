@@ -30,15 +30,13 @@ import NewPeermalls from "@/pages/main/peermalls/NewPeermalls";
 
 // Product pages
 import ProductList from "@/pages/main/products/ProductList";
-import ProductDetail from "@/pages/main/products/ProductDetail";
-import ProductCreate from "@/pages/main/products/ProductCreate";
 import NewProducts from "@/pages/main/products/NewProducts";
 import BestProducts from "@/pages/main/products/BestProducts";
 
 // Community pages
 import Community from "@/pages/main/community/Community";
-import BoardCreate from "@/pages/main/community/BoardCreate";
-import BoardDetail from "@/pages/main/community/BoardDetail";
+import BoardCreate from "@/components/common/community/BoardCreate";
+import BoardDetail from "@/components/common/community/BoardDetail";
 
 // Event pages
 import Events from "@/pages/main/events/Events";
@@ -59,6 +57,7 @@ import QRCode from "@/pages/QRCode";
 import ProductPage from "./pages/common/ProductPage";
 import CommunityPage from "./pages/common/CommunityPage";
 import PeermallCreate from "./components/common/peermall/PeermallCreate";
+import PeermallPage from "./pages/main/peermalls/PeermallPage";
 
 const queryClient = new QueryClient();
 
@@ -84,22 +83,17 @@ const App = () => (
               
               {/* Main Routes */}
               <Route path="/" element={<MainLayout><MainPage /></MainLayout>} />
+              <Route path="/peermalls" element={<MainLayout><PeermallPage /></MainLayout>} />
               <Route path="/peermalls/new" element={<MainLayout><NewPeermalls /></MainLayout>} />
               <Route path="/peermalls/best" element={<MainLayout><BestPeermalls /></MainLayout>} />
-              
               <Route path="/peermalls/create" element={<ProtectedRoute><PeermallCreate /></ProtectedRoute>} />
 
               <Route path="/products" element={<MainLayout><ProductList /></MainLayout>} />
               <Route path="/products/new" element={<MainLayout><NewProducts /></MainLayout>} />
               <Route path="/products/best" element={<MainLayout><BestProducts /></MainLayout>} />
-              <Route path="/products/create" element={<ProtectedRoute><MainLayout><ProductCreate /></MainLayout></ProtectedRoute>} />
-              <Route path="/products/:id" element={<MainLayout><ProductDetail /></MainLayout>} />
+              
               <Route path="/community" element={<MainLayout><Community /></MainLayout>} />
-              <Route path="/community/create" element={<ProtectedRoute><MainLayout><BoardCreate /></MainLayout></ProtectedRoute>} />
-              <Route path="/community/:id" element={<MainLayout><BoardDetail /></MainLayout>} />
               <Route path="/events" element={<MainLayout><Events /></MainLayout>} />
-              <Route path="/events/create" element={<ProtectedRoute><MainLayout><EventCreate /></MainLayout></ProtectedRoute>} />
-              <Route path="/events/:id" element={<MainLayout><EventDetail /></MainLayout>} />
               
               {/* Peermall List and Creation */}
               {/* <Route path="/peermalls" element={<MainLayout><PeermallListMain /></MainLayout>} /> */}
@@ -118,9 +112,6 @@ const App = () => (
                 <Route path="events/create" element={<ProtectedRoute><EventCreate /></ProtectedRoute>} />
                 <Route path="events/:id" element={<EventDetail />} />
               </Route>
-
-              {/* User Peermall Product Routes - Requires authentication */}
-              
 
               {/* MyPage Routes - 로그인 필요 */}
               <Route 

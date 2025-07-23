@@ -7,7 +7,6 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
-import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 interface NavigationTabsProps {
@@ -40,7 +39,7 @@ const UserNavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) =>
               <NavigationMenuTrigger 
                 className={cn(
                   "font-semibold",
-                  activeTab.includes('new') ? 'text-primary' : 'text-muted-foreground'
+                  activeTab === 'new' ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
                 신규
@@ -49,16 +48,15 @@ const UserNavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) =>
                 <ul className="grid w-[200px] gap-2 p-4">
                   <li>
                     <NavigationMenuLink asChild>
-                      <Link 
-                        to="/products/new"
-                        onClick={() => setActiveTab('new-products')}
-                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      <button
+                        onClick={() => setActiveTab('new')}
+                        className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer"
                       >
                         <div className="text-sm font-medium leading-none">신규 제품</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                           새로 등록된 제품들
                         </p>
-                      </Link>
+                      </button>
                     </NavigationMenuLink>
                   </li>
                 </ul>
@@ -70,7 +68,7 @@ const UserNavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) =>
               <NavigationMenuTrigger 
                 className={cn(
                   "font-semibold",
-                  activeTab.includes('best') ? 'text-primary' : 'text-muted-foreground'
+                  activeTab === 'best' ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
                 베스트
@@ -79,55 +77,49 @@ const UserNavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) =>
                 <ul className="grid w-[200px] gap-2 p-4">
                   <li>
                     <NavigationMenuLink asChild>
-                      <Link 
-                        to="/products/best"
-                        onClick={() => setActiveTab('best-products')}
-                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      <button
+                        onClick={() => setActiveTab('best')}
+                        className="block w-full text-left select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer"
                       >
                         <div className="text-sm font-medium leading-none">베스트 제품</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                           인기 높은 제품들
                         </p>
-                      </Link>
+                      </button>
                     </NavigationMenuLink>
                   </li>
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
 
-            {/* 커뮤니티 탭 - 직접 이동 */}
+            {/* 커뮤니티 탭 - onClick 이벤트로 변경 */}
             <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link 
-                  to="/community"
-                  className={cn(
-                    navigationMenuTriggerStyle(),
-                    "font-semibold hover:text-primary transition-colors",
-                    activeTab === 'community' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
-                  )}
-                >
-                  커뮤니티
-                </Link>
-              </NavigationMenuLink>
+              <button
+                onClick={() => setActiveTab('community')}
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  "font-semibold hover:text-primary transition-colors",
+                  activeTab === 'community' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+                )}
+              >
+                커뮤니티
+              </button>
             </NavigationMenuItem>
 
-            {/* 이벤트 탭 - 직접 이동 */}
+            {/* 이벤트 탭 - onClick 이벤트로 변경 */}
             <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link 
-                  to="/events"
-                  className={cn(
-                    navigationMenuTriggerStyle(),
-                    "font-semibold hover:text-primary transition-colors",
-                    activeTab === 'events' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
-                  )}
-                >
-                  이벤트
-                </Link>
-              </NavigationMenuLink>
+              <button
+                onClick={() => setActiveTab('events')}
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  "font-semibold hover:text-primary transition-colors",
+                  activeTab === 'events' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+                )}
+              >
+                이벤트
+              </button>
             </NavigationMenuItem>
           </NavigationMenuList>
-
         </NavigationMenu>
       </div>
     </section>

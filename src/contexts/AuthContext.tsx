@@ -6,8 +6,8 @@ import { toast } from '@/hooks/use-toast';
 
 // 타입 정의
 interface User {
-  [x: string]: any;
-  uid: string;
+  [x: string]: string;
+  user_uid: string;
   email: string;
   name?: string;
   phone?: string;
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       if (currentSessionId) {
-        await apiClient.post('/api/v1/users/logout', { sessionId: currentSessionId });
+        await apiClient.post('/users/logout', { sessionId: currentSessionId });
       }
     } catch (error) {
       console.error('Logout API call failed:', error);
@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
      try {
       // CSRF 토큰도 헤더에 포함되도록 확인
-      const response = await apiClient.get('/api/v1/users/me', {
+      const response = await apiClient.get('/users/me', {
         headers: {
           'X-CSRF-Token': storedCsrfToken
         }

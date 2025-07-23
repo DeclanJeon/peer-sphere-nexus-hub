@@ -8,7 +8,7 @@ export const API_BASE_URL =
 
 // Axios 인스턴스 생성
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `${API_BASE_URL}/api/v1`,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
