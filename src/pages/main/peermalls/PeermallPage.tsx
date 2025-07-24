@@ -42,14 +42,15 @@ const PeermallPage = () => {
   useEffect(() => {
     // activeTab이 변경될 때마다 데이터를 다시 불러옵니다.
     fetchPeermalls();
-  }, [activeTab]);
+  }, [activeTab, initialTab]);
 
   useEffect(() => {
     // 필터링 관련 상태가 변경될 때마다 목록을 다시 필터링합니다.
     filterPeermalls();
-  }, [bestPeermalls, newPeermalls, searchQuery, selectedCategory, activeTab]);
+  }, [bestPeermalls, newPeermalls, searchQuery, selectedCategory, activeTab, initialTab]);
 
   const fetchPeermalls = async () => {
+    setActiveTab(initialTab);
     setLoading(true);
     try {
       if (activeTab === 'best' && bestPeermalls.length === 0) { // 데이터가 없을 때만 호출
