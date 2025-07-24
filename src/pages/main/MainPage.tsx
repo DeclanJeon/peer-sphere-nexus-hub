@@ -23,7 +23,6 @@ const MainPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <NavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       <SearchSection searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <HeroSection categories={categories} />
       <CategorySection 
