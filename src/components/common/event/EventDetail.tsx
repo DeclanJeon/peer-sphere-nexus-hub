@@ -291,10 +291,10 @@ const EventDetail = () => {
                     <Share className="h-4 w-4" />
                     공유하기
                   </Button>
-                  <Button variant="outline" className="flex items-center gap-2">
+                  {/* <Button variant="outline" className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
                     참여하기
-                  </Button>
+                  </Button> */}
                 </div>
                 
                 {canEditOrDelete && (
