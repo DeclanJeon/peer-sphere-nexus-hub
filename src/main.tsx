@@ -8,7 +8,7 @@ const rootElement = document.getElementById("root");
 
 const renderApp = () => {
   createRoot(rootElement!).render(
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={process.env.VITE_GOOGLE_CLIENT_ID as string}>
       <App />
     </GoogleOAuthProvider>
   );
