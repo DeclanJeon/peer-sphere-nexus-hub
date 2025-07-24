@@ -6,6 +6,7 @@ import { Event, EventBase } from '@/types/event';
 import { Skeleton } from '@/components/ui/skeleton';
 import { processEventData } from '@/lib/dateUtils';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Store, Globe, User } from 'lucide-react'; // 아이콘 추가
 
 interface EventListProps {
   peermallId?: string;
@@ -26,15 +27,13 @@ const EventList = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { url } = useParams<{ url: string }>();
 
   const handleEventClick = (event: Event) => {
 
-  // 메인 피어몰에서는 이벤트의 피어몰 URL로 이동
-    if (isMainPeermall && event.peermall_url) {
+    if (event.registration_source !== 'main') {
       navigate(`/home/${event.peermall_url}/event/${event.id}`);
     } else {
-      navigate(`/home/${url || peermallId}/event/${event.id}`);
+      navigate(`/event/${event.id}`);
     }
   };
 
@@ -106,7 +105,7 @@ const EventList = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {events.map((event) => (
         <Card 
           key={event.id} 
@@ -135,6 +134,28 @@ const EventList = ({
               <h3 className="font-semibold text-foreground line-clamp-2 min-h-[3rem]">
                 {event.title}
               </h3>
+              
+              {/* 이벤트 등록 정보 추가 */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                {event.registration_source === 'main' ? (
+                  <Badge variant="outline" className="text-xs gap-1">
+                    <Globe className="h-3 w-3" />
+                    전체 공개
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs gap-1">
+                    <Store className="h-3 w-3" />
+                    {event.peermall_name || '피어몰'}
+                  </Badge>
+                )}
+                {(event.user_name || event.user_email) && (
+                  <span className="flex items-center gap-1">
+                    <User className="h-3 w-3" />
+                    {event.user_name || event.user_email}
+                  </span>
+                )}
+              </div>
+              
               <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
                 {event.content}
               </p>

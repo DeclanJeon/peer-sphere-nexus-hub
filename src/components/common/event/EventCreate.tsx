@@ -15,7 +15,10 @@ const EventCreate = () => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (formData: FormData) => {
-    if (!currentPeermall?.id) {
+    // 메인 페이지에서 등록하는 경우 currentPeermall이 없을 수 있음
+    const isMainPageCreate = !url; // URL 파라미터가 없으면 메인 페이지
+    
+    if (!isMainPageCreate && !currentPeermall?.id) {
       toast({
         title: '오류',
         description: '피어몰 정보를 찾을 수 없습니다.',
@@ -36,17 +39,24 @@ const EventCreate = () => {
     setLoading(true);
 
     try {
-      // 새로운 FormData 객체 생성
       const payload = new FormData();
       
       // 기존 FormData의 모든 필드를 복사
       formData.forEach((value, key) => {
         payload.append(key, value);
       });
+
+      console.log(currentPeermall)
       
-      // peermall_id 추가
-      payload.append('peermall_id', currentPeermall.id);
-      payload.append('url', url);
+      // 메인 페이지 등록인 경우와 피어몰 등록인 경우 구분
+      if (isMainPageCreate) {
+        payload.append('registration_source', 'main');
+        // 메인 페이지 등록 시 peermall_id는 선택적
+      } else {
+        payload.append('peermall_id', currentPeermall!.id);
+        payload.append('url', url!);
+        payload.append('registration_source', 'peermall');
+      }
 
       const result = await eventApi.createEvent(payload);
       console.log('Event created:', result);
@@ -56,12 +66,12 @@ const EventCreate = () => {
         description: '새로운 이벤트가 성공적으로 등록되었습니다!',
       });
       
-      navigate(`/home/${url}/events`);
+      // 메인 페이지에서 등록했으면 메인 이벤트 페이지로, 아니면 해당 피어몰 이벤트 페이지로
+      navigate(isMainPageCreate ? '/events' : `/home/${url}/events`);
       
     } catch (error: any) {
       console.error('이벤트 생성 오류:', error);
       
-      // 에러 메시지 개선
       const errorMessage = error.response?.data?.message || '이벤트 생성에 실패했습니다. 입력 내용을 확인해주세요.';
       
       toast({

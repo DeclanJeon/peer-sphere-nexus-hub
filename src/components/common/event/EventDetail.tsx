@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, Trash2, Edit, Share, Clock, MapPin, Users, Eye, ArrowLeft } from 'lucide-react';
+import { Calendar, Trash2, Edit, Share, Clock, MapPin, Users, Eye, ArrowLeft, Globe, Store, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Event, EventBase } from '@/types/event';
 import { eventApi } from '@/services/event.api';
@@ -37,7 +37,6 @@ const EventDetail = () => {
       setLoading(true);
       setError(null);
       const eventData = await eventApi.getEventById(id);
-      console.log(eventData)
       setEvent(processEventData(eventData));
     } catch (err) {
       console.error('이벤트 조회 오류:', err);
@@ -219,6 +218,29 @@ const EventDetail = () => {
                         day: 'numeric' 
                       })}
                     </p>
+                  </div>
+                  </div>
+                  
+                {/* 등록 정보 추가 */}
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                    {event.registration_source === 'main' ? (
+                      <Globe className="h-5 w-5 text-blue-500" />
+                    ) : (
+                      <Store className="h-5 w-5 text-blue-500" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">등록 위치</p>
+                    <p className="font-semibold">
+                      {event.registration_source === 'main' ? '전체 공개' : event.peermall_name || '피어몰'}
+                    </p>
+                    {event.user_name && (
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <User className="h-3 w-3" />
+                        {event.user_name}
+                      </p>
+                    )}
                   </div>
                 </div>
 

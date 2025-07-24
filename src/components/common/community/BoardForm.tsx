@@ -3,18 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Post } from '@/types/post';
+import { RichEditor } from '@/components/ui/rich-editor';
 
 interface BoardFormProps {
   mode: 'create' | 'edit';
   initialData?: Partial<Post>;
   onSubmit: (data: {
+    author_name: string;
     title: string;
     category: string;
     content: string;
-    is_notice?: boolean;
   }) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
@@ -22,19 +22,19 @@ interface BoardFormProps {
 
 const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: BoardFormProps) => {
   const [formData, setFormData] = useState({
+    author_name: '',
     title: '',
     category: '',
     content: '',
-    is_notice: false,
   });
 
   useEffect(() => {
     if (initialData) {
       setFormData({
+        author_name: initialData.author_name || '',
         title: initialData.title || '',
         category: initialData.category || '',
         content: initialData.content || '',
-        is_notice: initialData.is_notice || false,
       });
     }
   }, [initialData]);
@@ -44,7 +44,7 @@ const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: B
     await onSubmit(formData);
   };
 
-  const categories = ['공지사항', '일반', '질문', '정보', '운영팁', '자유'];
+  const categories = ['일반', '질문', '정보', '운영팁', '자유'];
 
   return (
     <Card>
@@ -53,7 +53,20 @@ const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: B
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="author_name">작성자 *</Label>
+              <Input
+                id="author_name"
+                value={formData.author_name}
+                onChange={(e) => setFormData({ ...formData, author_name: e.target.value })}
+                required
+                disabled={loading}
+                placeholder="작성자 이름을 입력하세요"
+                maxLength={100}
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="title">제목 *</Label>
               <Input
@@ -63,6 +76,7 @@ const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: B
                 required
                 disabled={loading}
                 placeholder="제목을 입력하세요"
+                maxLength={255}
               />
             </div>
 
@@ -72,6 +86,7 @@ const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: B
                 value={formData.category} 
                 onValueChange={(value) => setFormData({ ...formData, category: value })}
                 disabled={loading}
+                required
               >
                 <SelectTrigger>
                   <SelectValue placeholder="카테고리를 선택하세요" />
@@ -85,23 +100,20 @@ const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: B
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="content">내용 *</Label>
+              <RichEditor
+                content={formData.content}
+                onChange={(content) => setFormData(prev => ({ ...prev, content }))}
+                placeholder="게시글 내용을 작성해주세요."
+                disabled={loading}
+                className="min-h-[400px]"
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="content">내용 *</Label>
-            <Textarea
-              id="content"
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              rows={15}
-              placeholder="게시글 내용을 작성해주세요"
-              required
-              disabled={loading}
-              className="min-h-[400px]"
-            />
-          </div>
-
-          <div className="flex gap-4">
+          <div className="flex gap-4 pt-4">
             <Button 
               type="button" 
               variant="outline" 
@@ -114,7 +126,7 @@ const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: B
             <Button 
               type="submit" 
               className="flex-1"
-              disabled={loading || !formData.title.trim() || !formData.category || !formData.content.trim()}
+              disabled={loading || !formData.author_name.trim() || !formData.title.trim() || !formData.category || !formData.content.trim() || formData.content === '<p></p>'}
             >
               {loading ? (mode === 'create' ? '등록 중...' : '수정 중...') : (mode === 'create' ? '게시글 등록' : '게시글 수정')}
             </Button>

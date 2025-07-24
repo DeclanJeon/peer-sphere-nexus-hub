@@ -1,3 +1,5 @@
+// src/pages/BoardCreate.tsx
+
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -5,7 +7,7 @@ import { communityApi } from '@/services/community.api';
 import { usePeermall } from '@/contexts/PeermallContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Post } from '@/types/post';
-import BoardForm from './BoardForm';
+import BoardForm from '@/components/common/community/BoardForm';
 
 const BoardCreate = () => {
   const navigate = useNavigate();
@@ -15,52 +17,22 @@ const BoardCreate = () => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (formData: {
+    author_name: string;
     title: string;
     category: string;
     content: string;
   }) => {
     if (!user) {
-      toast({
-        title: '오류',
-        description: '로그인이 필요합니다.',
-        variant: 'destructive',
-      });
+      toast({ title: '오류', description: '로그인이 필요합니다.', variant: 'destructive' });
       return;
     }
 
     setLoading(true);
 
     try {
-      const userDatas = Object.values(user);
-      const userUid = Object.values(userDatas[1])[0];
-
-      let peermallId: number;
-      let peermallName: string;
-      let peermallUrl: string | undefined;
-      let navigatePath: string;
-
-      if (currentPeermall?.id) {
-        peermallId = Number(currentPeermall.id);
-        peermallName = currentPeermall.name;
-        peermallUrl = params.url;
-        navigatePath = `/home/${params.url}/community`;
-      } else {
-        // Main community post
-        peermallId = 0; // Or a specific ID for main community posts
-        peermallName = '메인 커뮤니티';
-        peermallUrl = undefined; // No specific peermall URL
-        navigatePath = '/community';
-      }
-      
-      const newPost: Post = {
-        num: 0,
-        id: 0, // This will be assigned by the backend
-        peermall_name: peermallName,
-        peermall_url: peermallUrl,
-        peermall_id: peermallId,
-        peermall_owner_uid: '', // This might need to be fetched or set to null/empty for main community
-        user_uid: userUid,
-        author_name: user?.name || '익명',
+      const postData: Partial<Post> = {
+        user_uid: user.user_uid,
+        author_name: formData.author_name,
         title: formData.title,
         content: formData.content,
         category: formData.category,
@@ -71,22 +43,28 @@ const BoardCreate = () => {
         updated_at: new Date().toISOString(),
       };
 
-      await communityApi.createPost(newPost);
+      if (params.url) {
+        if (!currentPeermall) {
+          toast({ title: '오류', description: '피어몰 정보를 찾을 수 없습니다.', variant: 'destructive' });
+          setLoading(false);
+          return;
+        }
+        postData.peermall_id = Number(currentPeermall.id);
+        postData.peermall_url = params.url;
+      } else {
+        postData.peermall_id = null;
+        postData.peermall_url = null;
+      }
 
-      toast({
-        title: '게시글 작성 완료',
-        description: '새로운 게시글이 성공적으로 등록되었습니다!',
-      });
+      await communityApi.createPost(postData as Post);
+
+      toast({ title: '게시글 작성 완료', description: '새로운 게시글이 성공적으로 등록되었습니다!' });
       
-      navigate(navigatePath);
+      navigate(params.url ? `/home/${params.url}/community` : '/community');
       
     } catch (error) {
       console.error('게시글 작성 오류:', error);
-      toast({
-        title: '오류',
-        description: '게시글 작성에 실패했습니다.',
-        variant: 'destructive',
-      });
+      toast({ title: '오류', description: '게시글 작성에 실패했습니다.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -96,11 +74,16 @@ const BoardCreate = () => {
     navigate(-1);
   };
 
+  const initialDataForCreate = {
+    author_name: user?.name || user?.email || '',
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-3xl font-bold mb-8">게시글 작성</h1>
       <BoardForm
         mode="create"
+        initialData={initialDataForCreate}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         loading={loading}

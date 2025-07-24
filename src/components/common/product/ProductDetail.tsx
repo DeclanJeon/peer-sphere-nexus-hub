@@ -1,4 +1,3 @@
-// src/components/ProductDetail.tsx
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,7 +19,10 @@ import {
   MessageCircle,
   MoreVertical,
   ShoppingBag,
-  Lock
+  Lock,
+  HelpCircle,
+  AlertTriangle,
+  ExternalLink
 } from 'lucide-react';
 import { 
   AlertDialog,
@@ -40,7 +42,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
-import ProductModal from '@/components/common/product/ProductModal'; // 수정된 모달 import
+import ProductModal from '@/components/common/product/ProductModal';
 
 const ProductDetail = () => {
   const { url, id } = useParams<{ url: string; id: string }>();
@@ -50,7 +52,7 @@ const ProductDetail = () => {
   const { user, isAuthenticated } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 모달 상태
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // 로그인 여부 확인
   const isLoggedIn = isAuthenticated && user;
@@ -115,14 +117,14 @@ const ProductDetail = () => {
       toast({ title: "권한 없음", description: "본인이 등록한 상품만 수정할 수 있습니다.", variant: "destructive" });
       return;
     }
-    setIsEditModalOpen(true); // 모달 열기
+    setIsEditModalOpen(true);
   };
 
   // 수정 성공 후 처리
   const handleUpdateSuccess = () => {
     setIsEditModalOpen(false);
     setLoading(true);
-    fetchProduct(); // 데이터 새로고침
+    fetchProduct();
   };
 
   const handleStatusToggle = async () => {
@@ -158,6 +160,16 @@ const ProductDetail = () => {
         toast({ title: '링크 복사 완료', description: '상품 링크가 클립보드에 복사되었습니다.' });
       } catch (error) { console.error('클립보드 복사 실패:', error); }
     }
+  };
+
+  // ✨ [추가] 요구사항 6번: 신고하기 핸들러
+  const handleReport = () => {
+    if (!isLoggedIn) {
+      toast({ title: "로그인 필요", description: "신고하기 기능은 로그인 후 이용 가능합니다.", variant: "destructive" });
+      return;
+    }
+    // TODO: 신고하기 모달 또는 페이지로 이동
+    toast({ title: "준비 중", description: "신고하기 기능이 준비 중입니다." });
   };
 
   if (loading) {
@@ -211,25 +223,88 @@ const ProductDetail = () => {
           <div className="lg:col-span-7 space-y-6">
             <div>
               <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-              <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground"><span className="flex items-center gap-1"><Eye className="h-4 w-4" />조회 {(product.views || 0).toLocaleString()}</span><span className="flex items-center gap-1"><Heart className="h-4 w-4" />좋아요 {product.likes || 0}</span><span>등록일 {new Date(product.created_at).toLocaleDateString()}</span></div>
-              <div className="flex items-center gap-2 mb-4">{product.category && (<Badge variant="outline">{product.category}</Badge>)}{product.rating && (<div className="flex items-center gap-1"><Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /><span className="font-medium">{product.rating}</span></div>)}</div>
-              <div className="mb-6">{product.price && product.price !== product.selling_price && (<p className="text-lg text-muted-foreground line-through">{Number(product.price).toLocaleString()}원</p>)}<p className="text-3xl font-bold text-primary">{Number(product.selling_price || 0).toLocaleString()}원</p></div>
+              {/* ✨ [수정] 요구사항 5번: 좋아요 제거 */}
+              <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1"><Eye className="h-4 w-4" />조회 {(product.views || 0).toLocaleString()}</span>
+                <span>등록일 {new Date(product.created_at).toLocaleDateString()}</span>
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                {product.category && (<Badge variant="outline">{product.category}</Badge>)}
+                {product.rating && (<div className="flex items-center gap-1"><Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /><span className="font-medium">{product.rating}</span></div>)}
+              </div>
+              <div className="mb-6">
+                {product.price && product.price !== product.selling_price && (<p className="text-lg text-muted-foreground line-through">{Number(product.price).toLocaleString()}원</p>)}
+                <p className="text-3xl font-bold text-primary">{Number(product.selling_price || 0).toLocaleString()}원</p>
+              </div>
             </div>
 
+            {/* ✨ [추가] 요구사항 4번: 필수 표기 정보 표 */}
             <Card>
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-4">상품 정보</h3>
                 <div className="space-y-3">
-                  <div className="grid grid-cols-3 gap-4 py-2 border-b"><span className="font-medium text-muted-foreground">브랜드</span><span className="col-span-2">{product.brand || '정보 없음'}</span></div>
+                  <div className="grid grid-cols-3 gap-4 py-2 border-b">
+                    <span className="font-medium text-muted-foreground">브랜드</span>
+                    <span className="col-span-2 flex items-center gap-2">
+                      {product.brand || '정보 없음'}
+                      {/* ✨ [유지] 브랜드 홈페이지 버튼 */}
+                      {product.brand_website && (
+                        <Button asChild variant="ghost" size="sm" className="h-auto p-1">
+                          <a href={product.brand_website} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </Button>
+                      )}
+                    </span>
+                  </div>
                   <div className="grid grid-cols-3 gap-4 py-2 border-b"><span className="font-medium text-muted-foreground">제조사</span><span className="col-span-2">{product.manufacturer || '정보 없음'}</span></div>
+                  <div className="grid grid-cols-3 gap-4 py-2 border-b"><span className="font-medium text-muted-foreground">유통사</span><span className="col-span-2">{product.distributor || '정보 없음'}</span></div>
                   <div className="grid grid-cols-3 gap-4 py-2 border-b"><span className="font-medium text-muted-foreground">카테고리</span><span className="col-span-2">{product.category || '정보 없음'}</span></div>
                   <div className="grid grid-cols-3 gap-4 py-2 border-b"><span className="font-medium text-muted-foreground">상품 상태</span><span className="col-span-2"><Badge variant={product.status === 'active' ? 'default' : 'secondary'}>{product.status === 'active' ? '판매중' : '판매중단'}</Badge></span></div>
-                  {product.shipping_fee && (<div className="grid grid-cols-3 gap-4 py-2"><span className="font-medium text-muted-foreground">배송비</span><span className="col-span-2">{Number(product.shipping_fee).toLocaleString()}원</span></div>)}
+                  {product.shipping_fee !== undefined && (<div className="grid grid-cols-3 gap-4 py-2"><span className="font-medium text-muted-foreground">배송비</span><span className="col-span-2">{Number(product.shipping_fee) === 0 ? '무료배송' : `${Number(product.shipping_fee).toLocaleString()}원`}</span></div>)}
                 </div>
               </CardContent>
             </Card>
 
-            {isLoggedIn && isProductOwner() ? (
+            {/* 구매/문의 버튼 영역 */}
+            <div className="space-y-3">
+              {/* ✨ [추가] 요구사항 2번: 바로 구매 버튼 (product_url이 있을 때만 표시) */}
+              {product.product_url && (
+                <Button asChild className="w-full" size="lg">
+                  <a href={product.product_url} target="_blank" rel="noopener noreferrer">
+                    <ShoppingBag className="h-5 w-5 mr-2" />
+                    바로 구매
+                  </a>
+                </Button>
+              )}
+
+              <div className="flex gap-3">
+                {/* ✨ [추가] 요구사항 3번: 고객센터 버튼 */}
+                <Button asChild variant="outline" className="flex-1">
+                  <a href={`https://peerterra.com/one/channel/${currentPeermall?.url}`} target="_blank" rel="noopener noreferrer">
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    고객센터
+                  </a>
+                </Button>
+
+                {/* ✨ [추가] 요구사항 6번: 신고하기 버튼 */}
+                {/* <Button variant="outline" className="flex-1" onClick={handleReport}>
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  신고하기
+                </Button> */}
+              </div>
+
+              {/* ✨ [제거] 요구사항 5번: 좋아요 버튼 제거 */}
+              {/* 기존의 찜하기, 문의하기 버튼 영역 제거 */}
+
+              <Button variant="outline" size="sm" className="w-full" onClick={handleShare}>
+                <Share2 className="h-4 w-4 mr-2" />
+                공유
+              </Button>
+            </div>
+
+            {/* 관리자 기능 (소유자만 표시) */}
+            {isLoggedIn && isProductOwner() && (
               <div className="flex gap-3">
                 <Button className="flex-1" variant="outline" onClick={handleEdit}><Edit3 className="h-4 w-4 mr-2" />수정</Button>
                 <AlertDialog>
@@ -240,10 +315,7 @@ const ProductDetail = () => {
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
-            ) : (
-              <div className="space-y-3">{!isLoggedIn && (<div className="bg-muted/50 border rounded-lg p-4 text-center"><Lock className="h-5 w-5 mx-auto mb-2 text-muted-foreground" /><p className="text-sm text-muted-foreground mb-3">더 많은 기능을 이용하려면 로그인하세요</p><Button variant="outline" size="sm" onClick={() => navigate('/login')}>로그인</Button></div>)}<div className="flex gap-3"><Button className="flex-1" disabled={!isLoggedIn} onClick={() => {if (!isLoggedIn) {toast({title: "로그인 필요", description: "찜하기 기능은 로그인 후 이용 가능합니다."}); return;}}}><Heart className="h-4 w-4 mr-2" />찜하기</Button><Button className="flex-1" variant="outline" disabled={!isLoggedIn} onClick={() => {if (!isLoggedIn) {toast({title: "로그인 필요", description: "문의하기 기능은 로그인 후 이용 가능합니다."}); return;}}}><MessageCircle className="h-4 w-4 mr-2" />문의하기</Button></div></div>
             )}
-            <div className="flex gap-2"><Button variant="outline" size="sm" className="flex-1" onClick={handleShare}><Share2 className="h-4 w-4 mr-2" />공유</Button></div>
           </div>
         </div>
 

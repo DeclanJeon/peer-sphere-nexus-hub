@@ -10,6 +10,8 @@ import { RichEditor } from '@/components/ui/rich-editor';
 import { EventBase, CreateEventPayload, UpdateEventPayload } from '@/types/event';
 import { toast } from '@/hooks/use-toast';
 import { Calendar, Clock, MapPin, Tag, Image as ImageIcon } from 'lucide-react';
+import { useLocation } from 'react-router-dom'; // 추가
+import { useAuth } from '@/hooks/useAuth'; // 추가
 
 interface EventFormProps {
   mode: 'create' | 'edit';
@@ -20,6 +22,8 @@ interface EventFormProps {
 }
 
 const EventForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: EventFormProps) => {
+  const location = useLocation(); // 추가
+  const { user } = useAuth(); // 추가
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -84,6 +88,12 @@ const EventForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: E
     data.append('event_start_date', formData.event_start_date);
     data.append('event_end_date', formData.event_end_date);
     data.append('category', formData.category);
+
+    // 유저 정보 추가
+    if (user?.user_uid) {
+      data.append('user_uid', user.user_uid);
+    }
+    e
     if (imageFile) {
       data.append('image', imageFile);
     }
