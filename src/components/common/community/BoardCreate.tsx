@@ -19,15 +19,6 @@ const BoardCreate = () => {
     category: string;
     content: string;
   }) => {
-    if (!currentPeermall?.id) {
-      toast({
-        title: '오류',
-        description: '피어몰 정보를 찾을 수 없습니다.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     if (!user) {
       toast({
         title: '오류',
@@ -42,13 +33,31 @@ const BoardCreate = () => {
     try {
       const userDatas = Object.values(user);
       const userUid = Object.values(userDatas[1])[0];
+
+      let peermallId: number;
+      let peermallName: string;
+      let peermallUrl: string | undefined;
+      let navigatePath: string;
+
+      if (currentPeermall?.id) {
+        peermallId = Number(currentPeermall.id);
+        peermallName = currentPeermall.name;
+        peermallUrl = params.url;
+        navigatePath = `/home/${params.url}/community`;
+      } else {
+        // Main community post
+        peermallId = 0; // Or a specific ID for main community posts
+        peermallName = '메인 커뮤니티';
+        peermallUrl = undefined; // No specific peermall URL
+        navigatePath = '/community';
+      }
       
       const newPost: Post = {
-        id: 0,
-        peermall_name: currentPeermall.name,
-        peermall_url: params.url,
-        peermall_id: Number(currentPeermall.id),
-        peermall_owner_uid: '',
+        id: 0, // This will be assigned by the backend
+        peermall_name: peermallName,
+        peermall_url: peermallUrl,
+        peermall_id: peermallId,
+        peermall_owner_uid: '', // This might need to be fetched or set to null/empty for main community
         user_uid: userUid,
         author_name: user?.name || '익명',
         title: formData.title,
@@ -68,7 +77,7 @@ const BoardCreate = () => {
         description: '새로운 게시글이 성공적으로 등록되었습니다!',
       });
       
-      navigate(`/home/${params.url}/community`);
+      navigate(navigatePath);
       
     } catch (error) {
       console.error('게시글 작성 오류:', error);
