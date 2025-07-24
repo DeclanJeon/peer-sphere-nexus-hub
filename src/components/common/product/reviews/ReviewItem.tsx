@@ -1,8 +1,10 @@
 // Frontend/src/pages/user-peermall/products/reviews/ReviewItem.tsx
+import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Star, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Star, MoreVertical, Edit, Trash2, Heart, AlertTriangle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { Review } from './types';
 import { ReviewComments } from './ReviewComments';
 
@@ -12,6 +14,21 @@ interface ReviewItemProps {
 }
 
 export const ReviewItem = ({ review, isOwner }: ReviewItemProps) => {
+  const [isLiked, setIsLiked] = useState(false);
+  const { toast } = useToast();
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    // TODO: API 호출
+  };
+
+  const handleReport = () => {
+    toast({
+      title: '신고하기',
+      description: '신고가 접수되었습니다. 검토 후 조치하겠습니다.'
+    });
+  };
+
   return (
     <div className="py-4 border-b last:border-b-0">
       <div className="flex items-start gap-4">
@@ -75,6 +92,26 @@ export const ReviewItem = ({ review, isOwner }: ReviewItemProps) => {
               ))}
             </div>
           )}
+
+          {/* 리뷰 액션 버튼 */}
+          <div className="flex items-center gap-2 mt-4 pt-3 border-t">
+            <Button 
+              variant={isLiked ? "default" : "ghost"} 
+              size="sm"
+              onClick={handleLike}
+            >
+              <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
+              좋아요 {review.helpful || 0}
+            </Button>
+            
+            {!isOwner && (
+              <Button variant="ghost" size="sm" onClick={handleReport}>
+                <AlertTriangle className="h-4 w-4 mr-1" />
+                신고하기
+              </Button>
+            )}
+          </div>
+
           <ReviewComments comments={review.comments} />
         </div>
       </div>

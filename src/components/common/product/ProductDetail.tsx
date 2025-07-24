@@ -43,6 +43,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductModal from '@/components/common/product/ProductModal';
+import { ProductReviews } from '@/components/common/product/reviews/ProductReviews';
+import { RecommendedProducts } from '@/components/common/product/RecommendedProducts';
 
 const ProductDetail = () => {
   const { url, id } = useParams<{ url: string; id: string }>();
@@ -53,6 +55,7 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
   // 로그인 여부 확인
   const isLoggedIn = isAuthenticated && user;
@@ -296,10 +299,22 @@ const ProductDetail = () => {
               {/* ✨ [제거] 요구사항 5번: 좋아요 버튼 제거 */}
               {/* 기존의 찜하기, 문의하기 버튼 영역 제거 */}
 
-              <Button variant="outline" size="sm" className="w-full" onClick={handleShare}>
-                <Share2 className="h-4 w-4 mr-2" />
-                공유
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  variant={isLiked ? "default" : "outline"} 
+                  size="sm" 
+                  className="flex-1" 
+                  onClick={() => setIsLiked(!isLiked)}
+                >
+                  <Heart className={`h-4 w-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
+                  좋아요 {product.likes ? `(${product.likes})` : ''}
+                </Button>
+
+                <Button variant="outline" size="sm" className="flex-1" onClick={handleShare}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  공유
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -308,6 +323,16 @@ const ProductDetail = () => {
           <Card><CardContent className="p-6"><h3 className="text-xl font-semibold mb-4">상품 상세 설명</h3>{product.description ? (<div className="prose max-w-none text-muted-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description }} />) : (<p className="text-muted-foreground">상세 설명이 없습니다.</p>)}</CardContent></Card>
           {product.features && product.features.length > 0 && (<Card><CardContent className="p-6"><h3 className="text-xl font-semibold mb-4">상품 특징</h3><ul className="space-y-2">{product.features.map((feature, index) => (<li key={index} className="flex items-center gap-2"><span className="w-2 h-2 bg-primary rounded-full"></span><span>{feature}</span></li>))}</ul></CardContent></Card>)}
           {product.specifications && Object.keys(product.specifications).length > 0 && (<Card><CardContent className="p-6"><h3 className="text-xl font-semibold mb-4">상품 사양</h3><div className="space-y-3">{Object.entries(product.specifications).map(([key, value]) => (<div key={key} className="flex flex-col sm:flex-row gap-2"><dt className="font-medium text-muted-foreground min-w-[120px]">{key}</dt><dd className="flex-1">{String(value)}</dd></div>))}</div></CardContent></Card>)}
+          
+          {/* 상품 리뷰 섹션 */}
+          <ProductReviews 
+            productId={id!} 
+            averageRating={product.rating || 0} 
+            totalReviews={product.reviewCount || 0} 
+          />
+          
+          {/* 추천 상품 섹션 */}
+          <RecommendedProducts currentProductId={id!} peermallId={product.peermallId} />
         </div>
       </div>
       
