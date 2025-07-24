@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { usePeermall } from '@/contexts/PeermallContext';
-import ProductCreateModal from '@/components/common/ProductCreateModal';
+import ProductModal from '@/components/common/product/ProductModal';
 
 interface UserPeermallLayoutProps {
   children: ReactNode;
@@ -216,10 +216,11 @@ const UserPeermallLayout = ({ children }: UserPeermallLayoutProps) => {
       </footer>
 
       {/* 제품 등록 모달 */}
-      <ProductCreateModal
+      <ProductModal
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
         onSuccess={handleProductCreateSuccess}
+        mode="create"
       />
     </div>
   );
