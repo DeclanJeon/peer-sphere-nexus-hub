@@ -9,6 +9,7 @@ import { usePeermall } from '@/contexts/PeermallContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Product } from '@/types/product';
 import ProductDetailTabs from '@/components/common/product/reviews/ProductDetailTabs';
+import BoardList from '@/components/common/community/BoardList';
 import {
   ArrowLeft,
   Star,
@@ -18,7 +19,9 @@ import {
   MoreVertical,
   ShoppingBag,
   HelpCircle,
-  ExternalLink
+  ExternalLink,
+  MessageSquare,
+  Plus
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -39,6 +42,11 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [productMessages] = useState([
+    { id: 1, title: "맛있는 요리 먹고 싶어요", author: "김푸드", created_at: "2024-01-15", views: 45, likes: 8, category: "맛집", comment_count: 12 },
+    { id: 2, title: "저랑 만나실 분", author: "이만남", created_at: "2024-01-14", views: 67, likes: 15, category: "모임", comment_count: 25 },
+    { id: 3, title: "이 상품 후기 궁금해요", author: "박궁금", created_at: "2024-01-13", views: 89, likes: 22, category: "후기", comment_count: 18 }
+  ]);
 
   // 로그인 여부 확인
   const isLoggedIn = isAuthenticated && user;
@@ -158,6 +166,20 @@ const ProductDetail = () => {
     toast({ title: "준비 중", description: "신고하기 기능이 준비 중입니다." });
   };
 
+  // 메시지 클릭 핸들러
+  const handleMessageClick = (messageId: number) => {
+    navigate(`/home/${url}/product/${id}/channel/${messageId}`);
+  };
+
+  // 메시지 생성 핸들러
+  const handleCreateMessage = () => {
+    if (!isLoggedIn) {
+      toast({ title: "로그인 필요", description: "메시지 작성은 로그인 후 이용 가능합니다.", variant: "destructive" });
+      return;
+    }
+    navigate(`/home/${url}/product/${id}/message/create`);
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -205,6 +227,60 @@ const ProductDetail = () => {
 
           {/* 오른쪽: 상품 정보 및 테이블 */}
           <div className="lg:col-span-7 space-y-6">
+            
+            {/* 상품 메시지 섹션 */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" />
+                    상품 메시지
+                  </h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleCreateMessage}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    메시지 작성
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {productMessages.map((message) => (
+                    <div 
+                      key={message.id}
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() => handleMessageClick(message.id)}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium">{message.title}</span>
+                          <Badge variant="outline" className="text-xs">{message.category}</Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {message.author} · {new Date(message.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Eye className="h-4 w-4" />
+                          {message.views}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="h-4 w-4" />
+                          {message.likes}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MessageSquare className="h-4 w-4" />
+                          {message.comment_count}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
             <div>
               <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
               {/* ✨ [수정] 요구사항 5번: 좋아요 제거 */}

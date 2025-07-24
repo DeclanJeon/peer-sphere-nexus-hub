@@ -39,6 +39,8 @@ import EventDetail from "@/components/common/event/EventDetail";
 import EventCreate from "@/components/common/event/EventCreate";
 import EventPage from "@/pages/common/EventPage";
 import ProductDetail from "./components/common/product/ProductDetail";
+import ProductChannelPage from "./pages/common/ProductChannelPage";
+import ProductMessageCreate from "./pages/common/ProductMessageCreate";
 import { ProfileManagement } from "./components/admin/ProfileManagement";
 import { PeermallManagement } from "./components/admin/PeermallManagement";
 import { ProductManagement } from "./components/admin/ProductManagement";
@@ -90,6 +92,8 @@ const App = () => (
                 <Route index element={<UserPeermallHome />} />
                 <Route path="products" element={<ProductPage />} />
                 <Route path="product/:id" element={<ProductDetail />} />
+                <Route path="product/:productId/channel/:channelId" element={<ProductChannelPage />} />
+                <Route path="product/:productId/message/create" element={<ProtectedRoute><ProductMessageCreate /></ProtectedRoute>} />
                 
                 <Route path="community" element={<CommunityPage />} />
                 <Route path="community/create" element={<ProtectedRoute><BoardCreate /></ProtectedRoute>} />
