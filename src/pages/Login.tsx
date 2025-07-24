@@ -171,7 +171,7 @@ const Login = () => {
       const deviceInfo = getDeviceInfo();
       
       // 백엔드의 resend-otp 엔드포인트 호출
-      const response = await apiClient.post('/users/resend-otp', {
+      const response = await apiClient.post('/users/login/resend-otp', {
         email,
         deviceInfo,
         purpose: 'login' // 로그인 목적임을 명시
