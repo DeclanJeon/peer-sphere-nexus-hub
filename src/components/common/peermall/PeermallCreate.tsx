@@ -164,6 +164,7 @@ const PeermallCreate = () => {
       name: '피어몰 이름',
       url: '피어몰 주소',
       referrerCode: '추천인 코드',
+      category: '카테고리'
     };
 
     for (const [field, label] of Object.entries(requiredFields)) {
@@ -390,6 +391,23 @@ const PeermallCreate = () => {
                 />
               </div>
 
+              {/* 카테고리 */}
+              <div className="space-y-2 mb-4">
+                <Label htmlFor="category">카테고리 *</Label>
+                <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+                  <SelectTrigger className="transition-all duration-200 focus:scale-[1.01] bg-white">
+                    <SelectValue placeholder="카테고리를 선택해주세요" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* 추천인 코드 */}
               <div className="space-y-2">
                 <Label htmlFor="referralCode">추천인 코드 *</Label>
@@ -517,23 +535,6 @@ const PeermallCreate = () => {
                     className="bg-white"
                   />
                 </div>
-              </div>
-              
-              {/* 카테고리 */}
-              <div className="space-y-2 mt-4">
-                <Label htmlFor="category">카테고리</Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                  <SelectTrigger className="transition-all duration-200 focus:scale-[1.01] bg-white">
-                    <SelectValue placeholder="카테고리를 선택해주세요 (선택사항)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 

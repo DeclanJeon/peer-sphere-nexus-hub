@@ -203,8 +203,8 @@ const ProductDetail = () => {
                 <DropdownMenuTrigger asChild><Button variant="ghost" size="sm"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={handleStatusToggle}>{product.status === 'active' ? '판매 중단' : '판매 재개'}</DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleEdit}><Edit3 className="h-4 w-4 mr-2" />수정</DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" />삭제</DropdownMenuItem>
+                  {/* <DropdownMenuItem onClick={handleEdit}><Edit3 className="h-4 w-4 mr-2" />수정</DropdownMenuItem> */}
+                  {/* <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" />삭제</DropdownMenuItem> */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -268,7 +268,6 @@ const ProductDetail = () => {
 
             {/* 구매/문의 버튼 영역 */}
             <div className="space-y-3">
-              {/* ✨ [추가] 요구사항 2번: 바로 구매 버튼 (product_url이 있을 때만 표시) */}
               {product.product_url && (
                 <Button asChild className="w-full" size="lg">
                   <a href={product.product_url} target="_blank" rel="noopener noreferrer">
@@ -302,20 +301,6 @@ const ProductDetail = () => {
                 공유
               </Button>
             </div>
-
-            {/* 관리자 기능 (소유자만 표시) */}
-            {isLoggedIn && isProductOwner() && (
-              <div className="flex gap-3">
-                <Button className="flex-1" variant="outline" onClick={handleEdit}><Edit3 className="h-4 w-4 mr-2" />수정</Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild><Button variant="destructive" className="flex-1"><Trash2 className="h-4 w-4 mr-2" />삭제</Button></AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader><AlertDialogTitle>상품을 삭제하시겠습니까?</AlertDialogTitle><AlertDialogDescription>이 작업은 되돌릴 수 없습니다. 상품이 영구적으로 삭제됩니다.</AlertDialogDescription></AlertDialogHeader>
-                    <AlertDialogFooter><AlertDialogCancel>취소</AlertDialogCancel><AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">삭제</AlertDialogAction></AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            )}
           </div>
         </div>
 

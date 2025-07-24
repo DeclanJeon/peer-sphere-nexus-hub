@@ -193,10 +193,10 @@ const PeermallPage = () => {
       </Card>
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+        {/* <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
           <TabsTrigger value="new">신규 피어몰</TabsTrigger>
           <TabsTrigger value="best">베스트 피어몰</TabsTrigger>
-        </TabsList>
+        </TabsList> */}
 
         <TabsContent value="best" className="space-y-6">
           <Card>
