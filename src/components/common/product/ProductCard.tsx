@@ -135,11 +135,11 @@ const ProductCard = ({ product, showPeermallInfo = false, mode = 'full' }: Produ
                   BEST
                 </Badge>
               )}
-              {product.discount && product.discount > 0 && (
+              {/* {product.discount && product.discount > 0 && (
                 <Badge variant="destructive">
                   {product.discount}%
                 </Badge>
-              )}
+              )} */}
             </div>
           </div>
           
