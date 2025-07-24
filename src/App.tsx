@@ -49,6 +49,7 @@ import { EventManagement } from "./components/admin/EventManagement";
 import { OverviewSection } from "./components/admin/OverviewSection";
 import { CommentManagement } from "./components/admin/CommentManagement";
 import { ReviewManagement } from "./components/admin/ReviewManagement";
+import ProductChannelPostDetail from "./pages/common/ProductChannelPostDetail";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => (
               <Route path="/community" element={<MainLayout><CommunityPage /></MainLayout>} />
               <Route path="/community/create" element={<ProtectedRoute><MainLayout><BoardCreate /></MainLayout></ProtectedRoute>} />
               <Route path="community/:id" element={<ProtectedRoute><MainLayout><BoardDetail /></MainLayout></ProtectedRoute>} />
+              
 
               <Route path="/events" element={<MainLayout><EventPage /></MainLayout>} />
               <Route path="/event/create" element={<ProtectedRoute><MainLayout><EventCreate /></MainLayout></ProtectedRoute>} />
@@ -93,6 +95,7 @@ const App = () => (
                 <Route path="products" element={<ProductPage />} />
                 <Route path="product/:id" element={<ProductDetail />} />
                 <Route path="product/:productId/channel/:channelId" element={<ProductChannelPage />} />
+                <Route path="product/:productId/channel/:channelId/post/:postId" element={<ProductChannelPostDetail />} />
                 <Route path="product/:productId/message/create" element={<ProtectedRoute><ProductMessageCreate /></ProtectedRoute>} />
                 
                 <Route path="community" element={<CommunityPage />} />

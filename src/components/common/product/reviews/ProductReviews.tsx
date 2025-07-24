@@ -1,11 +1,13 @@
 // Frontend/src/components/common/product/reviews/ProductReviews.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { reviewApi, Review, ReviewStats } from '@/services/review.api';
+
 import { 
   Star, 
   ThumbsUp, 
@@ -14,7 +16,8 @@ import {
   Edit,
   Trash2,
   Send,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Loader2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -31,95 +34,27 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-
-// 타입 정의
-interface Review {
-  id: string;
-  author: string;
-  avatar?: string;
-  rating: number;
-  content: string;
-  createdAt: string;
-  images?: string[];
-  likes?: number;
-  isLiked?: boolean;
-  comments: Comment[];
-}
-
-interface Comment {
-  id: string;
-  author: string;
-  avatar?: string;
-  content: string;
-  createdAt: string;
-}
-
-// Mock 데이터
-const mockReviews: Review[] = [
-  {
-    id: 'review-1',
-    author: '김리뷰',
-    avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
-    rating: 5,
-    content: '정말 좋은 상품이에요! 품질도 만족스럽고 배송도 빨랐습니다. 강력 추천합니다! 특히 디자인이 세련되고 실용적이어서 매우 만족하고 있어요.',
-    createdAt: '2024-07-20T10:00:00Z',
-    images: ['/placeholder-product.png', '/placeholder-product.png'],
-    likes: 12,
-    isLiked: false,
-    comments: [
-      {
-        id: 'comment-1-1',
-        author: '판매자',
-        avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704e',
-        content: '소중한 리뷰 감사합니다! 앞으로도 좋은 상품으로 보답하겠습니다.',
-        createdAt: '2024-07-20T11:00:00Z',
-      },
-    ],
-  },
-  {
-    id: 'review-2',
-    author: '박코멘트',
-    avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704f',
-    rating: 4,
-    content: '디자인이 예쁘고 마음에 들어요. 다만, 사이즈가 조금 작은 것 같네요. 그래도 전반적으로 만족합니다.',
-    createdAt: '2024-07-19T15:30:00Z',
-    likes: 8,
-    isLiked: true,
-    comments: [
-      {
-        id: 'comment-2-1',
-        author: '이구매자',
-        avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704g',
-        content: '저도 같은 생각이에요. 사이즈 표를 더 자세히 봤으면 좋았을 것 같아요.',
-        createdAt: '2024-07-19T16:00:00Z',
-      },
-    ],
-  },
-  {
-    id: 'review-3',
-    author: 'CurrentUser',
-    avatar: 'https://github.com/shadcn.png',
-    rating: 5,
-    content: '내가 쓴 리뷰입니다. 수정과 삭제가 가능해야 합니다. 상품 품질이 정말 좋네요!',
-    createdAt: '2024-07-21T09:00:00Z',
-    likes: 3,
-    isLiked: false,
-    comments: [],
-  },
-];
+import { Progress } from '@/components/ui/progress';
 
 // 별점 컴포넌트
 const StarRating = ({ 
   rating, 
   onRatingChange, 
-  readonly = false 
+  readonly = false,
+  size = 'default'
 }: { 
   rating: number; 
   onRatingChange?: (rating: number) => void; 
-  readonly?: boolean; 
+  readonly?: boolean;
+  size?: 'small' | 'default' | 'large';
 }) => {
+  const sizeClasses = {
+    small: 'h-4 w-4',
+    default: 'h-5 w-5',
+    large: 'h-6 w-6'
+  };
+
   return (
     <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -131,7 +66,7 @@ const StarRating = ({
           className={`${readonly ? 'cursor-default' : 'cursor-pointer hover:scale-110'} transition-transform`}
         >
           <Star
-            className={`h-5 w-5 ${
+            className={`${sizeClasses[size]} ${
               star <= rating
                 ? 'fill-yellow-400 text-yellow-400'
                 : 'text-muted-foreground'
@@ -144,7 +79,7 @@ const StarRating = ({
 };
 
 // 리뷰 작성 폼 컴포넌트
-const ReviewForm = () => {
+const ReviewForm = ({ productId, onSuccess }: { productId: string; onSuccess: () => void }) => {
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState('');
   const [images, setImages] = useState<File[]>([]);
@@ -185,8 +120,16 @@ const ReviewForm = () => {
     setIsSubmitting(true);
     
     try {
-      // [검증되지 않음] 실제 API 호출 로직
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 임시 지연
+      const formData = new FormData();
+      formData.append('productId', productId);
+      formData.append('rating', rating.toString());
+      formData.append('content', content);
+      
+      images.forEach((image) => {
+        formData.append('images', image);
+      });
+
+      await reviewApi.createReview(formData);
       
       toast({
         title: '리뷰 작성 완료',
@@ -197,6 +140,9 @@ const ReviewForm = () => {
       setRating(0);
       setContent('');
       setImages([]);
+      
+      // 리뷰 목록 새로고침
+      onSuccess();
       
     } catch (error) {
       console.error('리뷰 작성 실패:', error);
@@ -296,7 +242,10 @@ const ReviewForm = () => {
 
       <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSubmitting ? (
-          <>작성 중...</>
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            작성 중...
+          </>
         ) : (
           <>
             <Send className="h-4 w-4 mr-2" />
@@ -309,17 +258,26 @@ const ReviewForm = () => {
 };
 
 // 개별 리뷰 컴포넌트
-const ReviewItem = ({ review }: { review: Review }) => {
+const ReviewItem = ({ 
+  review, 
+  onUpdate, 
+  onDelete 
+}: { 
+  review: Review; 
+  onUpdate: () => void;
+  onDelete: () => void;
+}) => {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
-  const [isLiked, setIsLiked] = useState(review.isLiked || false);
-  const [likes, setLikes] = useState(review.likes || 0);
+  const [isLiked, setIsLiked] = useState(review.isLiked);
+  const [likes, setLikes] = useState(review.likeCount || 0);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
-  const isOwner = user?.name === review.author || user?.email === review.author;
+  const isOwner = user?.id === review.userId;
 
-  const handleLike = () => {
+  const handleLike = async () => {
     if (!isAuthenticated) {
       toast({
         title: '로그인 필요',
@@ -329,11 +287,21 @@ const ReviewItem = ({ review }: { review: Review }) => {
       return;
     }
 
-    setIsLiked(!isLiked);
-    setLikes(prev => isLiked ? prev - 1 : prev + 1);
+    try {
+      const result = await reviewApi.toggleLike(review.id);
+      setIsLiked(result.isLiked);
+      setLikes(prev => result.isLiked ? prev + 1 : prev - 1);
+    } catch (error) {
+      console.error('좋아요 실패:', error);
+      toast({
+        title: '오류',
+        description: '좋아요 처리 중 오류가 발생했습니다.',
+        variant: 'destructive'
+      });
+    }
   };
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!isAuthenticated) {
       toast({
         title: '로그인 필요',
@@ -345,44 +313,63 @@ const ReviewItem = ({ review }: { review: Review }) => {
 
     if (!newComment.trim()) return;
 
-    // [검증되지 않음] 실제 댓글 추가 로직
-    toast({
-      title: '댓글 작성 완료',
-      description: '댓글이 성공적으로 작성되었습니다.'
-    });
-    setNewComment('');
+    try {
+      await reviewApi.createComment(review.id, newComment);
+      toast({
+        title: '댓글 작성 완료',
+        description: '댓글이 성공적으로 작성되었습니다.'
+      });
+      setNewComment('');
+      onUpdate(); // 리뷰 목록 새로고침
+    } catch (error) {
+      console.error('댓글 작성 실패:', error);
+      toast({
+        title: '댓글 작성 실패',
+        description: '댓글 작성 중 오류가 발생했습니다.',
+        variant: 'destructive'
+      });
+    }
   };
 
-  const handleEdit = () => {
-    toast({
-      title: '준비 중',
-      description: '리뷰 수정 기능이 준비 중입니다.'
-    });
-  };
-
-  const handleDelete = () => {
-    toast({
-      title: '리뷰 삭제 완료',
-      description: '리뷰가 성공적으로 삭제되었습니다.'
-    });
+  const handleDelete = async () => {
+    try {
+      await reviewApi.deleteReview(review.id);
+      toast({
+        title: '리뷰 삭제 완료',
+        description: '리뷰가 성공적으로 삭제되었습니다.'
+      });
+      onDelete();
+    } catch (error) {
+      console.error('리뷰 삭제 실패:', error);
+      toast({
+        title: '리뷰 삭제 실패',
+        description: '리뷰 삭제 중 오류가 발생했습니다.',
+        variant: 'destructive'
+      });
+    }
   };
 
   return (
     <div className="border-b border-border pb-6 last:border-b-0">
       <div className="flex items-start gap-4">
         <Avatar className="w-10 h-10">
-          <AvatarImage src={review.avatar} alt={review.author} />
-          <AvatarFallback>{review.author[0]}</AvatarFallback>
+          <AvatarImage src={review.authorAvatar} alt={review.authorName} />
+          <AvatarFallback>{review.authorName}</AvatarFallback>
         </Avatar>
         
         <div className="flex-1 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="font-medium">{review.author}</span>
-              <StarRating rating={review.rating} readonly />
+              <span className="font-medium">{review.authorName}</span>
+              <StarRating rating={review.rating} readonly size="small" />
               <span className="text-sm text-muted-foreground">
                 {new Date(review.createdAt).toLocaleDateString()}
               </span>
+              {review.isVerifiedPurchase && (
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                  구매 인증
+                </span>
+              )}
             </div>
             
             {isOwner && (
@@ -393,32 +380,17 @@ const ReviewItem = ({ review }: { review: Review }) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleEdit}>
+                  <DropdownMenuItem onClick={() => toast({ title: '준비 중', description: '리뷰 수정 기능이 준비 중입니다.' })}>
                     <Edit className="h-4 w-4 mr-2" />
                     수정
                   </DropdownMenuItem>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        삭제
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>리뷰를 삭제하시겠습니까?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          삭제된 리뷰는 복구할 수 없습니다.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>취소</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete}>
-                          삭제
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <DropdownMenuItem 
+                    className="text-destructive"
+                    onClick={() => setIsDeleteOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    삭제
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -447,7 +419,7 @@ const ReviewItem = ({ review }: { review: Review }) => {
               className={`gap-1 ${isLiked ? 'text-primary' : 'text-muted-foreground'}`}
             >
               <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-              좋아요 {likes > 0 && `(${likes})`}
+              도움이 돼요 {likes > 0 && `(${likes})`}
             </Button>
             
             <Button
@@ -466,12 +438,17 @@ const ReviewItem = ({ review }: { review: Review }) => {
               {review.comments.map((comment) => (
                 <div key={comment.id} className="flex items-start gap-3">
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src={comment.avatar} alt={comment.author} />
-                    <AvatarFallback>{comment.author[0]}</AvatarFallback>
+                    <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
+                    <AvatarFallback>{comment.authorName[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm">{comment.author}</span>
+                      <span className="font-medium text-sm">{comment.authorName}</span>
+                      {comment.isSellerReply && (
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                          판매자
+                        </span>
+                      )}
                       <span className="text-xs text-muted-foreground">
                         {new Date(comment.createdAt).toLocaleDateString()}
                       </span>
@@ -503,6 +480,23 @@ const ReviewItem = ({ review }: { review: Review }) => {
           )}
         </div>
       </div>
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>리뷰를 삭제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              삭제된 리뷰는 복구할 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
@@ -519,43 +513,114 @@ export const ProductReviews = ({
   averageRating, 
   totalReviews 
 }: ProductReviewsProps) => {
-  const [reviews] = useState<Review[]>(mockReviews);
-  const [sortBy, setSortBy] = useState<'latest' | 'rating' | 'likes'>('latest');
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [stats, setStats] = useState<ReviewStats | null>(null);
+  const [sortBy, setSortBy] = useState<'latest' | 'rating' | 'helpful'>('latest');
+  const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const sortedReviews = [...reviews].sort((a, b) => {
-    switch (sortBy) {
-      case 'rating':
-        return b.rating - a.rating;
-      case 'likes':
-        return (b.likes || 0) - (a.likes || 0);
-      default:
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  useEffect(() => {
+    fetchReviews();
+    fetchStats();
+  }, [productId, sortBy, refreshKey]);
+
+  const fetchReviews = async () => {
+    try {
+      setLoading(true);
+      const data = await reviewApi.getReviews({
+        productId,
+        sortBy,
+        limit: 20
+      });
+      setReviews(data);
+    } catch (error) {
+      console.error('리뷰 조회 실패:', error);
+    } finally {
+      setLoading(false);
     }
-  });
+  };
+
+  const fetchStats = async () => {
+    try {
+      const data = await reviewApi.getReviewStats(productId);
+      setStats(data);
+    } catch (error) {
+      console.error('리뷰 통계 조회 실패:', error);
+    }
+  };
+
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* 리뷰 통계 헤더 */}
-      <div className="flex items-center justify-between p-6 bg-muted/50 rounded-lg">
-        <div>
-          <h3 className="text-xl font-semibold mb-2">
-            고객 리뷰 ({totalReviews})
-          </h3>
-          <p className="text-muted-foreground">
-            다른 고객들의 솔직한 후기를 확인해보세요
-          </p>
-        </div>
-        <div className="text-right">
-          <div className="flex items-center gap-2 mb-1">
-            <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
-            <span className="text-2xl font-bold">{averageRating}</span>
-            <span className="text-muted-foreground">/ 5.0</span>
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-muted/50 rounded-lg">
+          <div>
+            <h3 className="text-xl font-semibold mb-4">
+              고객 리뷰 ({stats.totalCount})
+            </h3>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-2">
+                <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
+                <span className="text-3xl font-bold">{stats.averageRating}</span>
+                <span className="text-muted-foreground">/ 5.0</span>
+              </div>
+            </div>
+            <p className="text-muted-foreground">
+              {stats.totalCount}개의 리뷰 기준
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {totalReviews}개의 리뷰
-          </p>
+          
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm w-12">5점</span>
+              <Progress value={(stats.fiveStar / stats.totalCount) * 100} className="flex-1" />
+              <span className="text-sm text-muted-foreground w-12 text-right">
+                {stats.fiveStar}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm w-12">4점</span>
+              <Progress value={(stats.fourStar / stats.totalCount) * 100} className="flex-1" />
+              <span className="text-sm text-muted-foreground w-12 text-right">
+                {stats.fourStar}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm w-12">3점</span>
+              <Progress value={(stats.threeStar / stats.totalCount) * 100} className="flex-1" />
+              <span className="text-sm text-muted-foreground w-12 text-right">
+                {stats.threeStar}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm w-12">2점</span>
+              <Progress value={(stats.twoStar / stats.totalCount) * 100} className="flex-1" />
+              <span className="text-sm text-muted-foreground w-12 text-right">
+                {stats.twoStar}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm w-12">1점</span>
+              <Progress value={(stats.oneStar / stats.totalCount) * 100} className="flex-1" />
+              <span className="text-sm text-muted-foreground w-12 text-right">
+                {stats.oneStar}
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 리뷰 작성 폼 */}
       <Card>
@@ -563,7 +628,7 @@ export const ProductReviews = ({
           <CardTitle className="text-lg">리뷰 작성하기</CardTitle>
         </CardHeader>
         <CardContent>
-          <ReviewForm />
+          <ReviewForm productId={productId} onSuccess={handleRefresh} />
         </CardContent>
       </Card>
 
@@ -581,16 +646,21 @@ export const ProductReviews = ({
               >
                 <option value="latest">최신순</option>
                 <option value="rating">별점순</option>
-                <option value="likes">좋아요순</option>
+                <option value="helpful">도움순</option>
               </select>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          {sortedReviews.length > 0 ? (
+          {reviews.length > 0 ? (
             <div className="space-y-6">
-              {sortedReviews.map((review) => (
-                <ReviewItem key={review.id} review={review} />
+              {reviews.map((review) => (
+                <ReviewItem 
+                  key={review.id} 
+                  review={review} 
+                  onUpdate={handleRefresh}
+                  onDelete={handleRefresh}
+                />
               ))}
             </div>
           ) : (
