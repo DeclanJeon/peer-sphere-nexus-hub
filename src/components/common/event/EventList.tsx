@@ -55,8 +55,6 @@ const EventList = ({
       try {
         const data: EventBase[] = await eventApi.getEventsByPeermallId(peermallId);
 
-        console.log(data)
-
         setInternalEvents(data.map(processEventData));
       } catch (err) {
         setError('이벤트를 불러오는데 실패했습니다.');

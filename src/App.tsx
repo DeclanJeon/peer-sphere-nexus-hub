@@ -20,45 +20,33 @@ import MainPage from "@/pages/main/MainPage";
 import UserPeermallPage from "@/pages/user-peermall/UserPeermallPage";
 import UserPeermallHome from "@/pages/user-peermall/UserPeermallHome";
 
-// User Peermall Product Pages
-import UserProductDetail from "@/pages/user-peermall/products/UserProductDetail";
-
 // Shared Pages (used by both main and user peermalls)
 
-import BestPeermalls from "@/pages/main/peermalls/BestPeermalls";
-import NewPeermalls from "@/pages/main/peermalls/NewPeermalls";
-
-// Product pages
-import ProductList from "@/pages/main/products/ProductList";
-import NewProducts from "@/pages/main/products/NewProducts";
-import BestProducts from "@/pages/main/products/BestProducts";
-
 // Community pages
-import Community from "@/pages/main/community/Community";
 import BoardDetail from "@/components/common/community/BoardDetail";
 
-// Event pages
-// import Events from "@/pages/main/events/Events";
-
 // My pages
-import MyInfo from "@/pages/main/mypage/MyInfo";
-import MyPage from "@/pages/main/mypage/MyPage";
-import MyMall from "@/pages/main/mypage/MyMall";
-import MyMallInfo from "@/pages/main/mypage/MyMallInfo";
-import MyPosts from "@/pages/main/mypage/MyPosts";
-import MyProducts from "@/pages/main/mypage/MyProducts";
-import MyReviews from "@/pages/main/mypage/MyReviews";
+import ManagePage from "@/pages/main/mypage/ManagePage";
 
 // QR Code
 import QRCode from "@/pages/QRCode";
-import ProductPage from "./pages/common/ProductPage";
-import CommunityPage from "./pages/common/CommunityPage";
-import PeermallCreate from "./components/common/peermall/PeermallCreate";
-import PeermallPage from "./pages/main/peermalls/PeermallPage";
-import BoardCreate from "./components/common/community/BoardCreate";
-import EventDetail from "./components/common/event/EventDetail";
-import EventCreate from "./components/common/event/EventCreate";
-import EventPage from "./pages/common/EventPage";
+import ProductPage from "@/pages/common/ProductPage";
+import CommunityPage from "@/pages/common/CommunityPage";
+import PeermallCreate from "@/components/common/peermall/PeermallCreate";
+import PeermallPage from "@/pages/main/peermalls/PeermallPage";
+import BoardCreate from "@/components/common/community/BoardCreate";
+import EventDetail from "@/components/common/event/EventDetail";
+import EventCreate from "@/components/common/event/EventCreate";
+import EventPage from "@/pages/common/EventPage";
+import ProductDetail from "./components/common/product/ProductDetail";
+import { ProfileManagement } from "./components/admin/ProfileManagement";
+import { PeermallManagement } from "./components/admin/PeermallManagement";
+import { ProductManagement } from "./components/admin/ProductManagement";
+import { CommunityManagement } from "./components/admin/CommunityManagement";
+import { EventManagement } from "./components/admin/EventManagement";
+import { OverviewSection } from "./components/admin/OverviewSection";
+import { CommentManagement } from "./components/admin/CommentManagement";
+import { ReviewManagement } from "./components/admin/ReviewManagement";
 
 const queryClient = new QueryClient();
 
@@ -85,26 +73,17 @@ const App = () => (
               {/* Main Routes */}
               <Route path="/" element={<MainLayout><MainPage /></MainLayout>} />
               <Route path="/peermalls" element={<MainLayout><PeermallPage /></MainLayout>} />
-              <Route path="/peermalls/new" element={<MainLayout><NewPeermalls /></MainLayout>} />
-              <Route path="/peermalls/best" element={<MainLayout><BestPeermalls /></MainLayout>} />
               <Route path="/peermalls/create" element={<ProtectedRoute><PeermallCreate /></ProtectedRoute>} />
 
-              <Route path="/products" element={<MainLayout><ProductList /></MainLayout>} />
-              <Route path="/products/new" element={<MainLayout><NewProducts /></MainLayout>} />
-              <Route path="/products/best" element={<MainLayout><BestProducts /></MainLayout>} />
-              
+              <Route path="/products" element={<MainLayout><ProductPage /></MainLayout>} />
               <Route path="/community" element={<MainLayout><CommunityPage /></MainLayout>} />
               <Route path="/events" element={<MainLayout><EventPage /></MainLayout>} />
-              
-              {/* Peermall List and Creation */}
-              {/* <Route path="/peermalls" element={<MainLayout><PeermallListMain /></MainLayout>} /> */}
-              {/* <Route path="/peermalls/create" element={<ProtectedRoute><MainLayout><PeermallCreate /></MainLayout></ProtectedRoute>} /> */}
               
               {/* User Peermall Routes */}
               <Route path="/home/:url" element={<UserPeermallPage />}>
                 <Route index element={<UserPeermallHome />} />
                 <Route path="products" element={<ProductPage />} />
-                <Route path="product/:id" element={<UserProductDetail />} />
+                <Route path="product/:id" element={<ProductDetail />} />
                 
                 <Route path="community" element={<CommunityPage />} />
                 <Route path="community/create" element={<ProtectedRoute><BoardCreate /></ProtectedRoute>} />
@@ -116,61 +95,23 @@ const App = () => (
 
               {/* MyPage Routes - 로그인 필요 */}
               <Route 
-                path="/mypage" 
+                path="/mypage/manage"
                 element={
                   <ProtectedRoute>
-                    <MainLayout><MyPage /></MainLayout>
+                    <ManagePage />
                   </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/info" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyInfo /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/mall" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyMall /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/mall-info" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyMallInfo /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/posts" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyPosts /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/products" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyProducts /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/reviews" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyReviews /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
+                }
+              >
+                <Route index element={<OverviewSection />} />
+                <Route path="overview" element={<OverviewSection />} />
+                <Route path="profile" element={<ProfileManagement />} />
+                <Route path="peermall" element={<PeermallManagement />} />
+                <Route path="products" element={<ProductManagement />} />
+                <Route path="community" element={<CommunityManagement />} />
+                <Route path="events" element={<EventManagement />} />
+                <Route path="comments" element={<CommentManagement />} />
+                <Route path="reviews" element={<ReviewManagement />} />
+              </Route>
               
               {/* QR Code - 로그인 필요 */}
               <Route 

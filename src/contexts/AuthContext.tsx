@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           'X-CSRF-Token': storedCsrfToken
         }
       });
-      
+       
       if (response.data.success) {
         setUser(response.data.data);
         setIsAuthenticated(true);

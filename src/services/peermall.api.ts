@@ -1,6 +1,11 @@
 import { apiClient } from '@/lib/api/clients';
 import { Peermall } from '@/types/peermall';
 
+interface PeermallListResponse {
+  peermalls: Peermall[];
+  total: number;
+}
+
 class PeermallApi {
   // 피어몰 생성
   async createPeermall(peermallData: FormData): Promise<Peermall> {
@@ -31,8 +36,17 @@ class PeermallApi {
   }
 
   // 모든 피어몰 조회
-  async getAllPeermalls(): Promise<Peermall[]> {
-    const response = await apiClient.get('/peermalls');
+  async getAllPeermalls(
+    params: {
+      search?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<PeermallListResponse> {
+    const response = await apiClient.get('/peermalls', { params });
+
+    console.log(response);
+
     return response.data.data;
   }
 
@@ -79,7 +93,7 @@ class PeermallApi {
         params: { url },
       });
       return response.data.available;
-    } catch (error) {
+    } catch (error: any) {
       if (error.response?.status === 400) {
         return false;
       }

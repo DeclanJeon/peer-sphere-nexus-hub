@@ -8,7 +8,7 @@ interface PeermallListProps {
   title: string;
   description: string;
   peermalls: Peermall[];
-  viewAllLink: string;
+  viewAllLink?: string;
   selectedCategory?: string;
   onQRClick: (peermall: Peermall) => void;
 }
@@ -33,9 +33,11 @@ const PeermallList = ({
             )}
           </CardDescription>
         </div>
-        <Button variant="outline" asChild>
-          <Link to={viewAllLink}>전체보기</Link>
-        </Button>
+        {viewAllLink && (
+          <Button variant="outline" asChild>
+            <Link to={viewAllLink}>전체보기</Link>
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -44,8 +46,15 @@ const PeermallList = ({
           ))}
         </div>
         {peermalls.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            해당 카테고리에 피어몰이 없습니다.
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg mb-2">
+              {selectedCategory !== 'all' 
+                ? `${selectedCategory} 카테고리에 해당하는 피어몰이 없습니다.`
+                : '검색 결과가 없습니다.'}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              다른 검색어나 카테고리를 시도해보세요.
+            </p>
           </div>
         )}
       </CardContent>

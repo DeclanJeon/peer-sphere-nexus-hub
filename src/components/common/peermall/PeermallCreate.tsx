@@ -219,7 +219,7 @@ const PeermallCreate = () => {
         title: '🎉 생성 완료!',
         description: '피어몰이 성공적으로 생성되었습니다.',
       });
-      navigate('/dashboard');
+      navigate(`/home/${formData.url}`);
     } catch (error) {
       console.error('피어몰 생성 실패:', error);
       toast({

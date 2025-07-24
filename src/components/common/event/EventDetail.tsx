@@ -144,7 +144,7 @@ const EventDetail = () => {
           <EventForm
             mode="edit"
             initialData={event}
-            onSubmit={handleEditSubmit}
+            onSubmit={(data) => handleEditSubmit(data as any)}
             onCancel={handleCancelEdit}
             loading={loading}
           />

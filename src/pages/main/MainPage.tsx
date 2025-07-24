@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import HeroSection from '@/components/home/HeroSection';
 import SearchSection from '@/components/home/SearchSection';
@@ -32,7 +31,12 @@ const MainPage = () => {
         selectedCategory={selectedCategory} 
         setSelectedCategory={setSelectedCategory} 
       />
-      <ContentSection activeTab={activeTab} selectedCategory={selectedCategory} isMainPeermall={true} />
+      <ContentSection 
+        activeTab={activeTab} 
+        selectedCategory={selectedCategory} 
+        searchQuery={searchQuery} 
+        isMainPeermall={true} 
+      />
     </div>
   );
 };

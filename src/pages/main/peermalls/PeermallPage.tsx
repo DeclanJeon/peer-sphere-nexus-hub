@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,12 @@ import QRCodeDialog from '@/components/common/QRCodeDialog';
 import { toast } from '@/hooks/use-toast';
 
 const PeermallPage = () => {
-  const [activeTab, setActiveTab] = useState('best');
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // URL에서 'tab' 파라미터를 읽어와 초기 상태를 설정합니다. 없으면 'best'가 기본값.
+  const initialTab = searchParams.get('tab') === 'new' ? 'new' : 'best';
+
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [bestPeermalls, setBestPeermalls] = useState<Peermall[]>([]);
   const [newPeermalls, setNewPeermalls] = useState<Peermall[]>([]);
   const [filteredPeermalls, setFilteredPeermalls] = useState<Peermall[]>([]);
@@ -34,20 +40,22 @@ const PeermallPage = () => {
   ];
 
   useEffect(() => {
+    // activeTab이 변경될 때마다 데이터를 다시 불러옵니다.
     fetchPeermalls();
   }, [activeTab]);
 
   useEffect(() => {
+    // 필터링 관련 상태가 변경될 때마다 목록을 다시 필터링합니다.
     filterPeermalls();
   }, [bestPeermalls, newPeermalls, searchQuery, selectedCategory, activeTab]);
 
   const fetchPeermalls = async () => {
     setLoading(true);
     try {
-      if (activeTab === 'best') {
+      if (activeTab === 'best' && bestPeermalls.length === 0) { // 데이터가 없을 때만 호출
         const data = await peermallApi.getBestPeermalls(20);
         setBestPeermalls(data);
-      } else {
+      } else if (activeTab === 'new' && newPeermalls.length === 0) { // 데이터가 없을 때만 호출
         const data = await peermallApi.getNewPeermalls(20);
         setNewPeermalls(data);
       }
@@ -68,12 +76,10 @@ const PeermallPage = () => {
     
     let filtered = currentPeermalls;
 
-    // 카테고리 필터
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(peermall => peermall.category === selectedCategory);
     }
 
-    // 검색 필터
     if (searchQuery.trim()) {
       filtered = filtered.filter(peermall =>
         peermall.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -82,6 +88,12 @@ const PeermallPage = () => {
     }
 
     setFilteredPeermalls(filtered);
+  };
+
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    // URL의 쿼리 파라미터를 업데이트하여 상태를 동기화합니다.
+    setSearchParams({ tab: newTab });
   };
 
   const handleQRClick = (peermall: Peermall) => {
@@ -102,9 +114,40 @@ const PeermallPage = () => {
     setSelectedCategory('all');
   };
 
+  const renderPeermallList = () => {
+    if (loading) {
+      return (
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="mt-2 text-muted-foreground">로딩 중...</p>
+        </div>
+      );
+    }
+    
+    if (filteredPeermalls.length === 0) {
+      return (
+        <div className="text-center py-12 text-muted-foreground">
+          <p className="text-lg">조건에 맞는 피어몰이 없습니다.</p>
+          <p className="text-sm mt-2">검색어나 필터를 변경해보세요.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {filteredPeermalls.map((peermall) => (
+          <PeermallCard
+            key={peermall.id}
+            peermall={peermall}
+            onQRClick={handleQRClick}
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
-      {/* 페이지 헤더 */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold">피어몰 둘러보기</h1>
         <p className="text-muted-foreground">
@@ -112,7 +155,6 @@ const PeermallPage = () => {
         </p>
       </div>
 
-      {/* 검색 및 필터 */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -150,11 +192,10 @@ const PeermallPage = () => {
         </CardContent>
       </Card>
 
-      {/* 탭 컨텐츠 */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
-          <TabsTrigger value="best">베스트 피어몰</TabsTrigger>
           <TabsTrigger value="new">신규 피어몰</TabsTrigger>
+          <TabsTrigger value="best">베스트 피어몰</TabsTrigger>
         </TabsList>
 
         <TabsContent value="best" className="space-y-6">
@@ -170,32 +211,7 @@ const PeermallPage = () => {
                 )}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-center py-8">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <p className="mt-2 text-muted-foreground">로딩 중...</p>
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredPeermalls.map((peermall) => (
-                      <PeermallCard
-                        key={peermall.id}
-                        peermall={peermall}
-                        onQRClick={handleQRClick}
-                      />
-                    ))}
-                  </div>
-                  {filteredPeermalls.length === 0 && !loading && (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <p className="text-lg">조건에 맞는 피어몰이 없습니다.</p>
-                      <p className="text-sm mt-2">검색어나 필터를 변경해보세요.</p>
-                    </div>
-                  )}
-                </>
-              )}
-            </CardContent>
+            <CardContent>{renderPeermallList()}</CardContent>
           </Card>
         </TabsContent>
 
@@ -212,37 +228,11 @@ const PeermallPage = () => {
                 )}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-center py-8">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <p className="mt-2 text-muted-foreground">로딩 중...</p>
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredPeermalls.map((peermall) => (
-                      <PeermallCard
-                        key={peermall.id}
-                        peermall={peermall}
-                        onQRClick={handleQRClick}
-                      />
-                    ))}
-                  </div>
-                  {filteredPeermalls.length === 0 && !loading && (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <p className="text-lg">조건에 맞는 피어몰이 없습니다.</p>
-                      <p className="text-sm mt-2">검색어나 필터를 변경해보세요.</p>
-                    </div>
-                  )}
-                </>
-              )}
-            </CardContent>
+            <CardContent>{renderPeermallList()}</CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* QR 코드 다이얼로그 */}
       <QRCodeDialog
         open={qrDialogOpen}
         onOpenChange={setQrDialogOpen}
