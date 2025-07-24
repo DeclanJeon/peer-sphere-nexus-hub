@@ -15,7 +15,7 @@ const EventPage = () => {
   const { url } = useParams<{ url: string }>();
   const location = useLocation();
   const { currentPeermall } = usePeermall();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth(); // ✨ isAuthenticated 추가
 
   const [activeTab, setActiveTab] = useState('전체');
   const [events, setEvents] = useState<Event[]>([]);
@@ -69,8 +69,8 @@ const EventPage = () => {
     fetchEvents();
   }, [currentPeermall?.id, isMainPeermall, isUserPeermall]);
 
-  // 피어몰 소유주인지 확인 (메인 피어몰에서는 false)
-  const isPeermallOwner = !isMainPeermall && user?.user_uid === currentPeermall?.owner_uid;
+  // ✨ [삭제] 피어몰 소유주 확인 로직 제거
+  // const isPeermallOwner = !isMainPeermall && user?.user_uid === currentPeermall?.owner_uid;
 
   // 탭에 따른 이벤트 필터링
   const filteredEvents = events.filter(event => {
@@ -125,6 +125,14 @@ const EventPage = () => {
     return '다양한 이벤트와 특별 혜택을 확인해보세요';
   };
 
+  // ✨ [새로운 추가] 이벤트 등록 경로 결정
+  const getEventCreatePath = () => {
+    if (isMainPeermall) {
+      return '/event/create';
+    }
+    return `/home/${url}/event/create`;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6">
@@ -140,10 +148,10 @@ const EventPage = () => {
                 {getPageDescription()}
               </p>
             </div>
-            {/* 유저 피어몰에서만 이벤트 등록 버튼 표시 */}
-            {isPeermallOwner && !isMainPeermall && (
+            {/* ✨ [수정] 로그인한 모든 사용자가 이벤트 등록 가능 */}
+            {isAuthenticated && (
               <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                <Link to={`/home/${url}/events/create`}>
+                <Link to={getEventCreatePath()}>
                   <Plus className="w-5 h-5 mr-2" />
                   이벤트 등록
                 </Link>

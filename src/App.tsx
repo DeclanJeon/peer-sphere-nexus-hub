@@ -76,8 +76,12 @@ const App = () => (
               <Route path="/peermalls/create" element={<ProtectedRoute><PeermallCreate /></ProtectedRoute>} />
 
               <Route path="/products" element={<MainLayout><ProductPage /></MainLayout>} />
+
               <Route path="/community" element={<MainLayout><CommunityPage /></MainLayout>} />
+              <Route path="/community/create" element={<ProtectedRoute><MainLayout><BoardCreate /></MainLayout></ProtectedRoute>} />
+
               <Route path="/events" element={<MainLayout><EventPage /></MainLayout>} />
+              <Route path="/event/create" element={<ProtectedRoute><MainLayout><EventCreate /></MainLayout></ProtectedRoute>} />
               
               {/* User Peermall Routes */}
               <Route path="/home/:url" element={<UserPeermallPage />}>

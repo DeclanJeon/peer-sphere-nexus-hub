@@ -5,7 +5,9 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* 피어몰 정보 */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">피어몰</h3>
+              <a href="/" className="text-2xl font-bold text-primary">
+                피어몰
+              </a>
               <p className="text-sm text-gray-600">
                 세상을 넓히는 연결의 시작,<br />
                 피어몰과 함께 하세요.
