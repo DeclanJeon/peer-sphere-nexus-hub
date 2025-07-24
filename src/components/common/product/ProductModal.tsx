@@ -150,22 +150,6 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
         </DialogHeader>
 
         <div className="space-y-6 py-4 overflow-y-auto pr-6">
-          {/* URL 입력 섹션 (생성 모드에서만 보임) */}
-          {!isEditMode && (
-            <>
-              <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Globe className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="font-medium">판매 상품 주소를 입력 하세요</h3>
-                </div>
-                <div className="flex gap-2">
-                  <Input type="url" value={productUrl} onChange={(e) => setProductUrl(e.target.value)} placeholder="https://www.example.com/product/..." disabled={isParsing} />
-                </div>
-              </div>
-              <Separator />
-            </>
-          )}
-
           {/* ProductForm 컴포넌트 렌더링 */}
           <ProductForm
             ref={formRef}
