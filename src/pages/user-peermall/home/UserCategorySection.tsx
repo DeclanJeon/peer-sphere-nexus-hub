@@ -21,7 +21,7 @@ const UserCategorySection = ({ categories, selectedCategory, setSelectedCategory
           >
             <div className="text-3xl mb-2">🏪</div>
             <div className="text-sm font-semibold">전체</div>
-            <div className="text-xs text-muted-foreground">모든 상품</div>
+            {/* <div className="text-xs text-muted-foreground">모든 상품</div> */}
           </button>
           {categories.map((category) => (
             <button
@@ -35,9 +35,9 @@ const UserCategorySection = ({ categories, selectedCategory, setSelectedCategory
             >
               <div className="text-3xl mb-2">{category.icon}</div>
               <div className="text-sm font-semibold">{category.name}</div>
-              <div className={`text-xs ${selectedCategory === category.name ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              {/* <div className={`text-xs ${selectedCategory === category.name ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                 {category.count}개
-              </div>
+              </div> */}
             </button>
           ))}
         </div>

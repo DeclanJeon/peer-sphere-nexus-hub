@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Search, Filter } from 'lucide-react';
 import { Post } from '@/types/post';
 import BoardList from '@/components/common/community/BoardList';
 import CommunityTabs from '@/components/common/community/CommunityTabs';
@@ -9,13 +9,8 @@ import { communityApi } from '@/services/community.api';
 import { usePeermall } from '@/contexts/PeermallContext';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 const CommunityPage = () => {
   const location = useLocation();
@@ -35,6 +30,7 @@ const CommunityPage = () => {
     total: 0,
     totalPages: 0
   });
+  const [searchQuery, setSearchQuery] = useState('');
 
   const peermallUrl = params.url;
   
@@ -102,8 +98,14 @@ const CommunityPage = () => {
     fetchPosts();
   }, [fetchPosts]);
 
-  // 탭에 따른 게시글 필터링
-  const filteredPosts = posts.filter((post: Post) => {
+  // 탭, 검색색에 따른 게시글 필터링
+  let filteredPosts = posts.filter((post: Post) => {
+    
+    if (searchQuery.trim()) {
+        return post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.content?.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+
     switch (activeTab) {
       case '추천글':
         return post.likes > 10;
@@ -186,6 +188,14 @@ const CommunityPage = () => {
     return '커뮤니티에서 다양한 이야기를 나눠보세요';
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -209,8 +219,46 @@ const CommunityPage = () => {
           )}
         </div>
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              검색 및 필터
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="게시글을 검색해보세요"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="pl-10"
+                />
+              </div>
+              {/* <Select value={selectedCategory} onValueChange={handleCategoryChange}> */}
+              {/* <Select>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="카테고리 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select> */}
+              <Button variant="outline" onClick={clearFilters}>
+                필터 초기화
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* 필터 및 정렬 */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-4 mb-1 mt-6">
           <div className="flex-1">
             <CommunityTabs activeTab={activeTab} onTabChange={setActiveTab} />
           </div>
