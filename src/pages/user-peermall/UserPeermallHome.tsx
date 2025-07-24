@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import UserContentSection from './home/UserContentSection';
 import UserCategorySection from './home/UserCategorySection';
 import UserNavigationTabs from './home/UserNavigationTabs';
 import UserSearchSection from './home/UserSearchSection';
 
 const UserPeermallHome = () => {
-  const { peermallName } = useParams();
+  // const { peermallName } = useParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
+  // const [activeTab, setActiveTab] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const {activeTab} = useOutletContext();
 
   // TODO: This should be fetched from the specific peermall's data
   const categories = [
@@ -25,7 +26,7 @@ const UserPeermallHome = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <UserNavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* <UserNavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} /> */}
       <UserSearchSection searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <UserCategorySection 
         categories={categories} 
