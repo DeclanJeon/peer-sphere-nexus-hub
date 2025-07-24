@@ -23,10 +23,12 @@ const UserNavigationTabs = ({ activeTab, setActiveTab }: NavigationTabsProps) =>
     switch(tabId) {
       case 'community':
       case 'events':
-        navigate(`/home/${url}/${tabId}`)
+        setActiveTab(tabId);
+        navigate(`/home/${url}/${tabId}`);
         return;
       default:
         setActiveTab(tabId);
+        navigate(`/home/${url}`);
       return;
     }
   }
