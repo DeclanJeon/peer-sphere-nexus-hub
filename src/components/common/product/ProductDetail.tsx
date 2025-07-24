@@ -8,6 +8,7 @@ import { productApi } from '@/services/product.api';
 import { usePeermall } from '@/contexts/PeermallContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Product } from '@/types/product';
+import ProductDetailTabs from '@/components/common/product/reviews/ProductDetailTabs';
 import { 
   ArrowLeft, 
   Edit3, 
@@ -320,30 +321,75 @@ const ProductDetail = () => {
         </div>
 
         <div className="mt-12 space-y-8">
-          <Card><CardContent className="p-6"><h3 className="text-xl font-semibold mb-4">상품 상세 설명</h3>{product.description ? (<div className="prose max-w-none text-muted-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description }} />) : (<p className="text-muted-foreground">상세 설명이 없습니다.</p>)}</CardContent></Card>
-          {product.features && product.features.length > 0 && (<Card><CardContent className="p-6"><h3 className="text-xl font-semibold mb-4">상품 특징</h3><ul className="space-y-2">{product.features.map((feature, index) => (<li key={index} className="flex items-center gap-2"><span className="w-2 h-2 bg-primary rounded-full"></span><span>{feature}</span></li>))}</ul></CardContent></Card>)}
-          {product.specifications && Object.keys(product.specifications).length > 0 && (<Card><CardContent className="p-6"><h3 className="text-xl font-semibold mb-4">상품 사양</h3><div className="space-y-3">{Object.entries(product.specifications).map(([key, value]) => (<div key={key} className="flex flex-col sm:flex-row gap-2"><dt className="font-medium text-muted-foreground min-w-[120px]">{key}</dt><dd className="flex-1">{String(value)}</dd></div>))}</div></CardContent></Card>)}
-          
-          {/* 상품 리뷰 섹션 */}
-          <ProductReviews 
-            productId={id!} 
-            averageRating={product.rating || 0} 
-            totalReviews={product.reviewCount || 0} 
-          />
-          
-          {/* 추천 상품 섹션 */}
-          <RecommendedProducts currentProductId={id!} peermallId={product.peermallId} />
-        </div>
+             {/* 상품 상세 설명 */}
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-xl font-semibold mb-4">상품 상세 설명</h3>
+            {product.description ? (
+              <div 
+                className="prose max-w-none text-muted-foreground leading-relaxed" 
+                dangerouslySetInnerHTML={{ __html: product.description }} 
+              />
+            ) : (
+              <p className="text-muted-foreground">상세 설명이 없습니다.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 상품 특징 (있는 경우만) */}
+        {product.features && product.features.length > 0 && (
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold mb-4">상품 특징</h3>
+              <ul className="space-y-2">
+                {product.features.map((feature, index) => (
+                  <li key={index} className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-primary rounded-full"></span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 상품 사양 (있는 경우만) */}
+        {product.specifications && Object.keys(product.specifications).length > 0 && (
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold mb-4">상품 사양</h3>
+              <div className="space-y-3">
+                {Object.entries(product.specifications).map(([key, value]) => (
+                  <div key={key} className="flex flex-col sm:flex-row gap-2">
+                    <dt className="font-medium text-muted-foreground min-w-[120px]">
+                      {key}
+                    </dt>
+                    <dd className="flex-1">{String(value)}</dd>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* 탭 기반 리뷰/추천 상품 섹션 */}
+        <ProductDetailTabs 
+          productId={id!}
+          peermallId={product.peermallId}
+          averageRating={product.rating || 0}
+          totalReviews={product.reviewCount || 0}
+        />
       </div>
-      
-      {/* 수정 모달 렌더링 */}
-      <ProductModal 
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSuccess={handleUpdateSuccess}
-        mode="edit"
-        productToEdit={product}
-      />
+    </div>
+    
+    {/* 수정 모달 */}
+    <ProductModal 
+      isOpen={isEditModalOpen}
+      onClose={() => setIsEditModalOpen(false)}
+      onSuccess={handleUpdateSuccess}
+      mode="edit"
+      productToEdit={product}
+    />
     </>
   );
 };
