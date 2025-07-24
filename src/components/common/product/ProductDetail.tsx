@@ -411,9 +411,9 @@ const ProductDetail = () => {
         {/* 탭 기반 리뷰/추천 상품 섹션 */}
         <ProductDetailTabs 
           productId={id!}
-          peermallId={product.peermallId}
+          peermallId={product.peermall_id}
           averageRating={product.rating || 0}
-          totalReviews={product.reviewCount || 0}
+          totalReviews={product.review_count || 0}
         />
       </div>
     </div>

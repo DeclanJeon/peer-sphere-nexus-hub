@@ -1,53 +1,12 @@
 // Frontend/src/services/review.api.ts
 import { apiClient } from '@/lib/api/clients';
-
-export interface Review {
-  id: string;
-  productId: string;
-  userId: string;
-  rating: number;
-  content: string;
-  images: string[];
-  isVerifiedPurchase: boolean;
-  helpfulCount: number;
-  likeCount: number;
-  commentCount: number;
-  isLiked: boolean;
-  authorName: string;
-  authorAvatar?: string;
-  createdAt: string;
-  updatedAt: string;
-  comments: ReviewComment[];
-}
-
-export interface ReviewComment {
-  id: string;
-  reviewId: string;
-  userId: string;
-  content: string;
-  isSellerReply: boolean;
-  authorName: string;
-  authorAvatar?: string;
-  createdAt: string;
-}
-
-export interface ReviewStats {
-  totalCount: number;
-  averageRating: number;
-  fiveStar: number;
-  fourStar: number;
-  threeStar: number;
-  twoStar: number;
-  oneStar: number;
-}
-
-interface GetReviewsParams {
-  productId?: string;
-  userId?: string;
-  sortBy?: 'latest' | 'rating' | 'helpful';
-  limit?: number;
-  offset?: number;
-}
+import { useAuth } from '@/hooks/useAuth';
+import {
+  GetReviewsParams,
+  Review,
+  ReviewComment,
+  ReviewStats,
+} from '@/types/review';
 
 class ReviewApi {
   private basePath = '/products/reviews';
@@ -101,6 +60,7 @@ class ReviewApi {
         isSellerReply,
       }
     );
+
     return response.data.data;
   }
 

@@ -408,6 +408,34 @@ const PeermallCreate = () => {
                 </Select>
               </div>
 
+              <div className="space-y-2 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="ownerName">소유자 이름</Label>
+                    <Input
+                      id="ownerName"
+                      value={formData.ownerName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, ownerName: e.target.value }))}
+                    placeholder="소유자 이름"
+                    className="bg-white"
+                  />
+                </div>
+                  
+                <div className="space-y-2">
+                  <Label htmlFor="ownerEmail">이메일 주소</Label>
+                  <Input
+                    id="ownerEmail"
+                    type="email"
+                    value={user.user_email}
+                    disabled={true}
+                    onChange={(e) => setFormData(prev => ({ ...prev, ownerEmail: e.target.value }))}
+                    placeholder="example@email.com"
+                    className="bg-white"
+                  />
+                </div>
+                </div>
+              </div>
+
               {/* 추천인 코드 */}
               <div className="space-y-2">
                 <Label htmlFor="referralCode">추천인 코드 *</Label>
@@ -498,32 +526,7 @@ const PeermallCreate = () => {
               
               {/* 소유자 정보 */}
               <div className="space-y-4">
-                <h4 className="font-medium text-gray-700">소유자 정보</h4>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ownerName">소유자 이름</Label>
-                    <Input
-                      id="ownerName"
-                      value={formData.ownerName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, ownerName: e.target.value }))}
-                      placeholder="소유자 이름 (선택사항)"
-                      className="bg-white"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="ownerEmail">이메일 주소</Label>
-                    <Input
-                      id="ownerEmail"
-                      type="email"
-                      value={formData.ownerEmail}
-                      onChange={(e) => setFormData(prev => ({ ...prev, ownerEmail: e.target.value }))}
-                      placeholder="example@email.com (선택사항)"
-                      className="bg-white"
-                    />
-                  </div>
-                </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="ownerPhone">연락처</Label>
@@ -531,7 +534,7 @@ const PeermallCreate = () => {
                     id="ownerPhone"
                     value={formData.ownerPhone}
                     onChange={(e) => setFormData(prev => ({ ...prev, ownerPhone: e.target.value }))}
-                    placeholder="010-1234-5678 (선택사항)"
+                    placeholder="010-1234-5678"
                     className="bg-white"
                   />
                 </div>
