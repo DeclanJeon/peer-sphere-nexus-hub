@@ -81,6 +81,25 @@ const EventForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: E
       });
       return;
     }
+
+    // 필수 필드만 검증
+    const requiredFields = {
+      title: '이벤트 제목',
+      category: '이벤트 카테고리',
+      event_start_date: '이벤트 시작일',
+      event_end_date: '이벤트 종료일'
+    };
+
+    for (const [field, label] of Object.entries(requiredFields)) {
+      if (!formData[field as keyof typeof formData]?.toString().trim()) {
+        toast({
+          title: '필수 항목 누락',
+          description: `${label} 을(를) 입력해주세요.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
     
     const data = new FormData();
     data.append('title', formData.title);
@@ -144,7 +163,7 @@ const EventForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: E
             {/* Category and Date Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="space-y-3">
-                <Label htmlFor="category" className="text-base font-semibold">카테고리</Label>
+                <Label htmlFor="category" className="text-base font-semibold">카테고리 *</Label>
                 <Select value={formData.category} onValueChange={handleSelectChange} disabled={loading}>
                   <SelectTrigger id="category" className="py-6">
                     <SelectValue placeholder="카테고리를 선택하세요" />
@@ -162,7 +181,7 @@ const EventForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: E
               <div className="space-y-3">
                 <Label htmlFor="event_start_date" className="text-base font-semibold flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  시작일
+                  시작일 *
                 </Label>
                 <Input 
                   id="event_start_date" 
@@ -177,7 +196,7 @@ const EventForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: E
               <div className="space-y-3">
                 <Label htmlFor="event_end_date" className="text-base font-semibold flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  종료일
+                  종료일 *
                 </Label>
                 <Input 
                   id="event_end_date" 
