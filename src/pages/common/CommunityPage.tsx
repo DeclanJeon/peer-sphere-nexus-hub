@@ -108,7 +108,8 @@ const CommunityPage = () => {
       case '추천글':
         return post.likes > 10;
       case '공지':
-        return post.is_notice;
+        //return post.is_notice;
+        return post.category == '공지사항';
       case '인기글':
         return post.is_popular || post.views > 100;
       default:
@@ -213,7 +214,7 @@ const CommunityPage = () => {
           <div className="flex-1">
             <CommunityTabs activeTab={activeTab} onTabChange={setActiveTab} />
           </div>
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="카테고리" />
@@ -237,7 +238,7 @@ const CommunityPage = () => {
                 <SelectItem value="likes">추천순</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
         </div>
 
         {/* 게시글 리스트 */}
