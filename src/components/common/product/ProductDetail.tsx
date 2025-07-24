@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,33 +9,17 @@ import { usePeermall } from '@/contexts/PeermallContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Product } from '@/types/product';
 import ProductDetailTabs from '@/components/common/product/reviews/ProductDetailTabs';
-import { 
-  ArrowLeft, 
-  Edit3, 
-  Trash2, 
-  Star, 
+import {
+  ArrowLeft,
+  Star,
   Eye,
   Heart,
   Share2,
-  MessageCircle,
   MoreVertical,
   ShoppingBag,
-  Lock,
   HelpCircle,
-  AlertTriangle,
   ExternalLink
 } from 'lucide-react';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,8 +28,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductModal from '@/components/common/product/ProductModal';
-import { ProductReviews } from '@/components/common/product/reviews/ProductReviews';
-import { RecommendedProducts } from '@/components/common/product/RecommendedProducts';
 
 const ProductDetail = () => {
   const { url, id } = useParams<{ url: string; id: string }>();
@@ -207,8 +189,6 @@ const ProductDetail = () => {
                 <DropdownMenuTrigger asChild><Button variant="ghost" size="sm"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={handleStatusToggle}>{product.status === 'active' ? '판매 중단' : '판매 재개'}</DropdownMenuItem>
-                  {/* <DropdownMenuItem onClick={handleEdit}><Edit3 className="h-4 w-4 mr-2" />수정</DropdownMenuItem> */}
-                  {/* <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" />삭제</DropdownMenuItem> */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -296,9 +276,6 @@ const ProductDetail = () => {
                   신고하기
                 </Button> */}
               </div>
-
-              {/* ✨ [제거] 요구사항 5번: 좋아요 버튼 제거 */}
-              {/* 기존의 찜하기, 문의하기 버튼 영역 제거 */}
 
               <div className="flex gap-3">
                 <Button 
