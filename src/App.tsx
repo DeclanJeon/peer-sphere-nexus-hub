@@ -45,6 +45,8 @@ import { ProductManagement } from "./components/admin/ProductManagement";
 import { CommunityManagement } from "./components/admin/CommunityManagement";
 import { EventManagement } from "./components/admin/EventManagement";
 import { OverviewSection } from "./components/admin/OverviewSection";
+import { CommentManagement } from "./components/admin/CommentManagement";
+import { ReviewManagement } from "./components/admin/ReviewManagement";
 
 const queryClient = new QueryClient();
 
@@ -96,7 +98,7 @@ const App = () => (
                 path="/mypage/manage"
                 element={
                   <ProtectedRoute>
-                    <MainLayout><ManagePage /></MainLayout>
+                    <ManagePage />
                   </ProtectedRoute>
                 }
               >
@@ -107,6 +109,8 @@ const App = () => (
                 <Route path="products" element={<ProductManagement />} />
                 <Route path="community" element={<CommunityManagement />} />
                 <Route path="events" element={<EventManagement />} />
+                <Route path="comments" element={<CommentManagement />} />
+                <Route path="reviews" element={<ReviewManagement />} />
               </Route>
               
               {/* QR Code - 로그인 필요 */}

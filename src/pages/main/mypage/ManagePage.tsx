@@ -20,7 +20,8 @@ import {
   Calendar,
   User,
   Settings,
-  BarChart3
+  BarChart3,
+  Star
 } from 'lucide-react';
 
 const menuItems = [
@@ -59,6 +60,18 @@ const menuItems = [
     title: '내 이벤트 관리', 
     icon: Calendar,
     path: '/mypage/manage/events'
+  },
+  { 
+    id: 'comments', 
+    title: '댓글 관리', 
+    icon: MessageCircle,
+    path: '/mypage/manage/comments'
+  },
+  { 
+    id: 'reviews', 
+    title: '리뷰 관리', 
+    icon: Star,
+    path: '/mypage/manage/reviews'
   },
 ];
 
@@ -102,27 +115,33 @@ function ManagementSidebar() {
 
 function ManagePage() {
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <ManagementSidebar />
-        
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <Settings className="h-8 w-8 text-primary" />
-                <h1 className="text-3xl font-bold">관리 센터</h1>
-              </div>
-              <Button asChild variant="outline">
-                <Link to="/">메인으로 돌아가기</Link>
-              </Button>
-            </div>
-            
-            <Outlet />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-background border-b sticky top-0 z-50">
+        <div className="flex h-16 items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <Settings className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-semibold">관리 센터</h1>
           </div>
-        </main>
-      </div>
-    </SidebarProvider>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/">메인으로 돌아가기</Link>
+          </Button>
+        </div>
+      </header>
+
+      {/* Main Content with Sidebar */}
+      <SidebarProvider>
+        <div className="flex w-full">
+          <ManagementSidebar />
+          
+          <main className="flex-1 p-6">
+            <div className="max-w-7xl mx-auto">
+              <Outlet />
+            </div>
+          </main>
+        </div>
+      </SidebarProvider>
+    </div>
   );
 }
 

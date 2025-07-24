@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 import { ReviewList } from './ReviewList';
 import { ReviewForm } from './ReviewForm';
-import { Review } from '@/types/review';
+import { Review } from './types';
 
 // Mock data for demonstration
 const mockReviews: Review[] = [
