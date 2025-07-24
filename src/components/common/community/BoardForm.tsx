@@ -44,7 +44,7 @@ const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: B
     await onSubmit(formData);
   };
 
-  const categories = ['일반', '질문', '정보', '운영팁', '자유'];
+  const categories = ['공지', '일반', '질문', '정보', '운영팁', '자유'];
 
   return (
     <Card>
