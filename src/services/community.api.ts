@@ -41,8 +41,10 @@ class CommunityApi {
     return response.data.data;
   }
 
-  async getPostById(id: string): Promise<Post> {
-    const response = await apiClient.get(`${this.basePath}/${id}`);
+  async getPostById(url: string, id: string): Promise<Post> {
+    const response = await apiClient.get(`${this.basePath}/${id}`, {
+      params: { url },
+    });
     return response.data.data;
   }
 

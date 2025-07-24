@@ -12,13 +12,23 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { 
   Home, Store, User, ShoppingBag, MessageCircle, Calendar,
-  LogOut, Menu, Settings, LogIn, Plus, Package,
+  LogOut, Menu, Settings, LogIn, Plus, Package, Star
 } from 'lucide-react';
 import ProductModal from '@/components/common/product/ProductModal';
 import { Peermall } from '@/types/peermall';
 
+// ✨ 프로필 드롭다운 메뉴 데이터
+const profileDropdownItems = [
+  { href: "/mypage/manage/profile", icon: Settings, label: "내 정보 관리" },
+  { href: "/mypage/manage/peermall", icon: Store, label: "내 피어몰 관리" },
+  { href: "/mypage/manage/products", icon: Package, label: "내 상품 관리" },
+  { href: "/mypage/manage/reviews", icon: Star, label: "내 리뷰 관리" },
+  { href: "/mypage/manage/community", icon: MessageCircle, label: "내 게시글 관리" },
+  { href: "/mypage/manage/events", icon: Calendar, label: "내 이벤트 관리" },
+];
+
 interface UserHeaderProps {
-  currentPeermall: Peermall | null; // 부모로부터 받을 prop 타입을 정의합니다.
+  currentPeermall: Peermall | null;
 }
 
 const UserHeader = ({ currentPeermall }: UserHeaderProps) => {
@@ -54,10 +64,27 @@ const UserHeader = ({ currentPeermall }: UserHeaderProps) => {
     ];
   }, [currentPeermall?.url]);
 
-  const isOwner = useMemo(() => 
-    isAuthenticated && currentPeermall && (
-      currentPeermall.ownerId === user?.email || currentPeermall.owner_id === user?.id
-    ), [isAuthenticated, currentPeermall, user]);
+  // ✨ 소유자 확인 로직 (로그인 + 이메일 매칭)
+  const isOwner = useMemo(() => {
+    // 로그인하지 않았으면 false
+    if (!isAuthenticated || !user || !currentPeermall) {
+      return false;
+    }
+    
+    // 이메일 비교 (대소문자 구분 없이)
+    const ownerEmail = currentPeermall.owner_email?.toLowerCase();
+    const userEmail = user.user_email?.toLowerCase();
+    
+    return ownerEmail === userEmail;
+  }, [isAuthenticated, currentPeermall, user]);
+
+  // 디버깅용 로그
+  console.log('🔍 소유자 확인:', {
+    isOwner,
+    isAuthenticated,
+    currentPeermall_owner: currentPeermall?.owner_email,
+    user_email: user?.user_email,
+  });
 
   // 4. UI 렌더링
   return (
@@ -69,7 +96,11 @@ const UserHeader = ({ currentPeermall }: UserHeaderProps) => {
             <div className="flex items-center space-x-4">
               <Link to={`/home/${currentPeermall?.url}`} className="flex-shrink-0">
                 {currentPeermall?.imageUrl || currentPeermall?.image_url ? (
-                  <img className="h-12 w-12 rounded-full object-cover" src={currentPeermall.imageUrl || currentPeermall.image_url} alt={currentPeermall.name} />
+                  <img 
+                    className="h-12 w-12 rounded-full object-cover" 
+                    src={currentPeermall.imageUrl || currentPeermall.image_url} 
+                    alt={currentPeermall.name} 
+                  />
                 ) : (
                   <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
                     <Store className="text-muted-foreground" />
@@ -104,9 +135,15 @@ const UserHeader = ({ currentPeermall }: UserHeaderProps) => {
 
             {/* 사용자 액션 버튼 */}
             <div className="flex items-center space-x-4">
+              {/* ✨ 제품 등록 버튼 - 로그인 + 소유자일 때만 표시 */}
               {isAuthenticated && isOwner && (
-                <Button size="sm" onClick={() => setIsProductModalOpen(true)} className="hidden md:flex items-center gap-2">
-                  <Plus className="h-4 w-4" /> 제품 등록
+                <Button 
+                  size="sm" 
+                  onClick={() => setIsProductModalOpen(true)} 
+                  className="hidden md:flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" /> 
+                  제품 등록
                 </Button>
               )}
 
@@ -117,13 +154,18 @@ const UserHeader = ({ currentPeermall }: UserHeaderProps) => {
                       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={user?.profile_image} alt={user?.name || '프로필'} />
-                          <AvatarFallback>{user?.name ? user.name[0].toUpperCase() : <User className="h-4 w-4" />}</AvatarFallback>
+                          <AvatarFallback>
+                            {user?.name ? user.name[0].toUpperCase() : <User className="h-4 w-4" />}
+                          </AvatarFallback>
                         </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56" align="end" forceMount>
-                      <div className="px-2 py-1.5 text-sm font-medium">{user?.email}</div>
+                      <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground">
+                        {user?.email}
+                      </div>
                       <DropdownMenuSeparator />
+                      {/* ✨ 드롭다운 내 제품 등록 - 소유자일 때만 표시 */}
                       {isOwner && (
                         <>
                           <DropdownMenuItem onClick={() => setIsProductModalOpen(true)}>
@@ -133,18 +175,47 @@ const UserHeader = ({ currentPeermall }: UserHeaderProps) => {
                           <DropdownMenuSeparator />
                         </>
                       )}
-                      <DropdownMenuItem asChild><Link to="/mypage/manage/profile" className="flex items-center"><Settings className="mr-2 h-4 w-4" /><span>내 정보 관리</span></Link></DropdownMenuItem>
-                      <DropdownMenuItem asChild><Link to="/mypage/manage/peermall" className="flex items-center"><Store className="mr-2 h-4 w-4" /><span>내 피어몰 관리</span></Link></DropdownMenuItem>
+                      {/* 프로필 메뉴 아이템들 */}
+                      {profileDropdownItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <DropdownMenuItem asChild key={item.href}>
+                            <Link to={item.href} className="flex items-center">
+                              <Icon className="mr-2 h-4 w-4" />
+                              <span>{item.label}</span>
+                            </Link>
+                          </DropdownMenuItem>
+                        );
+                      })}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600"><LogOut className="mr-2 h-4 w-4" /><span>로그아웃</span></DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={handleLogout} 
+                        className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>로그아웃</span>
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <Button size="sm" asChild><Link to="/login"><LogIn className="h-4 w-4 mr-2" />로그인</Link></Button>
+                  <Button size="sm" asChild>
+                    <Link to="/login">
+                      <LogIn className="h-4 w-4 mr-2" />
+                      로그인
+                    </Link>
+                  </Button>
                 )}
               </div>
+              
+              {/* 모바일 메뉴 버튼 */}
               <div className="md:hidden">
-                <Button variant="outline" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}><Menu className="h-5 w-5" /></Button>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
               </div>
             </div>
           </div>
@@ -155,28 +226,63 @@ const UserHeader = ({ currentPeermall }: UserHeaderProps) => {
           <div className="md:hidden border-t bg-white">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navigation.map((item) => (
-                 <Link key={item.name} to={item.href} onClick={() => setIsMobileMenuOpen(false)}
-                   className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-primary">
-                   <item.icon className="h-5 w-5" />
-                   <span>{item.name}</span>
-                 </Link>
+                <Link 
+                  key={item.name} 
+                  to={item.href} 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-primary"
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.name}</span>
+                </Link>
               ))}
               <div className="border-t my-2"></div>
               {isAuthenticated ? (
-                 <div className="px-3 py-2">
-                    <div className="text-sm font-medium mb-2">{user?.email}</div>
-                    {isOwner && (
-                      <button onClick={() => { setIsProductModalOpen(true); setIsMobileMenuOpen(false); }}
-                        className="flex items-center w-full text-left py-2 text-muted-foreground hover:text-primary">
-                        <Package className="mr-2 h-4 w-4" /><span>제품 등록</span>
-                      </button>
-                    )}
-                    <Link to="/mypage/manage/profile" className="flex items-center w-full text-left py-2 text-muted-foreground hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}><Settings className="mr-2 h-4 w-4" /><span>내 정보 관리</span></Link>
-                    <Link to="/mypage/manage/peermall" className="flex items-center w-full text-left py-2 text-muted-foreground hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}><Store className="mr-2 h-4 w-4" /><span>내 피어몰 관리</span></Link>
-                    <button onClick={handleLogout} className="flex items-center w-full text-left py-2 text-red-600"><LogOut className="mr-2 h-4 w-4" /><span>로그아웃</span></button>
-                 </div>
+                <div className="px-3 py-2">
+                  <div className="text-sm font-medium mb-2">{user?.email}</div>
+                  {/* ✨ 모바일 제품 등록 - 소유자일 때만 표시 */}
+                  {isOwner && (
+                    <button 
+                      onClick={() => { 
+                        setIsProductModalOpen(true); 
+                        setIsMobileMenuOpen(false); 
+                      }}
+                      className="flex items-center w-full text-left py-2 text-muted-foreground hover:text-primary"
+                    >
+                      <Package className="mr-2 h-4 w-4" />
+                      <span>제품 등록</span>
+                    </button>
+                  )}
+                  {/* 모바일 프로필 메뉴 */}
+                  {profileDropdownItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Link 
+                        key={item.href}
+                        to={item.href} 
+                        className="flex items-center w-full text-left py-2 text-muted-foreground hover:text-primary" 
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Icon className="mr-2 h-4 w-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                  <button 
+                    onClick={handleLogout} 
+                    className="flex items-center w-full text-left py-2 text-red-600"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>로그아웃</span>
+                  </button>
+                </div>
               ) : (
-                <Button size="sm" asChild className="w-full justify-start"><Link to="/login"><LogIn className="h-4 w-4 mr-2" />로그인</Link></Button>
+                <Button size="sm" asChild className="w-full justify-start">
+                  <Link to="/login">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    로그인
+                  </Link>
+                </Button>
               )}
             </div>
           </div>
