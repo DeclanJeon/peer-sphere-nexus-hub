@@ -223,29 +223,8 @@ const ProductDetail = () => {
             <div className="aspect-square overflow-hidden rounded-lg bg-muted">
               {product.image_url ? (<img src={product.image_url} alt={product.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = '/placeholder-product.png'; }} />) : (<div className="w-full h-full flex items-center justify-center"><ShoppingBag className="h-24 w-24 text-muted-foreground" /></div>)}
             </div>
-          </div>
-
-          {/* 오른쪽: 상품 정보 및 테이블 */}
-          <div className="lg:col-span-7 space-y-6">
-            
-            {/* 상품 메시지 섹션 */}
             <Card>
               <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5" />
-                    상품 메시지
-                  </h3>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleCreateMessage}
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    메시지 작성
-                  </Button>
-                </div>
                 <div className="space-y-2">
                   {productMessages.map((message) => (
                     <div 
@@ -281,6 +260,10 @@ const ProductDetail = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* 오른쪽: 상품 정보 및 테이블 */}
+          <div className="lg:col-span-7 space-y-6">
             <div>
               <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
               {/* ✨ [수정] 요구사항 5번: 좋아요 제거 */}
