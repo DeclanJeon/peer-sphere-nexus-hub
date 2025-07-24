@@ -1,5 +1,4 @@
 // src/components/ProductModal.tsx
-
 import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
@@ -11,9 +10,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Globe } from 'lucide-react';
+import { Loader2, Link as LinkIcon, CheckCircle, Globe } from 'lucide-react';
 import { productApi } from '@/services/product.api';
 import { ogParserApi } from '@/services/og-parser.api';
 import { usePeermall } from '@/contexts/PeermallContext';
@@ -32,35 +32,39 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
   const { toast } = useToast();
   const { currentPeermall } = usePeermall();
   const formRef = useRef<ProductFormRef>(null);
-  const formId = "product-form";
+  const formId = "product-form"; // 폼과 버튼을 연결할 고유 ID
 
   const isEditMode = mode === 'edit';
 
   const [productUrl, setProductUrl] = useState('');
   const [isParsing, setIsParsing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasImportedData, setHasImportedData] = useState(false);
   const [initialFormData, setInitialFormData] = useState<Partial<ProductFormData>>({});
 
+  // 모달이 닫힐 때 모든 상태를 초기화
   const resetAll = () => {
     setProductUrl('');
     setIsParsing(false);
     setIsSubmitting(false);
+    setHasImportedData(false);
     setInitialFormData({});
     formRef.current?.reset();
   };
 
   useEffect(() => {
     if (!isOpen) {
-      setTimeout(resetAll, 300);
+      setTimeout(resetAll, 300); // 애니메이션 후 초기화
     } else if (isEditMode && productToEdit) {
+      // 수정 모드일 때 기존 데이터로 폼 초기화
       const formDataFromProduct: Partial<ProductFormData> = {
         name: productToEdit.name || '',
         sellingPrice: productToEdit.selling_price?.toString() || '',
         shippingFee: productToEdit.shipping_fee?.toString() || '',
+        productUrl: productToEdit.product_url || '',
         description: productToEdit.description || '',
         brand: productToEdit.brand || '',
-        brandWebsite: productToEdit.brand_website || '', // ✨ [복원] 수정 시 brand_website 데이터 로드
-        productUrl: productToEdit.product_url || '',
+        brandWebsite: productToEdit.brand_website || '',
         manufacturer: productToEdit.manufacturer || '',
         distributor: productToEdit.distributor || '',
         imageUrl: productToEdit.image_url || '',
@@ -69,6 +73,7 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
     }
   }, [isOpen, isEditMode, productToEdit]);
 
+  // URL에서 Open Graph 데이터 가져오기
   const handleUrlImport = async () => {
     if (!productUrl.trim()) return;
     try {
@@ -86,13 +91,13 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
         name: ogData.title || '',
         sellingPrice: ogData.price?.replace(/[^0-9]/g, '') || '',
         brand: ogData.brand || '',
-        brandWebsite: ogData.url || '', // ✨ [수정] OG 파싱 시 brandWebsite 필드도 함께 채웁니다.
-        productUrl: productUrl, // 사용자가 입력한 URL은 판매 링크로 설정
+        brandWebsite: ogData.url || '',
         manufacturer: ogData.manufacturer || '',
         description: ogData.description || '',
         imageUrl: ogData.image || '',
       };
       setInitialFormData(parsedData);
+      setHasImportedData(true);
       toast({ title: "✨ 정보 가져오기 완료!", description: "상품 정보를 가져왔습니다." });
     } catch (error) {
       console.error('URL 파싱 오류:', error);
@@ -102,8 +107,36 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
     }
   };
 
+  // 폼 제출 (생성 또는 수정)
   const handleFormSubmit = async (submitData: FormData) => {
-    // ... (제출 로직은 이전과 동일)
+    if (!currentPeermall?.id) {
+      toast({ variant: "destructive", title: "오류", description: "피어몰 정보를 찾을 수 없습니다." });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      if (isEditMode) {
+        // 수정 로직
+        if (!productToEdit?.id) {
+          throw new Error("수정할 상품의 ID가 없습니다.");
+        }
+        await productApi.updateProduct(productToEdit.id.toString(), submitData);
+        toast({ title: "🎉 상품 수정 완료!", description: "상품 정보가 성공적으로 업데이트되었습니다." });
+      } else {
+        // 생성 로직
+        submitData.append('peermallId', currentPeermall.id.toString());
+        await productApi.createProduct(submitData);
+        toast({ title: "🎉 상품 등록 완료!", description: "새로운 상품이 성공적으로 등록되었습니다." });
+      }
+      onSuccess?.();
+      onClose();
+    } catch (error) {
+      console.error(`상품 ${isEditMode ? '수정' : '등록'} 오류:`, error);
+      toast({ variant: "destructive", title: `${isEditMode ? '수정' : '등록'} 실패`, description: `상품 ${isEditMode ? '수정' : '등록'} 중 오류가 발생했습니다.` });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -117,6 +150,7 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
         </DialogHeader>
 
         <div className="space-y-6 py-4 overflow-y-auto pr-6">
+          {/* URL 입력 섹션 (생성 모드에서만 보임) */}
           {!isEditMode && (
             <>
               <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
@@ -126,15 +160,13 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
                 </div>
                 <div className="flex gap-2">
                   <Input type="url" value={productUrl} onChange={(e) => setProductUrl(e.target.value)} placeholder="https://www.example.com/product/..." disabled={isParsing} />
-                  <Button onClick={handleUrlImport} disabled={isParsing || !productUrl.trim()}>
-                    {isParsing ? <Loader2 className="h-4 w-4 animate-spin" /> : '정보 가져오기'}
-                  </Button>
                 </div>
               </div>
               <Separator />
             </>
           )}
 
+          {/* ProductForm 컴포넌트 렌더링 */}
           <ProductForm
             ref={formRef}
             initialData={initialFormData}
@@ -147,7 +179,7 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>취소</Button>
             <Button
               type="submit"
-              form={formId}
+              form={formId} // ProductForm 내부의 form 태그와 연결
               disabled={isSubmitting}
             >
               {isSubmitting 

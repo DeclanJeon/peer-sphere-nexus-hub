@@ -25,8 +25,8 @@ export interface ProductFormData {
   shippingFee: string;
   description: string;
   brand: string;
-  brandWebsite: string; // ✨ [복원] 브랜드 홈페이지 필드 인터페이스에 다시 추가
-  productUrl: string;
+  productUrl: string; // ✨ [추가] 요구사항 7번: 제품 판매 링크 필드 추가
+  brandWebsite: string;
   manufacturer: string;
   distributor: string;
   imageUrl: string;
@@ -61,7 +61,7 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
     
     const [formData, setFormData] = useState<ProductFormData>({
       name: '', sellingPrice: '', shippingFee: '',
-      description: '', brand: '', brandWebsite: '', productUrl: '', manufacturer: '', distributor: '', imageUrl: ''
+      description: '', brand: '', productUrl: '', brandWebsite: '', manufacturer: '', distributor: '', imageUrl: ''
     });
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -77,7 +77,7 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
     const resetForm = useCallback(() => {
       setFormData({
         name: '', sellingPrice: '', shippingFee: '',
-        description: '', brand: '', brandWebsite: '', productUrl: '', manufacturer: '', distributor: '', imageUrl: ''
+        description: '', brand: '', productUrl: '', brandWebsite: '', manufacturer: '', distributor: '', imageUrl: ''
       });
       setImageFile(null);
       setImagePreview(null);
@@ -88,7 +88,46 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
       reset: resetForm,
     }));
 
-    // ... (이미지 처리 및 붙여넣기 관련 로직은 이전과 동일하게 유지)
+    const processImageFile = useCallback((file: File) => {
+      if (file.size > 5 * 1024 * 1024) { // 5MB 제한
+        toast({ variant: "destructive", title: "파일 크기 초과", description: "이미지는 5MB 이하로 업로드해주세요." });
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+        setFormData(prev => ({ ...prev, imageUrl: '' }));
+      };
+      reader.readAsDataURL(file);
+    }, [toast]);
+
+    // ✨ [핵심 수정] 전역 붙여넣기 이벤트 리스너 추가
+    useEffect(() => {
+        const handleGlobalPaste = (event: ClipboardEvent) => {
+            const items = event.clipboardData?.items;
+            if (!items) return;
+
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        event.preventDefault(); // 기본 붙여넣기 동작 방지
+                        processImageFile(file);
+                        break; // 첫 번째 이미지만 처리
+                    }
+                }
+            }
+        };
+
+        // 컴포넌트가 마운트될 때 이벤트 리스너 추가
+        window.addEventListener('paste', handleGlobalPaste);
+
+        // 컴포넌트가 언마운트될 때 이벤트 리스너 제거 (메모리 누수 방지)
+        return () => {
+            window.removeEventListener('paste', handleGlobalPaste);
+        };
+    }, [processImageFile]); // processImageFile이 변경될 때만 이 effect를 재실행
 
     useEffect(() => {
       if (initialData) {
@@ -98,8 +137,8 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
           shippingFee: initialData.shippingFee || '',
           description: initialData.description || '',
           brand: initialData.brand || '',
-          brandWebsite: initialData.brandWebsite || '', // ✨ [복원] brandWebsite 초기화
           productUrl: initialData.productUrl || '',
+          brandWebsite: initialData.brandWebsite || '',
           manufacturer: initialData.manufacturer || '',
           distributor: initialData.distributor || '',
           imageUrl: initialData.imageUrl || '',
@@ -129,27 +168,48 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
       handleInputChange(field, numericValue);
     };
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        processImageFile(file);
+      }
+    };
+    
+    const removeImage = () => {
+      setImageFile(null);
+      setImagePreview(null);
+      setFormData(prev => ({ ...prev, imageUrl: '' }));
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+      e.preventDefault();
 
-        // ... 유효성 검사 로직 ...
-
-        const submitData = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-            if (key === 'description') {
-                submitData.append(key, editor?.getHTML() || '');
-            } else if (key !== 'imageUrl' && value) {
-                submitData.append(key, value);
-            }
-        });
-        
-        if (imageFile) {
-            submitData.append('image', imageFile);
-        } else if (formData.imageUrl) {
-            submitData.append('imageUrl', formData.imageUrl);
+      if (!formData.name.trim()) {
+        toast({ variant: "destructive", title: "입력 오류", description: "제품명을 입력해주세요." });
+        return;
+      }
+      if (!formData.sellingPrice || isNaN(Number(formData.sellingPrice))) {
+        toast({ variant: "destructive", title: "입력 오류", description: "판매가격을 올바른 숫자로 입력해주세요." });
+        return;
+      }
+      
+      const submitData = new FormData();
+      
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === 'description') {
+          submitData.append(key, editor?.getHTML() || '');
+        } else if (key !== 'imageUrl' && value) {
+          submitData.append(key, value);
         }
-        
-        onSubmit(submitData);
+      });
+      
+      if (imageFile) {
+        submitData.append('image', imageFile);
+      } else if (formData.imageUrl) {
+        submitData.append('imageUrl', formData.imageUrl);
+      }
+      
+      onSubmit(submitData);
     };
 
     return (
@@ -161,6 +221,7 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
             <Label htmlFor="name">제품/상품 명 <span className="text-red-500">*</span></Label>
             <Input id="name" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} required />
           </div>
+          {/* ✨ [추가] 요구사항 7번: 제품 판매 링크 입력 필드 */}
           <div className="space-y-2">
             <Label htmlFor="productUrl">제품 판매 링크</Label>
             <Input id="productUrl" type="url" value={formData.productUrl} onChange={(e) => handleInputChange('productUrl', e.target.value)} placeholder="https://example.com/product/123" />
@@ -177,9 +238,38 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
           </div>
         </div>
 
-        {/* 이미지 업로드 (생략) */}
+        {/* 이미지 업로드 */}
+        <div className="space-y-2">
+          <Label>이미지 업로드</Label>
+          {imagePreview ? (
+            <div className="relative w-full">
+              <img src={imagePreview} alt="상품 이미지" className="w-full max-h-96 object-contain rounded-lg border bg-slate-50" />
+              <Button type="button" variant="destructive" size="sm" className="absolute top-2 right-2" onClick={removeImage}><X className="h-4 w-4" /></Button>
+              {formData.imageUrl && !imageFile && (
+                <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">기존 이미지</div>
+              )}
+            </div>
+          ) : (
+            // ✨ [핵심 수정] 기존 onPaste 핸들러는 제거합니다.
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+              <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+              <Label htmlFor="image-upload" className="cursor-pointer text-primary hover:text-primary/80 font-medium">
+                클릭하여 업로드
+                <Input id="image-upload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+              </Label>
+              <p className="text-xs text-muted-foreground mt-1">또는 이미지를 페이지에 붙여넣으세요 (JPG, PNG, 최대 5MB)</p>
+            </div>
+          )}
+        </div>
 
-        {/* 상품 설명 - 리치 에디터 (생략) */}
+        {/* 상품 설명 - 리치 에디터 */}
+        <div className="space-y-2">
+          <Label>제품/상품 설명</Label>
+          <div className="border rounded-lg overflow-hidden">
+            <EditorToolbar editor={editor} />
+            <EditorContent editor={editor} />
+          </div>
+        </div>
         
         {/* 추가 정보 */}
         <div className="space-y-4">
@@ -189,7 +279,6 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
               <Label htmlFor="brand">브랜드 명</Label>
               <Input id="brand" value={formData.brand} onChange={(e) => handleInputChange('brand', e.target.value)} />
             </div>
-            {/* ✨ [복원] 브랜드 홈페이지 입력 필드 JSX 복원 */}
             <div className="space-y-2">
               <Label htmlFor="brandWebsite">브랜드 홈페이지</Label>
               <Input id="brandWebsite" type="url" value={formData.brandWebsite} onChange={(e) => handleInputChange('brandWebsite', e.target.value)} placeholder="https://..." />
