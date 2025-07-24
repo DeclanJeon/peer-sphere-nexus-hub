@@ -1,5 +1,6 @@
 // types/post.ts
 export interface Post {
+  num: number;
   id: number;
   peermall_id: number; // string에서 number로 변경 (DB 스키마에 맞춤)
   peermall_name: string;

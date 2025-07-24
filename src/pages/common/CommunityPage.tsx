@@ -127,11 +127,17 @@ const CommunityPage = () => {
       return;
     }
     
+    // 메인 피어몰에서는 글쓰기 불가
     if (isMainPeermall) {
-      navigate('/community/create');
-    } else {
-      navigate(`/home/${peermallUrl}/community/create`);
+      toast({
+        title: '알림',
+        description: '메인 페이지에서는 글을 작성할 수 없습니다. 피어몰을 선택해주세요.',
+        variant: 'default',
+      });
+      return;
     }
+    
+    navigate(`/home/${peermallUrl}/community/create`);
   };
 
   const handlePostClick = (postId: number) => {
@@ -139,7 +145,9 @@ const CommunityPage = () => {
     
     // 메인 피어몰에서는 게시글의 피어몰로 이동
     const post = posts.find(p => p.id === postId);
-    
+
+    console.log(post)
+
     if (isMainPeermall) {
       if (post?.peermall_url) {
         
@@ -196,8 +204,8 @@ const CommunityPage = () => {
               {getPageDescription()}
             </p>
           </div>
-          {/* 로그인 상태일 때 글쓰기 버튼 표시 */}
-          {isAuthenticated && (
+          {/* 메인 피어몰이 아닐 때만 글쓰기 버튼 표시 */}
+          {!isMainPeermall && (
             <Button 
               onClick={handleWriteClick}
               className="bg-primary text-primary-foreground hover:bg-primary/90"

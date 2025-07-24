@@ -125,7 +125,7 @@ const BoardList = ({ peermallId, posts: propsPosts, onPostClick, isMainPeermall 
           {post.is_notice ? (
             <Badge variant="outline" className="border-primary text-primary">공지</Badge>
           ) : (
-            post.id
+            post.num
           )}
         </TableCell>
         {/* 메인 피어몰에서는 피어몰명 표시 */}
