@@ -37,6 +37,7 @@ import MyMallInfo from "@/pages/main/mypage/MyMallInfo";
 import MyPosts from "@/pages/main/mypage/MyPosts";
 import MyProducts from "@/pages/main/mypage/MyProducts";
 import MyReviews from "@/pages/main/mypage/MyReviews";
+import ManagePage from "@/pages/main/mypage/ManagePage";
 
 // QR Code
 import QRCode from "@/pages/QRCode";
@@ -149,6 +150,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout><MyReviews /></MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/mypage/manage" 
+                element={
+                  <ProtectedRoute>
+                    <ManagePage />
                   </ProtectedRoute>
                 } 
               />

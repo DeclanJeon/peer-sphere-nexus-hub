@@ -16,6 +16,7 @@ const MyPage = () => {
     { title: '상품 관리', description: '등록한 상품들을 관리하세요', icon: ShoppingBag, link: '/mypage/products' },
     { title: '게시글 관리', description: '작성한 게시글을 관리하세요', icon: MessageCircle, link: '/mypage/posts' },
     { title: 'QR 코드', description: 'QR 코드를 생성하고 관리하세요', icon: QrCode, link: '/qr' },
+    { title: '관리 센터', description: '모든 콘텐츠를 한곳에서 관리하세요', icon: User, link: '/mypage/manage' },
   ];
 
   return (
