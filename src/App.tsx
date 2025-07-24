@@ -39,6 +39,8 @@ import EventDetail from "@/components/common/event/EventDetail";
 import EventCreate from "@/components/common/event/EventCreate";
 import EventPage from "@/pages/common/EventPage";
 import ProductDetail from "./components/common/product/ProductDetail";
+import ProductChannelPage from "./pages/common/ProductChannelPage";
+import ProductMessageCreate from "./pages/common/ProductMessageCreate";
 import { ProfileManagement } from "./components/admin/ProfileManagement";
 import { PeermallManagement } from "./components/admin/PeermallManagement";
 import { ProductManagement } from "./components/admin/ProductManagement";
@@ -47,6 +49,7 @@ import { EventManagement } from "./components/admin/EventManagement";
 import { OverviewSection } from "./components/admin/OverviewSection";
 import { CommentManagement } from "./components/admin/CommentManagement";
 import { ReviewManagement } from "./components/admin/ReviewManagement";
+import ProductChannelPostDetail from "./pages/common/ProductChannelPostDetail";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +83,7 @@ const App = () => (
               <Route path="/community" element={<MainLayout><CommunityPage /></MainLayout>} />
               <Route path="/community/create" element={<ProtectedRoute><MainLayout><BoardCreate /></MainLayout></ProtectedRoute>} />
               <Route path="community/:id" element={<ProtectedRoute><MainLayout><BoardDetail /></MainLayout></ProtectedRoute>} />
+              
 
               <Route path="/events" element={<MainLayout><EventPage /></MainLayout>} />
               <Route path="/event/create" element={<ProtectedRoute><MainLayout><EventCreate /></MainLayout></ProtectedRoute>} />
@@ -90,6 +94,9 @@ const App = () => (
                 <Route index element={<UserPeermallHome />} />
                 <Route path="products" element={<ProductPage />} />
                 <Route path="product/:id" element={<ProductDetail />} />
+                <Route path="product/:productId/channel/:channelId" element={<ProductChannelPage />} />
+                <Route path="product/:productId/channel/:channelId/post/:postId" element={<ProductChannelPostDetail />} />
+                <Route path="product/:productId/message/create" element={<ProtectedRoute><ProductMessageCreate /></ProtectedRoute>} />
                 
                 <Route path="community" element={<CommunityPage />} />
                 <Route path="community/create" element={<ProtectedRoute><BoardCreate /></ProtectedRoute>} />

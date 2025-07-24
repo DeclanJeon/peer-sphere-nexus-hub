@@ -16,5 +16,6 @@ export interface Review {
   createdAt: string;
   avatar?: string;
   images?: string[];
+  helpful?: number;
   comments?: Comment[];
 }

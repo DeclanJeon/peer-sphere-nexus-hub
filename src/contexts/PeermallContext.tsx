@@ -61,8 +61,8 @@ export const PeermallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const fetchPeermalls = useCallback(async () => {
     setLoading(true);
     try {
-      const peermalls = await peermallApi.getAllPeermalls();
-      setPeermalls(peermalls.map(mapApiToPeermall));
+      const response = await peermallApi.getAllPeermalls();
+      setPeermalls(response.peermalls.map(mapApiToPeermall));
       setError(null);
     } catch (err) {
       setError('피어몰 목록을 불러오는데 실패했습니다.');

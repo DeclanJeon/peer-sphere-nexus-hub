@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,33 +8,21 @@ import { productApi } from '@/services/product.api';
 import { usePeermall } from '@/contexts/PeermallContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Product } from '@/types/product';
-import { 
-  ArrowLeft, 
-  Edit3, 
-  Trash2, 
-  Star, 
+import ProductDetailTabs from '@/components/common/product/reviews/ProductDetailTabs';
+import BoardList from '@/components/common/community/BoardList';
+import {
+  ArrowLeft,
+  Star,
   Eye,
   Heart,
   Share2,
-  MessageCircle,
   MoreVertical,
   ShoppingBag,
-  Lock,
   HelpCircle,
-  AlertTriangle,
-  ExternalLink
+  ExternalLink,
+  MessageSquare,
+  Plus
 } from 'lucide-react';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,6 +41,12 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [productMessages] = useState([
+    { id: 1, title: "맛있는 요리 먹고 싶어요", author: "김푸드", created_at: "2024-01-15", views: 45, likes: 8, category: "맛집", comment_count: 12 },
+    { id: 2, title: "저랑 만나실 분", author: "이만남", created_at: "2024-01-14", views: 67, likes: 15, category: "모임", comment_count: 25 },
+    { id: 3, title: "이 상품 후기 궁금해요", author: "박궁금", created_at: "2024-01-13", views: 89, likes: 22, category: "후기", comment_count: 18 }
+  ]);
 
   // 로그인 여부 확인
   const isLoggedIn = isAuthenticated && user;
@@ -172,6 +166,20 @@ const ProductDetail = () => {
     toast({ title: "준비 중", description: "신고하기 기능이 준비 중입니다." });
   };
 
+  // 메시지 클릭 핸들러
+  const handleMessageClick = (messageId: number) => {
+    navigate(`/home/${url}/product/${id}/channel/${messageId}`);
+  };
+
+  // 메시지 생성 핸들러
+  const handleCreateMessage = () => {
+    if (!isLoggedIn) {
+      toast({ title: "로그인 필요", description: "메시지 작성은 로그인 후 이용 가능합니다.", variant: "destructive" });
+      return;
+    }
+    navigate(`/home/${url}/product/${id}/message/create`);
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -203,8 +211,6 @@ const ProductDetail = () => {
                 <DropdownMenuTrigger asChild><Button variant="ghost" size="sm"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={handleStatusToggle}>{product.status === 'active' ? '판매 중단' : '판매 재개'}</DropdownMenuItem>
-                  {/* <DropdownMenuItem onClick={handleEdit}><Edit3 className="h-4 w-4 mr-2" />수정</DropdownMenuItem> */}
-                  {/* <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" />삭제</DropdownMenuItem> */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -217,6 +223,43 @@ const ProductDetail = () => {
             <div className="aspect-square overflow-hidden rounded-lg bg-muted">
               {product.image_url ? (<img src={product.image_url} alt={product.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = '/placeholder-product.png'; }} />) : (<div className="w-full h-full flex items-center justify-center"><ShoppingBag className="h-24 w-24 text-muted-foreground" /></div>)}
             </div>
+            <Card>
+              <CardContent className="p-6">
+                <div className="space-y-2">
+                  {productMessages.map((message) => (
+                    <div 
+                      key={message.id}
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() => handleMessageClick(message.id)}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium">{message.title}</span>
+                          <Badge variant="outline" className="text-xs">{message.category}</Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {message.author} · {new Date(message.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Eye className="h-4 w-4" />
+                          {message.views}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="h-4 w-4" />
+                          {message.likes}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MessageSquare className="h-4 w-4" />
+                          {message.comment_count}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* 오른쪽: 상품 정보 및 테이블 */}
@@ -293,32 +336,96 @@ const ProductDetail = () => {
                 </Button> */}
               </div>
 
-              {/* ✨ [제거] 요구사항 5번: 좋아요 버튼 제거 */}
-              {/* 기존의 찜하기, 문의하기 버튼 영역 제거 */}
+              <div className="flex gap-3">
+                <Button 
+                  variant={isLiked ? "default" : "outline"} 
+                  size="sm" 
+                  className="flex-1" 
+                  onClick={() => setIsLiked(!isLiked)}
+                >
+                  <Heart className={`h-4 w-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
+                  좋아요 {product.likes ? `(${product.likes})` : ''}
+                </Button>
 
-              <Button variant="outline" size="sm" className="w-full" onClick={handleShare}>
-                <Share2 className="h-4 w-4 mr-2" />
-                공유
-              </Button>
+                <Button variant="outline" size="sm" className="flex-1" onClick={handleShare}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  공유
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="mt-12 space-y-8">
-          <Card><CardContent className="p-6"><h3 className="text-xl font-semibold mb-4">상품 상세 설명</h3>{product.description ? (<div className="prose max-w-none text-muted-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description }} />) : (<p className="text-muted-foreground">상세 설명이 없습니다.</p>)}</CardContent></Card>
-          {product.features && product.features.length > 0 && (<Card><CardContent className="p-6"><h3 className="text-xl font-semibold mb-4">상품 특징</h3><ul className="space-y-2">{product.features.map((feature, index) => (<li key={index} className="flex items-center gap-2"><span className="w-2 h-2 bg-primary rounded-full"></span><span>{feature}</span></li>))}</ul></CardContent></Card>)}
-          {product.specifications && Object.keys(product.specifications).length > 0 && (<Card><CardContent className="p-6"><h3 className="text-xl font-semibold mb-4">상품 사양</h3><div className="space-y-3">{Object.entries(product.specifications).map(([key, value]) => (<div key={key} className="flex flex-col sm:flex-row gap-2"><dt className="font-medium text-muted-foreground min-w-[120px]">{key}</dt><dd className="flex-1">{String(value)}</dd></div>))}</div></CardContent></Card>)}
-        </div>
+             {/* 상품 상세 설명 */}
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-xl font-semibold mb-4">상품 상세 설명</h3>
+            {product.description ? (
+              <div 
+                className="prose max-w-none text-muted-foreground leading-relaxed" 
+                dangerouslySetInnerHTML={{ __html: product.description }} 
+              />
+            ) : (
+              <p className="text-muted-foreground">상세 설명이 없습니다.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 상품 특징 (있는 경우만) */}
+        {product.features && product.features.length > 0 && (
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold mb-4">상품 특징</h3>
+              <ul className="space-y-2">
+                {product.features.map((feature, index) => (
+                  <li key={index} className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-primary rounded-full"></span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 상품 사양 (있는 경우만) */}
+        {product.specifications && Object.keys(product.specifications).length > 0 && (
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold mb-4">상품 사양</h3>
+              <div className="space-y-3">
+                {Object.entries(product.specifications).map(([key, value]) => (
+                  <div key={key} className="flex flex-col sm:flex-row gap-2">
+                    <dt className="font-medium text-muted-foreground min-w-[120px]">
+                      {key}
+                    </dt>
+                    <dd className="flex-1">{String(value)}</dd>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* 탭 기반 리뷰/추천 상품 섹션 */}
+        <ProductDetailTabs 
+          productId={id!}
+          peermallId={product.peermall_id}
+          averageRating={product.rating || 0}
+          totalReviews={product.review_count || 0}
+        />
       </div>
-      
-      {/* 수정 모달 렌더링 */}
-      <ProductModal 
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSuccess={handleUpdateSuccess}
-        mode="edit"
-        productToEdit={product}
-      />
+    </div>
+    
+    {/* 수정 모달 */}
+    <ProductModal 
+      isOpen={isEditModalOpen}
+      onClose={() => setIsEditModalOpen(false)}
+      onSuccess={handleUpdateSuccess}
+      mode="edit"
+      productToEdit={product}
+    />
     </>
   );
 };
