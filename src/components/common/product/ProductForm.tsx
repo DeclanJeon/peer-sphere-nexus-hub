@@ -18,12 +18,10 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 
-// 폼 데이터 타입을 정의합니다.
+// [수정] 사용하지 않는 price, costPrice 필드 제거
 export interface ProductFormData {
   name: string;
-  price: string;
   sellingPrice: string;
-  costPrice: string;
   shippingFee: string;
   description: string;
   brand: string;
@@ -33,19 +31,16 @@ export interface ProductFormData {
   imageUrl: string;
 }
 
-// 부모로부터 받을 Props 타입을 정의합니다.
 interface ProductFormProps {
   initialData?: Partial<ProductFormData>;
   onSubmit: (data: FormData) => void;
-  formId: string; // 부모의 버튼과 연결하기 위한 ID
+  formId: string;
 }
 
-// 부모 컴포넌트에서 호출할 수 있는 함수들을 정의합니다.
 export interface ProductFormRef {
   reset: () => void;
 }
 
-// Tiptap 에디터 툴바
 const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
   return (
@@ -63,15 +58,14 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
   ({ initialData, onSubmit, formId }, ref) => {
     const { toast } = useToast();
     
-    // 폼 상태 관리
+    // [수정] 사용하지 않는 price, costPrice 필드 제거
     const [formData, setFormData] = useState<ProductFormData>({
-      name: '', price: '', sellingPrice: '', costPrice: '', shippingFee: '',
+      name: '', sellingPrice: '', shippingFee: '',
       description: '', brand: '', brandWebsite: '', manufacturer: '', distributor: '', imageUrl: ''
     });
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-    // Tiptap 에디터 설정
     const editor = useEditor({
       extensions: [StarterKit, Image, Link.configure({ openOnClick: false })],
       content: '',
@@ -80,10 +74,10 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
       },
     });
 
-    // 폼 초기화 로직
     const resetForm = () => {
+      // [수정] 사용하지 않는 price, costPrice 필드 제거
       setFormData({
-        name: '', price: '', sellingPrice: '', costPrice: '', shippingFee: '',
+        name: '', sellingPrice: '', shippingFee: '',
         description: '', brand: '', brandWebsite: '', manufacturer: '', distributor: '', imageUrl: ''
       });
       setImageFile(null);
@@ -91,20 +85,16 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
       editor?.commands.setContent('');
     };
 
-    // 부모가 reset 함수를 호출할 수 있도록 ref를 통해 노출
     useImperativeHandle(ref, () => ({
       reset: resetForm,
     }));
 
-    // initialData가 변경되면 폼을 업데이트
     useEffect(() => {
       if (initialData) {
-        // 모든 필드를 initialData로 업데이트
+        // [수정] 사용하지 않는 price, costPrice 필드 제거
         const newFormData: ProductFormData = {
           name: initialData.name || '',
-          price: initialData.price || '',
           sellingPrice: initialData.sellingPrice || '',
-          costPrice: initialData.costPrice || '',
           shippingFee: initialData.shippingFee || '',
           description: initialData.description || '',
           brand: initialData.brand || '',
@@ -120,7 +110,7 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
         }
         if (initialData.imageUrl) {
           setImagePreview(initialData.imageUrl);
-          setImageFile(null); // URL 이미지를 받았으므로 파일은 초기화
+          setImageFile(null);
         } else {
           setImagePreview(null);
         }
@@ -130,41 +120,61 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialData, editor]);
 
-    // 입력 값 변경 핸들러
     const handleInputChange = (field: keyof ProductFormData, value: string) => {
       setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    // 이미지 파일 선택
+    const handleNumericInputChange = (field: keyof ProductFormData, value: string) => {
+      const numericValue = value.replace(/[^0-9]/g, '');
+      handleInputChange(field, numericValue);
+    };
+
+    // ✨ [새로운 추가] 이미지 파일 처리 로직을 별도 함수로 분리
+    const processImageFile = (file: File) => {
+      if (file.size > 5 * 1024 * 1024) { // 5MB 제한
+        toast({ variant: "destructive", title: "파일 크기 초과", description: "이미지는 5MB 이하로 업로드해주세요." });
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+        setFormData(prev => ({ ...prev, imageUrl: '' }));
+      };
+      reader.readAsDataURL(file);
+    }
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
-        if (file.size > 5 * 1024 * 1024) { // 5MB 제한
-          toast({ variant: "destructive", title: "파일 크기 초과", description: "이미지는 5MB 이하로 업로드해주세요." });
-          return;
-        }
-        setImageFile(file);
-        const reader = new FileReader();
-        reader.onload = () => {
-          setImagePreview(reader.result as string);
-          setFormData(prev => ({ ...prev, imageUrl: '' })); // URL 이미지는 초기화
-        };
-        reader.readAsDataURL(file);
+        processImageFile(file);
       }
     };
+    
+    // ✨ [새로운 추가] 클립보드 붙여넣기 이벤트 핸들러
+    const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+      const items = e.clipboardData.items;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault(); // 기본 붙여넣기 동작 방지
+            processImageFile(file);
+            break; // 첫 번째 이미지만 처리
+          }
+        }
+      }
+    }
 
-    // 이미지 제거
     const removeImage = () => {
       setImageFile(null);
       setImagePreview(null);
       setFormData(prev => ({ ...prev, imageUrl: '' }));
     };
 
-    // 폼 제출 핸들러
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
 
-      // 유효성 검사
       if (!formData.name.trim()) {
         toast({ variant: "destructive", title: "입력 오류", description: "제품명을 입력해주세요." });
         return;
@@ -174,37 +184,29 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
         return;
       }
       
-      // FormData 객체 생성
       const submitData = new FormData();
       
-      // 모든 폼 데이터 추가
       Object.entries(formData).forEach(([key, value]) => {
         if (key === 'description') {
           submitData.append(key, editor?.getHTML() || '');
-        } else if (key !== 'imageUrl' && value) { // imageUrl은 파일 처리 후 별도 관리
+        } else if (key !== 'imageUrl' && value) {
           submitData.append(key, value);
         }
       });
       
-      // 가격(정가)이 비어있으면 판매가로 채움
-      if (!formData.price) {
-        submitData.set('price', formData.sellingPrice);
-      }
+      // [수정] price 필드 관련 로직 제거
       
-      // 이미지 처리
       if (imageFile) {
         submitData.append('image', imageFile);
       } else if (formData.imageUrl) {
-        // 파일이 없고 URL만 있을 경우 imageUrl 필드로 전송
         submitData.append('imageUrl', formData.imageUrl);
       }
       
-      // 부모 컴포넌트에 최종 데이터 전달
       onSubmit(submitData);
     };
 
     return (
-      <form id={formId} onSubmit={handleSubmit} className="space-y-6">
+      <form id={formId} onSubmit={handleSubmit} className="space-y-6 p-3">
         {/* 제품 정보 입력 */}
         <div className="space-y-4">
           <h3 className="font-medium flex items-center gap-2">제품 정보</h3>
@@ -212,24 +214,29 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
             <Label htmlFor="name">제품/상품 명 <span className="text-red-500">*</span></Label>
             <Input id="name" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} required />
           </div>
+          {/* [수정] price, costPrice 필드 레이아웃에서 제거 */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="price">제품/상품 가격</Label>
-              <Input id="price" type="number" value={formData.price} onChange={(e) => handleInputChange('price', e.target.value)} placeholder="할인 시 정가 입력" />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="sellingPrice">제품/상품 판매 가격 <span className="text-red-500">*</span></Label>
-              <Input id="sellingPrice" type="number" value={formData.sellingPrice} onChange={(e) => handleInputChange('sellingPrice', e.target.value)} required />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="costPrice">제품/상품 원가</Label>
-              <Input id="costPrice" type="number" value={formData.costPrice} onChange={(e) => handleInputChange('costPrice', e.target.value)} placeholder="선택입력" />
+              <Input 
+                id="sellingPrice" 
+                type="text" 
+                inputMode="numeric"
+                value={formData.sellingPrice} 
+                onChange={(e) => handleNumericInputChange('sellingPrice', e.target.value)} 
+                required 
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="shippingFee">제품/상품 배송비</Label>
-              <Input id="shippingFee" type="number" value={formData.shippingFee} onChange={(e) => handleInputChange('shippingFee', e.target.value)} placeholder="선택입력" />
+              <Input 
+                id="shippingFee" 
+                type="text" 
+                inputMode="numeric"
+                value={formData.shippingFee} 
+                onChange={(e) => handleNumericInputChange('shippingFee', e.target.value)} 
+                placeholder="선택입력" 
+              />
             </div>
           </div>
         </div>
@@ -239,17 +246,22 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
           <Label>이미지 업로드</Label>
           {imagePreview ? (
             <div className="relative w-full">
-              <img src={imagePreview} alt="상품 이미지" className="w-full h-64 object-cover rounded-lg border" />
+              {/* [수정] object-cover를 object-contain으로 변경하고 max-h-96 설정 */}
+              <img src={imagePreview} alt="상품 이미지" className="w-full max-h-96 object-contain rounded-lg border bg-slate-50" />
               <Button type="button" variant="destructive" size="sm" className="absolute top-2 right-2" onClick={removeImage}><X className="h-4 w-4" /></Button>
               {formData.imageUrl && !imageFile && (
                 <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">기존 이미지</div>
               )}
             </div>
           ) : (
-            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+            // ✨ [새로운 추가] onPaste 이벤트 핸들러 추가
+            <div 
+              className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center"
+              onPaste={handlePaste}
+            >
               <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
               <Label htmlFor="image-upload" className="cursor-pointer text-primary hover:text-primary/80 font-medium">
-                클릭하여 이미지 업로드
+                클릭 또는 이미지 붙여넣기
                 <Input id="image-upload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
               </Label>
               <p className="text-xs text-muted-foreground mt-1">JPG, PNG 파일 (최대 5MB)</p>

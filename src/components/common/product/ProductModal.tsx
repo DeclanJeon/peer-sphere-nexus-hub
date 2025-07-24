@@ -59,9 +59,7 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
       // 수정 모드일 때 기존 데이터로 폼 초기화
       const formDataFromProduct: Partial<ProductFormData> = {
         name: productToEdit.name || '',
-        price: productToEdit.price?.toString() || '',
         sellingPrice: productToEdit.selling_price?.toString() || '',
-        costPrice: productToEdit.cost_price?.toString() || '',
         shippingFee: productToEdit.shipping_fee?.toString() || '',
         description: productToEdit.description || '',
         brand: productToEdit.brand || '',
@@ -90,7 +88,6 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
       
       const parsedData: Partial<ProductFormData> = {
         name: ogData.title || '',
-        price: ogData.price?.replace(/[^0-9]/g, '') || '',
         sellingPrice: ogData.price?.replace(/[^0-9]/g, '') || '',
         brand: ogData.brand || '',
         brandWebsite: ogData.url || '',
@@ -158,20 +155,11 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
               <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Globe className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="font-medium">URL로 상품 정보 가져오기</h3>
+                  <h3 className="font-medium">판매 상품 주소를 입력 하세요</h3>
                 </div>
                 <div className="flex gap-2">
                   <Input type="url" value={productUrl} onChange={(e) => setProductUrl(e.target.value)} placeholder="https://www.example.com/product/..." disabled={isParsing} />
-                  <Button type="button" onClick={handleUrlImport} disabled={isParsing || !productUrl.trim()} variant="secondary">
-                    {isParsing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />가져오는 중...</> : <><LinkIcon className="mr-2 h-4 w-4" />가져오기</>}
-                  </Button>
                 </div>
-                {hasImportedData && (
-                  <Alert className="border-green-200 bg-green-50 text-green-800">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <AlertDescription>상품 정보를 가져왔습니다. 아래 내용을 확인하고 수정해주세요.</AlertDescription>
-                  </Alert>
-                )}
               </div>
               <Separator />
             </>
