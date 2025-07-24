@@ -198,7 +198,7 @@ const CommunityPage = () => {
             </p>
           </div>
           {/* 메인 피어몰이 아닐 때만 글쓰기 버튼 표시 */}
-          {!isMainPeermall && (
+          {isAuthenticated && (
             <Button 
               onClick={handleWriteClick}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
