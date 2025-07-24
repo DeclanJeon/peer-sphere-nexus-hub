@@ -23,20 +23,9 @@ import UserPeermallHome from "@/pages/user-peermall/UserPeermallHome";
 // Shared Pages (used by both main and user peermalls)
 
 // Community pages
-import Community from "@/pages/main/community/Community";
 import BoardDetail from "@/components/common/community/BoardDetail";
 
-// Event pages
-// import Events from "@/pages/main/events/Events";
-
 // My pages
-import MyInfo from "@/pages/main/mypage/MyInfo";
-import MyPage from "@/pages/main/mypage/MyPage";
-import MyMall from "@/pages/main/mypage/MyMall";
-import MyMallInfo from "@/pages/main/mypage/MyMallInfo";
-import MyPosts from "@/pages/main/mypage/MyPosts";
-import MyProducts from "@/pages/main/mypage/MyProducts";
-import MyReviews from "@/pages/main/mypage/MyReviews";
 import ManagePage from "@/pages/main/mypage/ManagePage";
 
 // QR Code
@@ -50,6 +39,12 @@ import EventDetail from "@/components/common/event/EventDetail";
 import EventCreate from "@/components/common/event/EventCreate";
 import EventPage from "@/pages/common/EventPage";
 import ProductDetail from "./components/common/product/ProductDetail";
+import { ProfileManagement } from "./components/admin/ProfileManagement";
+import { PeermallManagement } from "./components/admin/PeermallManagement";
+import { ProductManagement } from "./components/admin/ProductManagement";
+import { CommunityManagement } from "./components/admin/CommunityManagement";
+import { EventManagement } from "./components/admin/EventManagement";
+import { OverviewSection } from "./components/admin/OverviewSection";
 
 const queryClient = new QueryClient();
 
@@ -98,69 +93,21 @@ const App = () => (
 
               {/* MyPage Routes - 로그인 필요 */}
               <Route 
-                path="/mypage" 
+                path="/mypage/manage"
                 element={
                   <ProtectedRoute>
-                    <MainLayout><MyPage /></MainLayout>
+                    <MainLayout><ManagePage /></MainLayout>
                   </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/info" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyInfo /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/mall" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyMall /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/mall-info" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyMallInfo /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/posts" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyPosts /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/products" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyProducts /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/reviews" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout><MyReviews /></MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/mypage/manage" 
-                element={
-                  <ProtectedRoute>
-                    <ManagePage />
-                  </ProtectedRoute>
-                } 
-              />
+                }
+              >
+                <Route index element={<OverviewSection />} />
+                <Route path="overview" element={<OverviewSection />} />
+                <Route path="profile" element={<ProfileManagement />} />
+                <Route path="peermall" element={<PeermallManagement />} />
+                <Route path="products" element={<ProductManagement />} />
+                <Route path="community" element={<CommunityManagement />} />
+                <Route path="events" element={<EventManagement />} />
+              </Route>
               
               {/* QR Code - 로그인 필요 */}
               <Route 

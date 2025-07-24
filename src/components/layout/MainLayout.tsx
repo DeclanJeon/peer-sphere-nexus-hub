@@ -119,15 +119,45 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                       </div>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link to="/mypage/info" className="flex items-center">
+                        <Link to="/mypage/manage/profile" className="flex items-center">
                           <Settings className="mr-2 h-4 w-4" />
                           <span>내 정보 관리</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/mypage/mall" className="flex items-center">
+                        <Link to="/mypage/manage/peermall" className="flex items-center">
                           <Store className="mr-2 h-4 w-4" />
                           <span>내 피어몰 관리</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/mypage/manage/products" className="flex items-center">
+                          <Store className="mr-2 h-4 w-4" />
+                          <span>내 제품 관리</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/mypage/manage/products/reviews" className="flex items-center">
+                          <Store className="mr-2 h-4 w-4" />
+                          <span>내 제품 리뷰 관리</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/mypage/manage/community" className="flex items-center">
+                          <Store className="mr-2 h-4 w-4" />
+                          <span>내 게시글 관리</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/mypage/manage/community/comments" className="flex items-center">
+                          <Store className="mr-2 h-4 w-4" />
+                          <span>내 게시글 댓글 관리</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/mypage/manage/events" className="flex items-center">
+                          <Store className="mr-2 h-4 w-4" />
+                          <span>내 이벤트 관리</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
