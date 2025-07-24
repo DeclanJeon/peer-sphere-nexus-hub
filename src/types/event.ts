@@ -6,19 +6,26 @@
  */
 export interface EventBase {
   peermall_url: string;
-  id: string; // 데이터베이스에서는 INT지만, API 통신 시 문자열로 변환될 수 있으므로 string으로 통일
+  id: string;
   peermall_id: string;
   user_uid?: string;
   title: string;
   content: string;
-  event_start_date: string; // YYYY-MM-DD 형식의 문자열
-  event_end_date: string; // YYYY-MM-DD 형식의 문자열
+  event_start_date: string;
+  event_end_date: string;
   image_url?: string;
   category?: string;
   views?: number;
   participants?: number;
   created_at?: string;
   updated_at?: string;
+
+  // 수정된 필드들
+  registration_source?: 'main' | 'peermall';
+  user_email?: string; // user_name 대신 user_email
+  user_name?: string;
+  user_profile_image?: string; // 추가
+  peermall_name?: string;
 }
 
 /**

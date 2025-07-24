@@ -61,7 +61,7 @@ const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: B
                 value={formData.author_name}
                 onChange={(e) => setFormData({ ...formData, author_name: e.target.value })}
                 required
-                disabled={true}
+                disabled={loading}
                 placeholder="작성자 이름을 입력하세요"
                 maxLength={100}
               />

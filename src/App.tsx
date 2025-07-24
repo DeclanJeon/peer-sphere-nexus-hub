@@ -83,6 +83,7 @@ const App = () => (
 
               <Route path="/events" element={<MainLayout><EventPage /></MainLayout>} />
               <Route path="/event/create" element={<ProtectedRoute><MainLayout><EventCreate /></MainLayout></ProtectedRoute>} />
+              <Route path="event/:id" element={<ProtectedRoute><MainLayout><EventDetail /></MainLayout></ProtectedRoute>} />
               
               {/* User Peermall Routes */}
               <Route path="/home/:url" element={<UserPeermallPage />}>
