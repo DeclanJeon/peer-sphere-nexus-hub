@@ -53,6 +53,7 @@ const BoardCreate = () => {
       }
       
       const newPost: Post = {
+        num: 0,
         id: 0, // This will be assigned by the backend
         peermall_name: peermallName,
         peermall_url: peermallUrl,
