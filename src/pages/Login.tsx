@@ -140,13 +140,13 @@ const Login = () => {
           title: "로그인 완료",
           description: "성공적으로 로그인되었습니다.",
         });
-        
+
         // 원래 가려던 페이지로 리다이렉트
         // location.state가 null일 수 있으므로 optional chaining 사용
         const state = location.state as LocationState | null;
         const from = state?.from?.pathname || '/';
-
-        navigate(from, { replace: true });
+        //navigate(from, { replace: true });
+        navigate(`/home/${response.data.data.peermall.url}`);
       }
     } catch (error: any) {
       setError(error.response?.data?.message || '로그인에 실패했습니다.');
