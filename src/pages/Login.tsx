@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Mail, KeyRound } from 'lucide-react';
+import { Loader2, Mail, KeyRound, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import apiClient from '@/lib/api/clients';
@@ -27,13 +27,21 @@ const Login = () => {
   const [error, setError] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
+  const [rateLimitRetryAfter, setRateLimitRetryAfter] = useState<number | null>(null);
+  
+  // 계정 잠금 관련 state 추가
+  const [accountLocked, setAccountLocked] = useState<{
+    isLocked: boolean;
+    remainingMinutes: number;
+    unlockTime: string;
+  } | null>(null);
 
   // 이미 로그인된 경우 리다이렉트
   useEffect(() => {
     if (isAuthenticated) {
       const state = location.state as LocationState | null;
       const from = state?.from?.pathname || '/';
-
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);
@@ -46,13 +54,46 @@ const Login = () => {
     }
   }, [resendTimer]);
 
+  // Rate limit 타이머
+  useEffect(() => {
+    if (rateLimitRetryAfter && rateLimitRetryAfter > 0) {
+      const timer = setTimeout(() => {
+        setRateLimitRetryAfter(prev => prev ? prev - 1 : null);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (rateLimitRetryAfter === 0) {
+      setRateLimitRetryAfter(null);
+      setError('');
+    }
+  }, [rateLimitRetryAfter]);
+
+  // 계정 잠금 타이머
+  useEffect(() => {
+    if (accountLocked && accountLocked.remainingMinutes > 0) {
+      const timer = setInterval(() => {
+        const now = new Date();
+        const unlockTime = new Date(accountLocked.unlockTime);
+        const remainingMs = unlockTime.getTime() - now.getTime();
+        
+        if (remainingMs <= 0) {
+          setAccountLocked(null);
+          setError('');
+        } else {
+          const remainingMinutes = Math.ceil(remainingMs / (1000 * 60));
+          setAccountLocked(prev => prev ? { ...prev, remainingMinutes } : null);
+        }
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [accountLocked]);
+
   // 디바이스 정보 수집
   const getDeviceInfo = () => {
     const userAgent = navigator.userAgent;
     const platform = navigator.platform;
     const language = navigator.language;
     
-    // 간단한 디바이스 타입 판별
     let deviceType = 'desktop';
     if (/Mobile|Android|iPhone/i.test(userAgent)) {
       deviceType = 'mobile';
@@ -75,13 +116,16 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    setRemainingAttempts(null);
+    setAccountLocked(null);
 
     try {
-      // 테스트용 이메일인 경우 하드코딩된 OTP 사용
+      // 테스트용 이메일인 경우
       if (email === 'peermall@example.com') {
         setOtpSent(true);
         setStep('otp');
-        setResendTimer(180); // 3분 타이머
+        setResendTimer(180);
+        setRemainingAttempts(5); // 기본 시도 횟수
         toast({
           title: "인증번호 발송",
           description: "테스트용 인증번호가 발급되었습니다. (123456)",
@@ -101,14 +145,34 @@ const Login = () => {
       if (response.data.success) {
         setOtpSent(true);
         setStep('otp');
-        setResendTimer(180); // 3분 타이머
+        setResendTimer(180);
+        setRemainingAttempts(5); // 기본 시도 횟수
         toast({
           title: "인증번호 발송",
           description: "이메일로 인증번호가 발송되었습니다.",
         });
       }
     } catch (error: any) {
-      setError(error.response?.data?.message || '인증번호 발송에 실패했습니다.');
+      console.error('OTP 발송 오류:', error);
+      
+      // 계정 잠금 에러 처리
+      if (error.response?.status === 423) {
+        const data = error.response.data;
+        setAccountLocked({
+          isLocked: true,
+          remainingMinutes: data.remainingMinutes,
+          unlockTime: data.unlockTime,
+        });
+        setError(data.message);
+      }
+      // Rate limit 에러 처리
+      else if (error.response?.status === 429) {
+        const retryAfter = error.response.data.retryAfter || 60;
+        setRateLimitRetryAfter(retryAfter);
+        setError(`너무 많은 요청입니다. ${retryAfter}초 후에 다시 시도해주세요.`);
+      } else {
+        setError(error.response?.data?.message || '인증번호 발송에 실패했습니다.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -133,9 +197,8 @@ const Login = () => {
       if (response.data.success) {
         const { session, user } = response.data.data;
         
-        // AuthContext의 login 함수 호출
         login(session, user);
-        
+
         toast({
           title: "로그인 완료",
           description: "성공적으로 로그인되었습니다.",
@@ -149,11 +212,39 @@ const Login = () => {
         navigate(`/home/${response.data.data.peermall.url}`);
       }
     } catch (error: any) {
-      setError(error.response?.data?.message || '로그인에 실패했습니다.');
+      console.error('OTP 검증 오류:', error);
       
-      // OTP 만료 또는 잘못된 OTP인 경우
-      if (error.response?.status === 401) {
+      // Rate limit 에러 처리
+      if (error.response?.status === 429) {
+        const retryAfter = error.response.data.retryAfter || 60;
+        setRateLimitRetryAfter(retryAfter);
+        setError(`너무 많은 시도입니다. ${retryAfter}초 후에 다시 시도해주세요.`);
         setOtp('');
+      } 
+      // OTP 검증 실패 처리
+      else if (error.response?.data?.code === 'OTP_INVALID') {
+        const remaining = error.response.data.remainingAttempts;
+        setRemainingAttempts(remaining);
+        setError(error.response.data.message);
+        setOtp('');
+        
+        // 남은 시도 횟수가 적을 때 경고
+        if (remaining <= 2) {
+          toast({
+            title: "주의",
+            description: `남은 시도 횟수: ${remaining}번`,
+            variant: 'destructive',
+          });
+        }
+      }
+      // OTP 만료 또는 기타 에러
+      else {
+        setError(error.response?.data?.message || '로그인에 실패했습니다.');
+        if (error.response?.data?.code === 'OTP_EXPIRED' || 
+            error.response?.data?.code === 'OTP_MAX_ATTEMPTS') {
+          setOtp('');
+          setRemainingAttempts(null);
+        }
       }
     } finally {
       setIsLoading(false);
@@ -162,43 +253,37 @@ const Login = () => {
 
   // OTP 재전송
   const handleResendOTP = async () => {
-    if (resendTimer > 0) return;
-    
     setError('');
     setIsLoading(true);
+    setRemainingAttempts(null);
 
     try {
       const deviceInfo = getDeviceInfo();
       
-      // 백엔드의 resend-otp 엔드포인트 호출
       const response = await apiClient.post('/users/login/resend-otp', {
         email,
         deviceInfo,
-        purpose: 'login' // 로그인 목적임을 명시
+        purpose: 'login'
       });
 
       if (response.data.success) {
-        // 재전송 성공 시 타이머 초기화 (3분)
         setResendTimer(180);
-        // OTP 입력 필드 초기화
         setOtp('');
+        setRemainingAttempts(5); // 재전송 시 시도 횟수 초기화
         
-        // 성공 토스트 메시지 표시
         toast({
           title: "인증번호 재발송",
-          description: "새로운 인증번호가 이메일로 발송되었습니다. 3분 내에 입력해주세요.",
+          description: "새로운 인증번호가 이메일로 발송되었습니다.",
           variant: 'default',
-          duration: 5000 // 5초간 표시
+          duration: 5000
         });
       }
     } catch (error: any) {
       console.error('OTP 재전송 오류:', error);
       
-      // 에러 메시지 설정
-      const errorMessage = error.response?.data?.message || '인증번호 재발송에 실패했습니다. 잠시 후 다시 시도해주세요.';
+      const errorMessage = error.response?.data?.message || '인증번호 재발송에 실패했습니다.';
       setError(errorMessage);
       
-      // 에러 토스트 메시지 표시
       toast({
         title: "인증번호 발송 실패",
         description: errorMessage,
@@ -241,7 +326,36 @@ const Login = () => {
           <CardContent>
             {error && (
               <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* 계정 잠금 경고 */}
+            {accountLocked && accountLocked.isLocked && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="space-y-1">
+                    <p>계정이 일시적으로 잠겼습니다.</p>
+                    <p className="font-semibold">
+                      {accountLocked.remainingMinutes}분 후에 다시 시도해주세요.
+                    </p>
+                    <p className="text-xs">
+                      잠금 해제 시간: {new Date(accountLocked.unlockTime).toLocaleTimeString('ko-KR')}
+                    </p>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Rate limit 경고 */}
+            {rateLimitRetryAfter && rateLimitRetryAfter > 0 && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  잠시 후 다시 시도해주세요. ({rateLimitRetryAfter}초 남음)
+                </AlertDescription>
               </Alert>
             )}
 
@@ -259,7 +373,7 @@ const Login = () => {
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10"
                       required
-                      disabled={isLoading}
+                      disabled={isLoading || rateLimitRetryAfter !== null || (accountLocked?.isLocked ?? false)}
                     />
                   </div>
                 </div>
@@ -267,7 +381,7 @@ const Login = () => {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={isLoading || !email}
+                  disabled={isLoading || !email || rateLimitRetryAfter !== null || (accountLocked?.isLocked ?? false)}
                 >
                   {isLoading ? (
                     <>
@@ -278,11 +392,26 @@ const Login = () => {
                     '인증번호 받기'
                   )}
                 </Button>
+
+                {/* 계정 잠금 시 추가 안내 */}
+                {accountLocked?.isLocked && (
+                  <div className="text-center text-sm text-muted-foreground mt-4">
+                    <p>로그인 시도가 여러 번 실패하여 보안을 위해 계정이 일시적으로 잠겼습니다.</p>
+                    <p>잠시 후 다시 시도해주세요.</p>
+                  </div>
+                )}
               </form>
             ) : (
               <form onSubmit={handleVerifyOTP} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="otp">인증번호</Label>
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="otp">인증번호</Label>
+                    {remainingAttempts !== null && (
+                      <span className={`text-sm ${remainingAttempts <= 2 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                        남은 시도: {remainingAttempts}번
+                      </span>
+                    )}
+                  </div>
                   <div className="relative">
                     <KeyRound className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
@@ -294,7 +423,7 @@ const Login = () => {
                       className="pl-10"
                       maxLength={6}
                       required
-                      disabled={isLoading}
+                      disabled={isLoading || rateLimitRetryAfter !== null}
                     />
                   </div>
                 </div>
@@ -302,7 +431,7 @@ const Login = () => {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={isLoading || otp.length !== 6}
+                  disabled={isLoading || otp.length !== 6 || rateLimitRetryAfter !== null}
                 >
                   {isLoading ? (
                     <>
@@ -316,30 +445,29 @@ const Login = () => {
 
                 <div className="text-center">
                   <div className="flex flex-col items-center space-y-2">
+                    {resendTimer > 0 && (
+                      <span className="text-sm text-muted-foreground">
+                        인증번호 유효시간: {Math.floor(resendTimer / 60)}:{(resendTimer % 60).toString().padStart(2, '0')}
+                      </span>
+                    )}
+                    
                     <Button
                       type="button"
-                      variant={resendTimer > 0 ? 'outline' : 'link'}
+                      variant="link"
                       size="sm"
                       onClick={handleResendOTP}
-                      disabled={resendTimer > 0 || isLoading}
-                      className={`text-sm ${resendTimer > 0 ? 'text-muted-foreground' : 'text-primary'}`}
+                      disabled={isLoading || rateLimitRetryAfter !== null}
+                      className="text-sm text-primary"
                     >
                       {isLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           처리 중...
                         </>
-                      ) : resendTimer > 0 ? (
-                        `재전송 가능 (${Math.floor(resendTimer / 60)}:${(resendTimer % 60).toString().padStart(2, '0')})`
                       ) : (
                         '인증번호 재전송'
                       )}
                     </Button>
-                    {resendTimer > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        {Math.ceil(resendTimer / 60)}분 후에 재발송이 가능합니다
-                      </p>
-                    )}
                   </div>
                 </div>
               </form>
@@ -361,6 +489,9 @@ const Login = () => {
                       setStep('email');
                       setOtp('');
                       setError('');
+                      setRemainingAttempts(null);
+                      setRateLimitRetryAfter(null);
+                      setAccountLocked(null);
                     }}
                     className="text-sm p-0"
                   >

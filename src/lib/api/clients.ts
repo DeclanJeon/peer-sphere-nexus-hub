@@ -3,8 +3,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { toast } from '@/hooks/use-toast';
 
 // API 베이스 URL 설정
-export const API_BASE_URL =
-  process.env.VITE_API_URL || 'http://localhost:9393';
+export const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:9393';
 
 // Axios 인스턴스 생성
 export const apiClient = axios.create({
