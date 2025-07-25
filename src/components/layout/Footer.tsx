@@ -39,9 +39,8 @@ const Footer = () => {
               <h3 className="text-lg font-semibold text-gray-900">사업자 정보</h3>
               <div className="text-sm text-gray-600 space-y-1">
                 <p>피어테라㈜ | 대표이사: 김기환</p>
-                <p>선유로13길 25, 에이스하이테크시티2 408호</p>
-                <p>사업자 등록번호: 110-00-00000</p>
-                <p>통신판매업신고: 2017-서울송파-0680</p>
+                <p>선유로13길 25, 에이스하이테크시티2 408-A</p>
+                <p>사업자 등록번호: 375-81-03574</p>
               </div>
             </div>
 
