@@ -35,7 +35,8 @@ const UserPeermallHome = () => {
       />
       <UserContentSection 
         activeTab={activeTab} 
-        selectedCategory={selectedCategory} 
+        selectedCategory={selectedCategory}
+        searchQuery={searchQuery}
       />
     </div>
   );

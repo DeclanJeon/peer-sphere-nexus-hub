@@ -15,9 +15,10 @@ import { Product } from '@/types/product'; // [추가] Product 타입 import
 interface UserContentSectionProps {
   activeTab: string;
   selectedCategory: string;
+  searchQuery: string;
 }
 
-const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionProps) => {
+const UserContentSection = ({ activeTab, selectedCategory, searchQuery }: UserContentSectionProps) => {
   const params = useParams<{ url: string }>();
   const navigate = useNavigate();
   const { currentPeermall } = usePeermall();
@@ -103,7 +104,7 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
   };
 
   // 상품 섹션 렌더링
-  const renderProductSection = () => {
+  const renderProductSection = (filteredNewProducts, filteredBestProducts) => {
     // [수정] 로딩/에러 상태를 먼저 체크
     const loadingOrErrorUI = renderLoadingOrError();
     if (loadingOrErrorUI) {
@@ -134,7 +135,7 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
             <CardContent>
               {/* [수정] 직접 fetching한 데이터를 products prop으로 전달 */}
               <ProductList 
-                products={newProducts}
+                products={filteredNewProducts}
                 mode="full" // 미리보기 모드는 ProductList에서 제거하거나, CSS로 처리하는 것을 권장
               />
             </CardContent>
@@ -159,7 +160,7 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
             <CardContent>
               {/* [수정] 직접 fetching한 데이터를 products prop으로 전달 */}
               <ProductList 
-                products={bestProducts}
+                products={filteredBestProducts}
                 mode="full"
               />
             </CardContent>
@@ -169,7 +170,61 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
     );
   };
 
+  // 검색 및 카테고리 필터링 함수
+  const getFilteredProducts = (newProducts: Product[], bestProducts: Product[]) => {
+    let filteredNewProducts = [];
+    let filteredBestProducts = [];
+
+    // 카테고리 필터링
+    if (selectedCategory !== 'all') {
+      filteredNewProducts = newProducts.filter(product => 
+        (product.category || product.familyCompany || '').toLowerCase() === selectedCategory.toLowerCase()
+      );
+
+      filteredBestProducts = bestProducts.filter(product => 
+        (product.category || product.familyCompany || '').toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
+
+    // 검색어 필터링
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+
+      filteredNewProducts = newProducts.filter(product => 
+        product.name.toLowerCase().includes(query) ||
+        (product.description || '').toLowerCase().includes(query) ||
+        (product.category || '').toLowerCase().includes(query) ||
+        (product.brand || '').toLowerCase().includes(query)
+      );
+
+      filteredBestProducts = bestProducts.filter(product => 
+        product.name.toLowerCase().includes(query) ||
+        (product.description || '').toLowerCase().includes(query) ||
+        (product.category || '').toLowerCase().includes(query) ||
+        (product.brand || '').toLowerCase().includes(query)
+      );
+    }
+
+    return { filteredNewProducts, filteredBestProducts };
+  };
+
   const renderContent = () => {
+    // 검색어가 있을 때
+    if (searchQuery.trim()) {
+      const { filteredNewProducts, filteredBestProducts } = getFilteredProducts(newProducts, bestProducts);
+      
+      if (filteredNewProducts.length === 0 && filteredBestProducts.length === 0) {
+        return (
+          <div className="text-center py-12 text-muted-foreground">
+            <p className="text-lg font-medium">''{searchQuery}''에 대한 검색 결과가 없습니다.</p>
+            <p className="text-sm mt-2">다른 검색어를 시도해보세요.</p>
+          </div>
+        );
+      }
+
+      return renderProductSection(filteredNewProducts, filteredBestProducts);
+    }
+
     if (!currentPeermallId) {
       return (
         <Card className="shadow-lg">
@@ -235,7 +290,7 @@ const UserContentSection = ({ activeTab, selectedCategory }: UserContentSectionP
 
       default:
         // 'all', 'new', 'best' 탭에서는 상품 섹션을 렌더링
-        return renderProductSection();
+        return renderProductSection(newProducts, bestProducts);
     }
   };
 
