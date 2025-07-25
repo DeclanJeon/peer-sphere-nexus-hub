@@ -19,6 +19,7 @@ import { ogParserApi } from '@/services/og-parser.api';
 import { usePeermall } from '@/contexts/PeermallContext';
 import ProductForm, { ProductFormData, ProductFormRef } from '@/components/common/product/ProductForm';
 import { Product } from '@/types/product';
+import { useNavigate } from 'react-router-dom';
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasImportedData, setHasImportedData] = useState(false);
   const [initialFormData, setInitialFormData] = useState<Partial<ProductFormData>>({});
+  const navigate = useNavigate();
 
   // 모달이 닫힐 때 모든 상태를 초기화
   const resetAll = () => {
@@ -131,6 +133,10 @@ const ProductModal = ({ isOpen, onClose, onSuccess, mode, productToEdit }: Produ
       }
       onSuccess?.();
       onClose();
+
+      // 임시방편
+      location.reload();
+      
     } catch (error) {
       console.error(`상품 ${isEditMode ? '수정' : '등록'} 오류:`, error);
       toast({ variant: "destructive", title: `${isEditMode ? '수정' : '등록'} 실패`, description: `상품 ${isEditMode ? '수정' : '등록'} 중 오류가 발생했습니다.` });

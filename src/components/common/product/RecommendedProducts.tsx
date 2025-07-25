@@ -1,4 +1,3 @@
-// Frontend/src/components/common/product/RecommendedProducts.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -59,8 +58,12 @@ export const RecommendedProducts = ({
           status: 'active'
         });
         
-        // 현재 상품 제외
-        const filtered = allProducts.filter(p => p.id !== currentProductId);
+        // 현재 상품 제외 - ID 타입을 문자열로 통일
+        const filtered = allProducts.filter(p => {
+          const productIdStr = String(p.id);
+          const currentIdStr = String(currentProductId);
+          return productIdStr !== currentIdStr;
+        });
         
         // 카테고리 추출
         const uniqueCategories = Array.from(
@@ -81,7 +84,9 @@ export const RecommendedProducts = ({
       }
     };
 
-    fetchRecommendedProducts();
+    if (currentProductId && peermallId) {
+      fetchRecommendedProducts();
+    }
   }, [currentProductId, peermallId, toast]);
 
   // 필터링 및 정렬
@@ -216,23 +221,6 @@ export const RecommendedProducts = ({
             <ShoppingBag className="h-12 w-12 text-muted-foreground" />
           </div>
         )}
-        
-        {/* 할인 배지 */}
-        {/* {product.price && product.price !== product.selling_price && (
-          <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground">
-            {Math.round(((product.price - (product.selling_price || 0)) / product.price) * 100)}% OFF
-          </Badge>
-        )} */}
-        
-        {/* 찜하기 버튼 */}
-        {/* <Button
-          variant="ghost"
-          size="sm"
-          className="absolute top-2 right-2 bg-white/80 hover:bg-white text-muted-foreground hover:text-destructive"
-          onClick={(e) => handleWishlist(e, product.id)}
-        >
-          <Heart className="h-4 w-4" />
-        </Button> */}
         
         {/* 바로구매 버튼 (호버 시 표시) */}
         {product.product_url && (

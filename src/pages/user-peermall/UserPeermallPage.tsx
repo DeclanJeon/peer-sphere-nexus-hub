@@ -46,8 +46,7 @@ const UserPeermallPage = () => {
   }
 
   return (
-    <UserPeermallLayout>
-      <UserNavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+    <UserPeermallLayout activeTab={activeTab} setActiveTab={setActiveTab}>
       <Outlet context={{activeTab, setActiveTab}} />
     </UserPeermallLayout>
   );
