@@ -15,6 +15,9 @@ const BoardCreate = () => {
   const { currentPeermall } = usePeermall();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const { url } = useParams<{ url?: string; }>();
+  const isMainPeermall = !url;
+  const isPeermallOwner = !isMainPeermall && user?.user_uid === currentPeermall?.owner_uid;
 
   const handleSubmit = async (formData: {
     author_name: string;
@@ -87,6 +90,7 @@ const BoardCreate = () => {
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         loading={loading}
+        isPeermallOwner={isPeermallOwner}
       />
     </div>
   );

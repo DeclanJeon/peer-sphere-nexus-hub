@@ -18,9 +18,10 @@ interface BoardFormProps {
   }) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
+  isPeermallOwner?: boolean;
 }
 
-const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: BoardFormProps) => {
+const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false, isPeermallOwner }: BoardFormProps) => {
   const [formData, setFormData] = useState({
     author_name: '',
     title: '',
@@ -44,7 +45,12 @@ const BoardForm = ({ mode, initialData, onSubmit, onCancel, loading = false }: B
     await onSubmit(formData);
   };
 
-  const categories = ['공지', '일반', '질문', '정보', '운영팁', '자유'];
+  // 카테고리 전체와 일반 유저용 배열 분리
+  const allCategories = ['공지', '메세지 카드', '일반', '질문', '정보', '자유'];
+  const userCategories = allCategories.filter(
+    (cat) => cat !== '공지' && cat !== '메세지 카드'
+  );
+  const categories = isPeermallOwner ? allCategories : userCategories;
 
   return (
     <Card>
