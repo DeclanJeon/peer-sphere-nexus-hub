@@ -46,8 +46,6 @@ const EventCreate = () => {
         payload.append(key, value);
       });
 
-      console.log(currentPeermall)
-      
       // 메인 페이지 등록인 경우와 피어몰 등록인 경우 구분
       if (isMainPageCreate) {
         payload.append('registration_source', 'main');

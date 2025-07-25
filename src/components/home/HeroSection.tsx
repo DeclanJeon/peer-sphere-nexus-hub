@@ -1,7 +1,12 @@
-import { useState } from 'react';
+// components/HeroSection.tsx
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { eventApi } from '@/services/event.api';
+import { Event, EventBase } from '@/types/event';
+import { processEventData } from '@/lib/dateUtils';
 
 interface HeroSectionProps {
   categories: { name: string; icon: string; count: number }[];
@@ -9,35 +14,102 @@ interface HeroSectionProps {
 
 const HeroSection = ({ categories }: HeroSectionProps) => {
   const [currentBanner, setCurrentBanner] = useState(0);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  const eventBanners = [
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        // 모든 이벤트를 가져와서 진행중인 이벤트만 필터링
+        const allEvents: EventBase[] = await eventApi.getAllEvents();
+        const processedEvents = allEvents
+          .map(processEventData)
+          .filter(event => event.status === 'ongoing' || event.status === 'upcoming')
+          .sort((a, b) => {
+            // 진행중인 이벤트를 먼저, 그 다음 예정된 이벤트
+            if (a.status === 'ongoing' && b.status !== 'ongoing') return -1;
+            if (a.status !== 'ongoing' && b.status === 'ongoing') return 1;
+            // 같은 상태면 시작일 기준으로 정렬
+            return new Date(b.event_start_date).getTime() - new Date(a.event_start_date).getTime();
+          })
+          .slice(0, 5); // 최대 5개만 표시
+        
+        setEvents(processedEvents);
+      } catch (error) {
+        console.error('Failed to fetch events:', error);
+        // 에러 시 빈 배열로 설정
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+
+  // 기본 배너 (이벤트가 없을 때 표시)
+  const defaultBanners = [
     {
-      id: 1,
-      title: '신년 대축제 이벤트',
-      description: '새해를 맞이하여 모든 상품 최대 50% 할인! 이번 기회를 놓치지 마세요. 1월 31일까지 한정된 시간 동안만 진행되는 특별 이벤트입니다.',
-      image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&h=400&fit=crop',
-      eventPeriod: '2024.01.01 - 2024.01.31',
-      tags: ['할인', '신년이벤트', '전상품']
-    },
-    {
-      id: 2,
-      title: '봄맞이 뷰티 페스티벌',
-      description: '봄을 맞이하여 새로운 뷰티 아이템들을 만나보세요. 화사한 봄 메이크업부터 스킨케어까지, 당신의 아름다움을 더욱 빛내줄 제품들을 소개합니다.',
-      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop',
-      eventPeriod: '2024.03.01 - 2024.03.31',
-      tags: ['뷰티', '봄시즌', '신상품']
-    },
-    {
-      id: 3,
-      title: '건강한 라이프스타일 챌린지',
-      description: '건강한 삶을 위한 첫걸음! 유기농 식품과 건강 관리 제품들로 새로운 라이프스타일을 시작해보세요. 참여자 모두에게 특별한 혜택을 드립니다.',
-      image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=600&h=400&fit=crop',
-      eventPeriod: '2024.02.15 - 2024.04.15',
-      tags: ['건강', '라이프스타일', '챌린지']
+      id: 'default-1',
+      title: '새로운 이벤트를 기다려주세요',
+      description: '곧 흥미진진한 이벤트가 준비될 예정입니다. 조금만 기다려주세요!',
+      image_url: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&h=400&fit=crop',
+      event_start_date: new Date().toISOString(),
+      event_end_date: new Date().toISOString(),
+      category: '공지',
+      registration_source: 'main'
     }
   ];
 
-  const currentEvent = eventBanners[currentBanner];
+  const displayEvents = events.length > 0 ? events : defaultBanners;
+  const currentEvent = displayEvents[currentBanner] || displayEvents[0];
+
+  useEffect(() => {
+    if (displayEvents.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentBanner((prev) => (prev + 1) % displayEvents.length);
+    }, 5000); // 5초마다 자동 전환
+
+    return () => clearInterval(interval);
+  }, [displayEvents.length]);
+
+  const handleEventClick = () => {
+    if (!currentEvent || currentEvent.id === 'default-1') return;
+    
+    // Type guard to check if it's an Event with peermall_url
+    if ('peermall_url' in currentEvent && 
+        currentEvent.registration_source !== 'main' && 
+        currentEvent.peermall_url) {
+      navigate(`/home/${currentEvent.peermall_url}/event/${currentEvent.id}`);
+    } else {
+      navigate(`/event/${currentEvent.id}`);
+    }
+  };
+
+  const getEventTags = (event: Event | typeof defaultBanners[0]) => {
+    const tags = [];
+    if (event.category) tags.push(event.category);
+    if ('status' in event && event.status === 'ongoing') tags.push('진행중');
+    if ('status' in event && event.status === 'upcoming') tags.push('예정');
+    if ('dDay' in event && event.dDay <= 3 && event.dDay >= 0) tags.push('마감임박');
+    return tags;
+  };
+
+  if (loading) {
+    return (
+      <section className="relative bg-background py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center h-[400px]">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative bg-background py-8">
@@ -47,14 +119,33 @@ const HeroSection = ({ categories }: HeroSectionProps) => {
           <div className="relative">
             <div className="aspect-[4/3] rounded-lg overflow-hidden bg-muted">
               <img 
-                src={currentEvent.image}
+                src={currentEvent.image_url || 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&h=400&fit=crop'}
                 alt={currentEvent.title}
                 className="w-full h-full object-cover"
               />
+              {'status' in currentEvent && currentEvent.status && (
+                <div className="absolute top-4 right-4">
+                  <Badge 
+                    variant={currentEvent.status === 'ongoing' ? 'destructive' : 'secondary'}
+                    className="text-sm font-semibold"
+                  >
+                    {currentEvent.status === 'ongoing' && currentEvent.dDay >= 0 
+                      ? `D-${currentEvent.dDay}` 
+                      : currentEvent.status === 'upcoming' 
+                      ? `D-${currentEvent.dDay}`
+                      : '종료'}
+                  </Badge>
+                </div>
+              )}
             </div>
             <div className="mt-4 text-center">
-              <Button size="lg" className="px-8">
-                참여하기
+              <Button 
+                size="lg" 
+                className="px-8"
+                onClick={handleEventClick}
+                disabled={currentEvent.id === 'default-1'}
+              >
+                {currentEvent.id === 'default-1' ? '준비중' : '자세히 보기'}
               </Button>
             </div>
           </div>
@@ -63,7 +154,7 @@ const HeroSection = ({ categories }: HeroSectionProps) => {
           <div className="space-y-6">
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                {currentEvent.tags.map((tag, index) => (
+                {getEventTags(currentEvent).map((tag, index) => (
                   <Badge key={index} variant="secondary">
                     {tag}
                   </Badge>
@@ -74,46 +165,63 @@ const HeroSection = ({ categories }: HeroSectionProps) => {
                 {currentEvent.title}
               </h2>
               
-              <div className="text-sm text-muted-foreground">
-                이벤트 기간: {currentEvent.eventPeriod}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  {new Date(currentEvent.event_start_date).toLocaleDateString('ko-KR')} ~ 
+                  {new Date(currentEvent.event_end_date).toLocaleDateString('ko-KR')}
+                </span>
               </div>
               
               <p className="text-lg text-foreground leading-relaxed">
-                {currentEvent.description}
+                {'content' in currentEvent 
+                  ? currentEvent.content 
+                  : currentEvent.description}
               </p>
+
+              {'peermall_name' in currentEvent && currentEvent.peermall_name && (
+                <div className="text-sm text-muted-foreground">
+                  주최: {currentEvent.peermall_name}
+                </div>
+              )}
             </div>
 
             {/* 이벤트 네비게이션 */}
-            <div className="flex items-center justify-between pt-4">
-              <div className="flex space-x-2">
-                {eventBanners.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentBanner(index)}
-                    className={`w-3 h-3 rounded-full transition-all ${
-                      currentBanner === index ? 'bg-primary scale-110' : 'bg-muted hover:bg-muted-foreground/50'
-                    }`}
-                  />
-                ))}
+            {displayEvents.length > 1 && (
+              <div className="flex items-center justify-between pt-4">
+                <div className="flex space-x-2">
+                  {displayEvents.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentBanner(index)}
+                      className={`w-3 h-3 rounded-full transition-all ${
+                        currentBanner === index ? 'bg-primary scale-110' : 'bg-muted hover:bg-muted-foreground/50'
+                      }`}
+                      aria-label={`이벤트 ${index + 1}`}
+                    />
+                  ))}
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentBanner((prev) => (prev - 1 + displayEvents.length) % displayEvents.length)}
+                    aria-label="이전 이벤트"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentBanner((prev) => (prev + 1) % displayEvents.length)}
+                    aria-label="다음 이벤트"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentBanner((prev) => (prev - 1 + eventBanners.length) % eventBanners.length)}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentBanner((prev) => (prev + 1) % eventBanners.length)}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
