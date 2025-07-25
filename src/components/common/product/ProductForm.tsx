@@ -188,6 +188,10 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
         toast({ variant: "destructive", title: "입력 오류", description: "제품명을 입력해주세요." });
         return;
       }
+      if (!formData.productUrl.trim()) {
+        toast({ variant: "destructive", title: "입력 오류", description: "제품 판매 링크를 입력해주세요." });
+        return;
+      }
       if (!formData.sellingPrice || isNaN(Number(formData.sellingPrice))) {
         toast({ variant: "destructive", title: "입력 오류", description: "판매가격을 올바른 숫자로 입력해주세요." });
         return;
@@ -223,7 +227,7 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
           </div>
           {/* ✨ [추가] 요구사항 7번: 제품 판매 링크 입력 필드 */}
           <div className="space-y-2">
-            <Label htmlFor="productUrl">제품 판매 링크</Label>
+            <Label htmlFor="productUrl">제품 판매 링크 <span className="text-red-500">*</span></Label>
             <Input id="productUrl" type="url" value={formData.productUrl} onChange={(e) => handleInputChange('productUrl', e.target.value)} placeholder="https://example.com/product/123" />
           </div>
           <div className="grid grid-cols-2 gap-4">
