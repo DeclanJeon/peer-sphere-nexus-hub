@@ -233,7 +233,7 @@ const ProductDetail = () => {
                       <MessageSquare className="h-5 w-5" />
                       상품 관련 커뮤니티
                     </h3>
-                    {/* <Button 
+                    <Button 
                       variant="ghost" 
                       size="sm" 
                       onClick={handleCreateMessage}
@@ -241,7 +241,7 @@ const ProductDetail = () => {
                     >
                       <Plus className="h-4 w-4" />
                       글쓰기
-                    </Button> */}
+                    </Button>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     이 상품에 대한 질문, 후기, 모임 등을 자유롭게 나눠보세요
@@ -314,7 +314,7 @@ const ProductDetail = () => {
                     <span className="col-span-2 flex items-center gap-2">
                       {product.brand || '정보 없음'}
                       {/* ✨ [유지] 브랜드 홈페이지 버튼 */}
-                      {product.brand_website && (
+                      {product.brand_website && ( 
                         <Button asChild variant="ghost" size="sm" className="h-auto p-1">
                           <a href={product.brand_website} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-3 w-3" />
@@ -343,7 +343,6 @@ const ProductDetail = () => {
 
               <div className="flex gap-3">
                 {/* 🎯 변경사항 1: 브랜드 홈페이지 가기 버튼 추가 */}
-                
                 <Button asChild variant="outline" className="flex-1">
                   <a href={product.brand_website} target="_blank" rel="noopener noreferrer">
                     <Globe className="h-4 w-4 mr-2" />
@@ -351,11 +350,13 @@ const ProductDetail = () => {
                   </a>
                 </Button>
 
-                {/* ✨ [추가] 요구사항 6번: 신고하기 버튼 */}
-                {/* <Button variant="outline" className="flex-1" onClick={handleReport}>
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  신고하기
-                </Button> */}
+                {/* ✨ [추가] 요구사항 3번: 고객센터 버튼 */}
+                <Button asChild variant="outline" className="flex-1">
+                  <a href={`https://peerterra.com/one/channel/${currentPeermall?.url}`} target="_blank" rel="noopener noreferrer">
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    고객센터
+                  </a>
+                </Button>
               </div>
 
               <div className="flex gap-3">

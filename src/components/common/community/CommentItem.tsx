@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { UpdateCommentRequest } from "@/types/comment";
 import { Comment } from "@/types/comment";
 import { useAuth } from "@/hooks/useAuth";
+import { formatEmailToId } from "@/lib/utils";
 
 // --- 개별 댓글 아이템 컴포넌트 ---
 interface CommentItemProps {
@@ -26,18 +27,7 @@ const CommentItem = ({ comment, isOwner, isPostAuthor, onUpdate, onDelete }: Com
   const { user } = useAuth();
   const currentUserId = user?.user_email;
   
-  let extractedId = '';
-
-  if (currentUserId) {
-    const atIndex = currentUserId.indexOf('@');
-    if (atIndex !== -1) {
-      // '@'가 포함되어 있다면 '@' 왼쪽 부분만 추출
-      extractedId = currentUserId.substring(0, atIndex);
-    } else {
-      // '@'가 포함되어 있지 않다면 전체를 아이디로 간주
-      extractedId = currentUserId;
-    }
-  }
+  const extractedId = formatEmailToId(currentUserId);
 
   const handleUpdate = async () => {
     if (!editedContent.trim() || editedContent === comment.content) {

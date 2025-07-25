@@ -2,6 +2,7 @@ export interface Review {
   id: string;
   product_id: string;
   user_id: string;
+  user_uid: string;
   rating: number;
   content: string;
   images: string[];
