@@ -207,6 +207,8 @@ const ProductDetail = () => {
           
           {isLoggedIn && isProductOwner() && (
             <div className="flex items-center gap-2 ml-auto">
+              <Button variant="outline" size="sm" onClick={handleEdit}>수정</Button>
+              <Button variant="outline" size="sm" onClick={handleDelete}>삭제</Button>
               <Badge variant={product.status === 'active' ? 'default' : 'secondary'} className="text-sm">{product.status === 'active' ? '판매중' : '판매중단'}</Badge>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild><Button variant="ghost" size="sm"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
@@ -334,29 +336,35 @@ const ProductDetail = () => {
 
             {/* 구매/문의 버튼 영역 */}
             <div className="space-y-3">
-              <Button asChild className="w-full" size="lg">
-                <a href={product.product_url} target="_blank" rel="noopener noreferrer">
-                  <ShoppingBag className="h-5 w-5 mr-2" />
-                  바로 구매
-                </a>
-              </Button>
+              {product.product_url && (
+                <Button asChild className="w-full" size="lg">
+                  <a href={product.product_url} target="_blank" rel="noopener noreferrer">
+                    <ShoppingBag className="h-5 w-5 mr-2" />
+                    바로 구매
+                  </a>
+                </Button>
+              )}
 
               <div className="flex gap-3">
                 {/* 🎯 변경사항 1: 브랜드 홈페이지 가기 버튼 추가 */}
-                <Button asChild variant="outline" className="flex-1">
-                  <a href={product.brand_website} target="_blank" rel="noopener noreferrer">
-                    <Globe className="h-4 w-4 mr-2" />
-                    브랜드 홈페이지 가기
-                  </a>
-                </Button>
+                {product.brand_website && (
+                  <Button asChild variant="outline" className="flex-1">
+                    <a href={product.brand_website} target="_blank" rel="noopener noreferrer">
+                      <Globe className="h-4 w-4 mr-2" />
+                      브랜드 홈페이지 가기
+                    </a>
+                  </Button>
+                )}
 
                 {/* ✨ [추가] 요구사항 3번: 고객센터 버튼 */}
-                <Button asChild variant="outline" className="flex-1">
-                  <a href={`https://peerterra.com/one/channel/${currentPeermall?.url}`} target="_blank" rel="noopener noreferrer">
-                    <HelpCircle className="h-4 w-4 mr-2" />
-                    고객센터
-                  </a>
-                </Button>
+                {currentPeermall?.url && (
+                  <Button asChild variant="outline" className="flex-1">
+                    <a href={`https://peerterra.com/one/channel/${currentPeermall.url}`} target="_blank" rel="noopener noreferrer">
+                      <HelpCircle className="h-4 w-4 mr-2" />
+                      고객센터
+                    </a>
+                  </Button>
+                )}
               </div>
 
               <div className="flex gap-3">
@@ -433,7 +441,7 @@ const ProductDetail = () => {
         
         {/* 탭 기반 리뷰/추천 상품 섹션 */}
         <ProductDetailTabs 
-          productId={id!}
+          productId={id}
           peermallId={product.peermall_id}
           averageRating={product.rating || 0}
           totalReviews={product.review_count || 0}

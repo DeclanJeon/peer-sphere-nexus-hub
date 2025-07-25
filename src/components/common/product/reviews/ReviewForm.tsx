@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { reviewApi } from '@/services/review.api';
 import StarRating from './StarRating';
+import { formatEmailToId } from '@/lib/utils';
 
 const ReviewForm = ({ productId, onSuccess }: { productId: string; onSuccess: () => void }) => {
   const [rating, setRating] = useState(0);
@@ -49,8 +50,9 @@ const ReviewForm = ({ productId, onSuccess }: { productId: string; onSuccess: ()
 
     setIsSubmitting(true);
     
-        try {
+    try {
       const formData = new FormData();
+      formData.append('user_id', formatEmailToId(user.user_email));
       formData.append('productId', productId);
       formData.append('rating', rating.toString());
       formData.append('content', content);

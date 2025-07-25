@@ -72,6 +72,7 @@ export const ProductReviews = ({
         sortBy,
         limit: 20
       });
+
       setReviews(data);
     } catch (error) {
       console.error('리뷰 조회 실패:', error);

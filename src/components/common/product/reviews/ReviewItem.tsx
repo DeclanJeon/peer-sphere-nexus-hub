@@ -439,7 +439,7 @@ export const ReviewItem = ({
         <div className="flex-1 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="font-medium">{review.author_name || formatEmailToId(user.user_email) || '알 수 없는 사용자'}</span>
+              <span className="font-medium">{review?.author_name || review.user_id || '알 수 없는 사용자'}</span>
               <StarRating rating={review.rating} readonly />
               <span className="text-sm text-muted-foreground">
                 {new Date(review.created_at).toLocaleDateString()}
