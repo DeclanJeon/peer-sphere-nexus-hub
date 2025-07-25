@@ -1,7 +1,7 @@
 // services/community.api.ts
 import apiClient from '@/lib/api/clients';
 import { Post, PostsResponse } from '@/types/post';
-import { Comment } from '@/types/comment';
+import { Comment, UpdateCommentRequest } from '@/types/comment';
 
 class CommunityApi {
   private basePath = '/community';
@@ -67,10 +67,21 @@ class CommunityApi {
     return response.data.data;
   }
 
-  async createComment(postId: string, content: string): Promise<Comment> {
+  async createComment(commentData: Comment): Promise<Comment> {
     const response = await apiClient.post(
-      `${this.basePath}/${postId}/comments`,
-      { content }
+      `${this.basePath}/${commentData.post_id}/comments`,
+      commentData
+    );
+    return response.data.data;
+  }
+
+  async updateComment(
+    commentId: string,
+    data: UpdateCommentRequest
+  ): Promise<Comment> {
+    const response = await apiClient.patch(
+      `${this.basePath}/comments/${commentId}`,
+      data
     );
     return response.data.data;
   }

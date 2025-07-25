@@ -47,14 +47,14 @@ const BoardDetail = () => {
   const fetchComments = useCallback(async () => {
     if (!id) return;
     try {
-      // API 호출 활성화
-      // const commentsData = await communityApi.getComments(id);
-      // setComments(commentsData);
+      const commentsData = await communityApi.getCommentsByPostId(id);
+      setComments(commentsData);
     } catch (err) {
       console.error('댓글을 불러오는데 실패했습니다:', err);
       toast({ title: '오류', description: '댓글 목록을 가져오지 못했습니다.', variant: 'destructive' });
     }
   }, [id, toast]);
+
 
   useEffect(() => {
     if (id) {
@@ -107,16 +107,17 @@ const BoardDetail = () => {
     if (!id || !user) return;
     
     try {
-      // API 호출 활성화
-      // await communityApi.createComment(id, {
-      //   content,
-      //   // [추론] user 객체에 name과 photoURL 속성이 있다고 가정합니다.
-      //   author_name: user.name || '익명 사용자',
-      //   author_avatar_url: user.photoURL || '',
-      // });
-      
+
+      const commentData = {
+        post_id: id,
+        user_uid: user.user_uid,
+        author_name: user.user_name,
+        content,
+      };
+
+      await communityApi.createComment(commentData as Comment);
       toast({ title: '댓글 작성 완료', description: '댓글이 성공적으로 작성되었습니다.' });
-      await fetchComments(); // 댓글 목록 즉시 새로고침
+      await fetchComments();
     } catch (error) {
       toast({ title: '오류', description: '댓글 작성에 실패했습니다.', variant: 'destructive' });
       throw error;
@@ -125,9 +126,9 @@ const BoardDetail = () => {
 
   const handleCommentUpdate = async (commentId: string, data: UpdateCommentRequest) => {
     try {
-      // await communityApi.updateComment(commentId, data);
-      // toast({ title: '수정 완료', description: '댓글이 성공적으로 수정되었습니다.' });
-      // await fetchComments(); // 댓글 목록 즉시 새로고침
+      await communityApi.updateComment(commentId, data);
+      toast({ title: '수정 완료', description: '댓글이 성공적으로 수정되었습니다.' });
+      await fetchComments();
     } catch (error) {
       toast({ title: '오류', description: '댓글 수정에 실패했습니다.', variant: 'destructive' });
       throw error;
