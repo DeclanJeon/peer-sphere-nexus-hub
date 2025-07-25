@@ -1,13 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Outlet } from 'react-router-dom';
 import { usePeermall } from '@/contexts/PeermallContext';
 import UserPeermallLayout from '@/components/layout/UserPeermallLayout';
 import NotFound from '@/pages/NotFound';
 import { Loader2 } from 'lucide-react';
+import UserNavigationTabs from './home/UserNavigationTabs';
 
 const UserPeermallPage = () => {
   const { url } = useParams<{ url: string }>();
   const { fetchPeermallByUrl, currentPeermall, loading, error } = usePeermall();
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
     if (url) {
@@ -45,7 +47,8 @@ const UserPeermallPage = () => {
 
   return (
     <UserPeermallLayout>
-      <Outlet />
+      <UserNavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Outlet context={{activeTab, setActiveTab}} />
     </UserPeermallLayout>
   );
 };
