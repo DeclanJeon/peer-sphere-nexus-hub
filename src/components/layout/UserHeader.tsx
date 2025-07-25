@@ -79,12 +79,12 @@ const UserHeader = ({ currentPeermall }: UserHeaderProps) => {
   }, [isAuthenticated, currentPeermall, user]);
 
   // 디버깅용 로그
-  console.log('🔍 소유자 확인:', {
-    isOwner,
-    isAuthenticated,
-    currentPeermall_owner: currentPeermall?.owner_email,
-    user_email: user?.user_email,
-  });
+  // console.log('🔍 소유자 확인:', {
+  //   isOwner,
+  //   isAuthenticated,
+  //   currentPeermall_owner: currentPeermall?.owner_email,
+  //   user_email: user?.user_email,
+  // });
 
   // 4. UI 렌더링
   return (
@@ -144,6 +144,14 @@ const UserHeader = ({ currentPeermall }: UserHeaderProps) => {
                 >
                   <Plus className="h-4 w-4" /> 
                   제품 등록
+                </Button>
+              )}
+
+              {/* 로그아웃 버튼 */}
+              {isAuthenticated && (
+                <Button variant="secondary" size="sm" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  로그아웃
                 </Button>
               )}
 
@@ -253,6 +261,16 @@ const UserHeader = ({ currentPeermall }: UserHeaderProps) => {
                       <span>제품 등록</span>
                     </button>
                   )}
+
+                  {/* 로그아웃 버튼 */}
+                  <button 
+                      onClick={handleLogout} 
+                      className="flex items-center w-full text-left py-2 text-red-600"
+                    >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>로그아웃</span>
+                  </button>
+
                   {/* 모바일 프로필 메뉴 */}
                   {profileDropdownItems.map((item) => {
                     const Icon = item.icon;

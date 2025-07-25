@@ -1,4 +1,3 @@
-// Frontend/src/components/common/product/reviews/ProductReviews.tsx
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -94,6 +93,28 @@ export const ProductReviews = ({
     setRefreshKey(prev => prev + 1);
   };
 
+  // 🎯 평균 평점 계산 함수
+  const calculateAverageRating = () => {
+    if (!stats || stats.total_count === 0) {
+      return averageRating || 0;
+    }
+    
+    const totalScore = (stats.five_star * 5) + 
+                      (stats.four_star * 4) + 
+                      (stats.three_star * 3) + 
+                      (stats.two_star * 2) + 
+                      (stats.one_star * 1);
+    
+    const average = totalScore / stats.total_count;
+    return Math.round(average * 10) / 10; // 소수점 첫째자리까지 반올림
+  };
+
+  // 🎯 퍼센티지 계산 함수 (0으로 나누기 방지)
+  const getPercentage = (count: number, total: number) => {
+    if (total === 0) return 0;
+    return (count / total) * 100;
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -102,66 +123,93 @@ export const ProductReviews = ({
     );
   }
 
+  // 🎯 실제 표시할 평균 평점과 총 리뷰 수
+  const displayAverageRating = calculateAverageRating();
+  const displayTotalReviews = stats?.total_count || totalReviews || 0;
+
   return (
     <div className="space-y-6">
       {/* 리뷰 통계 헤더 */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-muted/50 rounded-lg">
-          <div>
-            <h3 className="text-xl font-semibold mb-4">
-              고객 리뷰 ({totalReviews})
-            </h3>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="flex items-center gap-2">
-                <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
-                <span className="text-3xl font-bold">{averageRating}</span>
-                <span className="text-muted-foreground">/ 5.0</span>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-muted/50 rounded-lg">
+        <div>
+          <h3 className="text-xl font-semibold mb-4">
+            고객 리뷰 ({displayTotalReviews})
+          </h3>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-2">
+              <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
+              <span className="text-3xl font-bold">
+                {displayAverageRating.toFixed(1)}
+              </span>
+              <span className="text-muted-foreground">/ 5.0</span>
             </div>
-            <p className="text-muted-foreground">
-              {totalReviews}개의 리뷰 기준
-            </p>
           </div>
-          
+          <p className="text-muted-foreground">
+            {displayTotalReviews}개의 리뷰 기준
+          </p>
+        </div>
+        
+        {stats && stats.total_count > 0 ? (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-sm w-12">5점</span>
-              <Progress value={(stats.five_star / stats.total_count) * 100} className="flex-1" />
+              <Progress 
+                value={getPercentage(stats.five_star, stats.total_count)} 
+                className="flex-1" 
+              />
               <span className="text-sm text-muted-foreground w-12 text-right">
                 {stats.five_star}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm w-12">4점</span>
-              <Progress value={(stats.four_star / stats.total_count) * 100} className="flex-1" />
+              <Progress 
+                value={getPercentage(stats.four_star, stats.total_count)} 
+                className="flex-1" 
+              />
               <span className="text-sm text-muted-foreground w-12 text-right">
                 {stats.four_star}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm w-12">3점</span>
-              <Progress value={(stats.three_star / stats.total_count) * 100} className="flex-1" />
+              <Progress 
+                value={getPercentage(stats.three_star, stats.total_count)} 
+                className="flex-1" 
+              />
               <span className="text-sm text-muted-foreground w-12 text-right">
                 {stats.three_star}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm w-12">2점</span>
-              <Progress value={(stats.two_star / stats.total_count) * 100} className="flex-1" />
+              <Progress 
+                value={getPercentage(stats.two_star, stats.total_count)} 
+                className="flex-1" 
+              />
               <span className="text-sm text-muted-foreground w-12 text-right">
                 {stats.two_star}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm w-12">1점</span>
-              <Progress value={(stats.one_star / stats.total_count) * 100} className="flex-1" />
+              <Progress 
+                value={getPercentage(stats.one_star, stats.total_count)} 
+                className="flex-1" 
+              />
               <span className="text-sm text-muted-foreground w-12 text-right">
                 {stats.one_star}
               </span>
             </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="flex items-center justify-center">
+            <p className="text-muted-foreground text-center">
+              아직 평점 분포 데이터가 없습니다
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* 리뷰 작성 폼 */}
       <Card>
