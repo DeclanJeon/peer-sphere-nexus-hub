@@ -209,13 +209,13 @@ const ReviewForm = ({ productId, onSuccess }: { productId: string; onSuccess: ()
             onClick={() => document.getElementById('review-images')?.click()}
           >
             <ImageIcon className="h-4 w-4 mr-2" />
-            사진 추가 ({images.length}/5)
+            사진 추가 ({images.length}/1)
           </Button>
           <input
             id="review-images"
             type="file"
             accept="image/*"
-            multiple
+            // multiple
             className="hidden"
             onChange={handleImageUpload}
           />
