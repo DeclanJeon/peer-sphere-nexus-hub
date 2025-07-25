@@ -1,15 +1,17 @@
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Heart, Clock, User, Trash2, Edit, ArrowLeft, Loader2 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Post } from '@/types/post';
+import { Comment, UpdateCommentRequest } from '@/types/comment'; // UpdateCommentRequest 임포트
 import { communityApi } from '@/services/community.api';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { usePeermall } from '@/contexts/PeermallContext';
 import BoardForm from '@/components/common/community/BoardForm';
+import CommentSection from '@/components/common/community/CommentSection';
 
 const BoardDetail = () => {
   const { url, id } = useParams<{ url?: string; id: string }>();
@@ -17,6 +19,7 @@ const BoardDetail = () => {
   const { user } = useAuth();
   const { currentPeermall } = usePeermall();
   const [post, setPost] = useState<Post | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -41,9 +44,24 @@ const BoardDetail = () => {
     }
   }, [id, url]);
 
+  const fetchComments = useCallback(async () => {
+    if (!id) return;
+    try {
+      // API 호출 활성화
+      // const commentsData = await communityApi.getComments(id);
+      // setComments(commentsData);
+    } catch (err) {
+      console.error('댓글을 불러오는데 실패했습니다:', err);
+      toast({ title: '오류', description: '댓글 목록을 가져오지 못했습니다.', variant: 'destructive' });
+    }
+  }, [id, toast]);
+
   useEffect(() => {
-    fetchPost();
-  }, [fetchPost]);
+    if (id) {
+      fetchPost();
+      fetchComments();
+    }
+  }, [id, fetchPost, fetchComments]);
 
   const isAuthor = user?.user_uid === post?.user_uid;
   const isPeermallOwner = !isMainPeermall && user?.user_uid === currentPeermall?.owner_uid;
@@ -83,6 +101,50 @@ const BoardDetail = () => {
     }
   };
 
+  // --- 댓글 로직 ---
+
+  const handleCommentSubmit = async (content: string) => {
+    if (!id || !user) return;
+    
+    try {
+      // API 호출 활성화
+      // await communityApi.createComment(id, {
+      //   content,
+      //   // [추론] user 객체에 name과 photoURL 속성이 있다고 가정합니다.
+      //   author_name: user.name || '익명 사용자',
+      //   author_avatar_url: user.photoURL || '',
+      // });
+      
+      toast({ title: '댓글 작성 완료', description: '댓글이 성공적으로 작성되었습니다.' });
+      await fetchComments(); // 댓글 목록 즉시 새로고침
+    } catch (error) {
+      toast({ title: '오류', description: '댓글 작성에 실패했습니다.', variant: 'destructive' });
+      throw error;
+    }
+  };
+
+  const handleCommentUpdate = async (commentId: string, data: UpdateCommentRequest) => {
+    try {
+      // await communityApi.updateComment(commentId, data);
+      // toast({ title: '수정 완료', description: '댓글이 성공적으로 수정되었습니다.' });
+      // await fetchComments(); // 댓글 목록 즉시 새로고침
+    } catch (error) {
+      toast({ title: '오류', description: '댓글 수정에 실패했습니다.', variant: 'destructive' });
+      throw error;
+    }
+  };
+
+  const handleCommentDelete = async (commentId: string) => {
+    try {
+      await communityApi.deleteComment(commentId);
+      toast({ title: '댓글 삭제 완료', description: '댓글이 성공적으로 삭제되었습니다.' });
+      await fetchComments(); // 댓글 목록 즉시 새로고침
+    } catch (error) {
+      toast({ title: '오류', description: '댓글 삭제에 실패했습니다.', variant: 'destructive' });
+      throw error;
+    }
+  };
+
   if (loading && !post) return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
   if (error || !post) return <div className="container text-center py-8"><p className="text-destructive">{error}</p></div>;
 
@@ -97,8 +159,11 @@ const BoardDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4"><ArrowLeft className="h-4 w-4 mr-2" /> 목록으로</Button>
-      <Card>
+      <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4">
+        <ArrowLeft className="h-4 w-4 mr-2" /> 목록으로
+      </Button>
+      
+      <Card className="mb-6">
         <CardHeader className="p-6">
           <div className="flex items-center justify-between mb-4">
             <Badge variant="outline">{post.category}</Badge>
@@ -121,6 +186,16 @@ const BoardDetail = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* 댓글 섹션에 모든 핸들러 함수를 props로 전달 */}
+      <CommentSection
+        postId={id!}
+        comments={comments}
+        postAuthorUid={post?.user_uid}
+        onCommentSubmit={handleCommentSubmit}
+        onCommentUpdate={handleCommentUpdate}
+        onCommentDelete={handleCommentDelete}
+      />
     </div>
   );
 };
