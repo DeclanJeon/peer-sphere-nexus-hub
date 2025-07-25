@@ -7,6 +7,7 @@ import {
   ReviewComment,
   ReviewStats,
 } from '@/types/review';
+import { formatEmailToId } from '@/lib/utils';
 
 class ReviewApi {
   private basePath = '/products/reviews';
@@ -49,6 +50,7 @@ class ReviewApi {
   }
 
   async createComment(
+    userId: string,
     reviewId: string,
     content: string,
     isSellerReply = false
@@ -56,6 +58,7 @@ class ReviewApi {
     const response = await apiClient.post(
       `${this.basePath}/${reviewId}/comments`,
       {
+        userId,
         content,
         isSellerReply,
       }

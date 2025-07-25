@@ -1,5 +1,5 @@
 // src/pages/ProductPage.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import ProductList from '@/components/common/product/ProductList';
 import ProductTabs from '@/components/common/product/ProductTabs';
@@ -20,14 +20,30 @@ const SORT_OPTIONS: { [key: string]: string } = {
   '평점순': 'rating',
 };
 
+// 🎯 탭 매핑 추가
+const TAB_MAPPING: { [key: string]: string } = {
+  'new': '신상품',
+  'best': '베스트',
+  'discount': '할인',
+  'all': '전체'
+};
+
+const REVERSE_TAB_MAPPING: { [key: string]: string } = {
+  '신상품': 'new',
+  '베스트': 'best',
+  '할인': 'discount',
+  '전체': 'all'
+};
+
 const ProductPage = () => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { currentPeermall } = usePeermall();
   const { toast } = useToast();
   
-  // URL 쿼리 파라미터에서 상태 초기화
-  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || '전체');
+  // 🎯 URL 쿼리 파라미터에서 상태 초기화 - 매핑 적용
+  const tabParam = searchParams.get('tab') || 'all';
+  const [activeTab, setActiveTab] = useState(TAB_MAPPING[tabParam] || '전체');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '전체');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || '최신순');
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
@@ -36,27 +52,110 @@ const ProductPage = () => {
   const [categories, setCategories] = useState<string[]>(['전체']);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // 🎯 무한 루프 방지를 위한 ref
+  const isUpdatingUrl = useRef(false);
 
   const isUserPeermall = location.pathname.startsWith('/home/');
   const isMainPage = location.pathname === '/products' || location.pathname === '/';
 
-  // 필터 상태가 변경될 때 URL 쿼리 파라미터를 업데이트하는 useEffect
+  // 🎯 URL 변경 감지 및 상태 업데이트
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (activeTab !== '전체') params.set('tab', activeTab);
-    if (selectedCategory !== '전체') params.set('category', selectedCategory);
-    if (sortBy !== '최신순') params.set('sort', sortBy);
-    if (searchQuery) params.set('search', searchQuery);
-    setSearchParams(params, { replace: true });
-  }, [activeTab, selectedCategory, sortBy, searchQuery, setSearchParams]);
+    if (isUpdatingUrl.current) return;
+    
+    const tabParam = searchParams.get('tab') || 'all';
+    const newTab = TAB_MAPPING[tabParam] || '전체';
+    const newCategory = searchParams.get('category') || '전체';
+    const newSort = searchParams.get('sort') || '최신순';
+    const newSearch = searchParams.get('search') || '';
+    
+    setActiveTab(newTab);
+    setSelectedCategory(newCategory);
+    setSortBy(newSort);
+    setSearchQuery(newSearch);
+  }, [searchParams]);
 
-  // [수정됨] 데이터 페칭 로직을 명확하게 수정하여 요구사항을 반영합니다.
+  // 🎯 상태 변경 시 URL 업데이트 (프로그래밍적 변경 시에만)
+  const updateUrlParams = (updates: {
+    tab?: string;
+    category?: string;
+    sort?: string;
+    search?: string;
+  }) => {
+    isUpdatingUrl.current = true;
+    
+    const params = new URLSearchParams(searchParams);
+    
+    if (updates.tab !== undefined) {
+      const tabValue = REVERSE_TAB_MAPPING[updates.tab] || 'all';
+      if (tabValue === 'all') {
+        params.delete('tab');
+      } else {
+        params.set('tab', tabValue);
+      }
+    }
+    
+    if (updates.category !== undefined) {
+      if (updates.category === '전체') {
+        params.delete('category');
+      } else {
+        params.set('category', updates.category);
+      }
+    }
+    
+    if (updates.sort !== undefined) {
+      if (updates.sort === '최신순') {
+        params.delete('sort');
+      } else {
+        params.set('sort', updates.sort);
+      }
+    }
+    
+    if (updates.search !== undefined) {
+      if (updates.search === '') {
+        params.delete('search');
+      } else {
+        params.set('search', updates.search);
+      }
+    }
+    
+    setSearchParams(params, { replace: true });
+    
+    // 다음 이벤트 루프에서 플래그 리셋
+    setTimeout(() => {
+      isUpdatingUrl.current = false;
+    }, 0);
+  };
+
+  // 🎯 탭 변경 핸들러
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    updateUrlParams({ tab: newTab });
+  };
+
+  // 🎯 카테고리 변경 핸들러
+  const handleCategoryChange = (newCategory: string) => {
+    setSelectedCategory(newCategory);
+    updateUrlParams({ category: newCategory });
+  };
+
+  // 🎯 정렬 변경 핸들러
+  const handleSortChange = (newSort: string) => {
+    setSortBy(newSort);
+    updateUrlParams({ sort: newSort });
+  };
+
+  // 🎯 검색 핸들러
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    updateUrlParams({ search: query });
+  };
+
+  // 데이터 페칭 로직
   useEffect(() => {
     const fetchProducts = async () => {
-      // 유저 피어몰 페이지인데, currentPeermall 정보가 아직 로드되지 않았다면 API 호출을 잠시 보류합니다.
       if (isUserPeermall && !currentPeermall) {
         console.log('피어몰 정보 로딩을 기다립니다...');
-        // 로딩 상태를 유지하여 사용자에게 대기 중임을 알릴 수 있습니다.
         setLoading(true); 
         return;
       }
@@ -67,20 +166,16 @@ const ProductPage = () => {
       try {
         // API에 보낼 파라미터를 구성합니다.
         const params: any = {
-          // [수정됨] 탭 '전체'는 백엔드에서 'all'로 처리되므로, 이를 반영합니다.
-          tab: activeTab === '전체' ? 'all' : activeTab === '신상품' ? 'new' : activeTab === '베스트' ? 'best' : activeTab === '할인' ? 'discount' : 'all',
+          tab: REVERSE_TAB_MAPPING[activeTab] || 'all',
           category: selectedCategory === '전체' ? undefined : selectedCategory,
           sortBy: SORT_OPTIONS[sortBy] || 'latest',
           search: searchQuery || undefined,
         };
 
-        // [핵심 로직] 페이지의 컨텍스트에 따라 peermallId를 설정합니다.
         if (isUserPeermall) {
-          // 유저 피어몰 페이지일 경우, 현재 피어몰의 ID를 파라미터에 추가합니다.
           params.peermallId = currentPeermall?.id.toString();
           console.log(`[유저 피어몰] '${currentPeermall?.name}' (ID: ${params.peermallId}) 상품을 조회합니다.`);
         } else if (isMainPage) {
-          // 메인 페이지일 경우, peermallId를 설정하지 않아 전체 상품을 조회합니다.
           console.log('[메인 페이지] 모든 피어몰의 상품을 조회합니다.');
         }
         
@@ -98,7 +193,6 @@ const ProductPage = () => {
             : [];
 
         console.log(`API로부터 ${validProducts.length}개의 상품을 성공적으로 받았습니다.`);
-        console.log(validProducts)
         setProducts(validProducts);
 
         // 카테고리 목록 동적 생성
@@ -127,15 +221,8 @@ const ProductPage = () => {
 
     fetchProducts();
     
-  // [수정됨] 의존성 배열을 간결하게 유지합니다. isMainPage는 isUserPeermall에 따라 결정되므로 하나만 있어도 충분합니다.
   }, [activeTab, selectedCategory, sortBy, searchQuery, currentPeermall, isUserPeermall, toast]);
 
-  // 검색 핸들러
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-
-  // 이하 렌더링 로직은 기존과 동일하게 유지됩니다.
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -187,16 +274,15 @@ const ProductPage = () => {
           </p>
         </div>
 
-        {/* [설명] 유저 피어몰에서만 탭이 표시되는 로직은 이미 훌륭합니다. */}
         {isUserPeermall && (
-          <ProductTabs activeTab={activeTab} onTabChange={setActiveTab} />
+          <ProductTabs activeTab={activeTab} onTabChange={handleTabChange} />
         )}
         
         <ProductFilters
           selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
+          onCategoryChange={handleCategoryChange}
           sortBy={sortBy}
-          onSortChange={setSortBy}
+          onSortChange={handleSortChange}
           categories={categories}
           searchQuery={searchQuery}
           onSearchChange={handleSearch}
@@ -232,7 +318,7 @@ const ProductPage = () => {
         ) : (
           <ProductList 
             products={products}
-            showPeermallInfo={isMainPage} // [설명] 메인 페이지에서만 피어몰 정보를 보여주는 로직, 아주 좋습니다.
+            showPeermallInfo={isMainPage}
             mode="full"
           />
         )}

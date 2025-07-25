@@ -7,18 +7,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Star, MoreVertical, Edit, Trash2, Heart, AlertTriangle, Loader2, ImageIcon, X, ThumbsUp, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import {Review } from '@/types/review';
-import { ReviewComments } from './ReviewComments';
+import { Review } from '@/types/review';
 import { reviewApi } from '@/services/review.api';
 import { useAuth } from '@/hooks/useAuth';
 import { formatEmailToId } from '@/lib/utils';
-
-interface ReviewItemProps {
-  review: Review;
-  isOwner: boolean;
-  onUpdate?: () => void; // 리뷰 업데이트 후 콜백
-  onDelete?: () => void; // 리뷰 삭제 후 콜백
-}
 
 // 별점 컴포넌트
 const StarRating = ({ 
@@ -137,14 +129,16 @@ export const ReviewItem = ({
       setComments(prev => [...prev, tempComment]);
       setNewComment('');
 
+      const userId = formatEmailToId(user.user_email);
+
       // API 호출
-      const response = await reviewApi.createComment(review.id, newComment);
+      const response = await reviewApi.createComment(userId, review.id, newComment);
       
       // 응답 데이터 보완
       const newCommentData = {
         ...response,
         id: String(response.id), // id를 문자열로 보장
-        author_name: response.author_name || user.name || user.email || '사용자',
+        author_name: response.author_name || user.user_name || user.user_email || '사용자',
         author_avatar: response.author_avatar || user.avatar || user.profile_image
       };
       
@@ -527,7 +521,7 @@ export const ReviewItem = ({
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm">{authorName}</span>
+                          <span className="font-medium text-sm">{comment?.user_id}</span>
                           {comment?.is_seller_reply && (
                             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
                               판매자
