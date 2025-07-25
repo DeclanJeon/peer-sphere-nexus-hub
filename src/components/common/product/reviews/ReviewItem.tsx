@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Star, MoreVertical, Edit, Trash2, Heart, AlertTriangle, Loader2, ImageIcon, X } from 'lucide-react';
+import { Star, MoreVertical, Edit, Trash2, Heart, AlertTriangle, Loader2, ImageIcon, X, ThumbsUp, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Review } from './types';
+import {Review } from '@/types/review';
 import { ReviewComments } from './ReviewComments';
 import { reviewApi } from '@/services/review.api';
+import { useAuth } from '@/hooks/useAuth';
+import { formatEmailToId } from '@/lib/utils';
 
 interface ReviewItemProps {
   review: Review;
@@ -51,28 +53,53 @@ const StarRating = ({
   );
 };
 
-export const ReviewItem = ({ review, isOwner, onUpdate, onDelete }: ReviewItemProps) => {
-  const [isLiked, setIsLiked] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
+export const ReviewItem = ({ 
+  review, 
+  onUpdate, 
+  onDelete 
+}: { 
+  review: Review; 
+  onUpdate: () => void;
+  onDelete: () => void;
+}) => {
+  const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [isLiked, setIsLiked] = useState(review.is_liked);
+  const [likes, setLikes] = useState(review.like_count || 0);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   
   // 수정 모드 상태
+  const [isEditMode, setIsEditMode] = useState(false);
   const [editRating, setEditRating] = useState(review.rating);
   const [editContent, setEditContent] = useState(review.content);
   const [editImages, setEditImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>(review.images || []);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   
+  // 댓글 로컬 상태 추가
+  const [comments, setComments] = useState(review.comments || []);
+  
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
+  const isOwner = user?.user_uid === review.user_uid;
+
   const handleLike = async () => {
-    setIsLiked(!isLiked);
+    if (!isAuthenticated) {
+      toast({
+        title: '로그인 필요',
+        description: '좋아요 기능은 로그인 후 이용 가능합니다.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
-      // API 호출
-      await reviewApi.toggleLike(review.id);
+      const result = await reviewApi.toggleLike(review.id);
+      setIsLiked(result.isLiked);
+      setLikes(prev => result.isLiked ? prev + 1 : prev - 1);
     } catch (error) {
-      setIsLiked(!isLiked); // 실패시 원복
+      console.error('좋아요 실패:', error);
       toast({
         title: '오류',
         description: '좋아요 처리 중 오류가 발생했습니다.',
@@ -81,13 +108,95 @@ export const ReviewItem = ({ review, isOwner, onUpdate, onDelete }: ReviewItemPr
     }
   };
 
-  const handleReport = () => {
+  const handleAddComment = async () => {
+  if (!isAuthenticated || !user) {
     toast({
-      title: '신고하기',
-      description: '신고가 접수되었습니다. 검토 후 조치하겠습니다.'
+      title: '로그인 필요',
+      description: '댓글 작성은 로그인 후 이용 가능합니다.',
+      variant: 'destructive'
     });
+    return;
+  }
+
+  if (!newComment.trim()) return;
+
+    try {
+      // 임시 댓글 객체 생성 (낙관적 업데이트)
+      const tempComment = {
+        id: `temp-${Date.now()}`, // 문자열로 보장
+        review_id: review.id,
+        user_id: user.id,
+        content: newComment,
+        author_name: user.name || user.email || '사용자',
+        author_avatar: user.avatar || user.profile_image,
+        created_at: new Date().toISOString(),
+        is_seller_reply: false
+      };
+
+      // 즉시 UI 업데이트
+      setComments(prev => [...prev, tempComment]);
+      setNewComment('');
+
+      // API 호출
+      const response = await reviewApi.createComment(review.id, newComment);
+      
+      // 응답 데이터 보완
+      const newCommentData = {
+        ...response,
+        id: String(response.id), // id를 문자열로 보장
+        author_name: response.author_name || user.name || user.email || '사용자',
+        author_avatar: response.author_avatar || user.avatar || user.profile_image
+      };
+      
+      // 성공 시 임시 댓글을 실제 댓글로 교체
+      setComments(prev => 
+        prev.map(comment => 
+          String(comment.id) === tempComment.id 
+            ? newCommentData
+            : comment
+        )
+      );
+
+      toast({
+        title: '댓글 작성 완료',
+        description: '댓글이 성공적으로 작성되었습니다.'
+      });
+      
+    } catch (error) {
+      // 실패 시 임시 댓글 제거 - String()으로 안전하게 처리
+      setComments(prev => prev.filter(c => {
+        const commentId = String(c.id || '');
+        return !commentId.startsWith('temp-');
+      }));
+      
+      console.error('댓글 작성 실패:', error);
+      toast({
+        title: '댓글 작성 실패',
+        description: '댓글 작성 중 오류가 발생했습니다.',
+        variant: 'destructive'
+      });
+    }
   };
 
+  const handleDelete = async () => {
+    try {
+      await reviewApi.deleteReview(review.id);
+      toast({
+        title: '리뷰 삭제 완료',
+        description: '리뷰가 성공적으로 삭제되었습니다.'
+      });
+      onDelete();
+    } catch (error) {
+      console.error('리뷰 삭제 실패:', error);
+      toast({
+        title: '리뷰 삭제 실패',
+        description: '리뷰 삭제 중 오류가 발생했습니다.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // 수정 모드 토글
   const handleEditToggle = () => {
     if (!isEditMode) {
       // 수정 모드 진입시 초기값 설정
@@ -99,6 +208,7 @@ export const ReviewItem = ({ review, isOwner, onUpdate, onDelete }: ReviewItemPr
     setIsEditMode(!isEditMode);
   };
 
+  // 리뷰 수정 처리
   const handleUpdate = async () => {
     if (!editContent.trim()) {
       toast({
@@ -134,7 +244,7 @@ export const ReviewItem = ({ review, isOwner, onUpdate, onDelete }: ReviewItemPr
       });
       
       setIsEditMode(false);
-      onUpdate?.(); // 리뷰 목록 새로고침
+      onUpdate(); // 리뷰 목록 새로고침
       
     } catch (error) {
       console.error('리뷰 수정 실패:', error);
@@ -148,29 +258,8 @@ export const ReviewItem = ({ review, isOwner, onUpdate, onDelete }: ReviewItemPr
     }
   };
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    try {
-      await reviewApi.deleteReview(review.id);
-      toast({
-        title: '리뷰 삭제 완료',
-        description: '리뷰가 성공적으로 삭제되었습니다.'
-      });
-      onDelete?.();
-    } catch (error) {
-      console.error('리뷰 삭제 실패:', error);
-      toast({
-        title: '리뷰 삭제 실패',
-        description: '리뷰 삭제 중 오류가 발생했습니다.',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteOpen(false);
-    }
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 이미지 업로드 핸들러
+  const handleEditImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const totalImages = existingImages.length + editImages.length + files.length;
     
@@ -186,10 +275,12 @@ export const ReviewItem = ({ review, isOwner, onUpdate, onDelete }: ReviewItemPr
     setEditImages(prev => [...prev, ...files]);
   };
 
+  // 기존 이미지 삭제
   const removeExistingImage = (index: number) => {
     setExistingImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  // 새 이미지 삭제
   const removeNewImage = (index: number) => {
     setEditImages(prev => prev.filter((_, i) => i !== index));
   };
@@ -197,7 +288,7 @@ export const ReviewItem = ({ review, isOwner, onUpdate, onDelete }: ReviewItemPr
   // 수정 모드 UI
   if (isEditMode) {
     return (
-      <div className="py-4 border-b last:border-b-0">
+      <div className="border-b border-border pb-6 last:border-b-0">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-semibold">리뷰 수정하기</h4>
@@ -279,7 +370,7 @@ export const ReviewItem = ({ review, isOwner, onUpdate, onDelete }: ReviewItemPr
                 accept="image/*"
                 multiple
                 className="hidden"
-                onChange={handleImageUpload}
+                onChange={handleEditImageUpload}
               />
             </div>
             
@@ -336,112 +427,162 @@ export const ReviewItem = ({ review, isOwner, onUpdate, onDelete }: ReviewItemPr
     );
   }
 
-  // 일반 모드 (기존 UI)
+  // 일반 모드
   return (
-    <div className="py-4 border-b last:border-b-0">
+    <div className="border-b border-border pb-6 last:border-b-0">
       <div className="flex items-start gap-4">
-        <Avatar>
-          <AvatarImage src={review.avatar} alt={review.author} />
-          <AvatarFallback>{review.author.charAt(0)}</AvatarFallback>
+        <Avatar className="w-10 h-10">
+          <AvatarImage src={review.author_avatar} alt={review.author_name} />
+          <AvatarFallback>{review.author_name || 'Pre'}</AvatarFallback>
         </Avatar>
-        <div className="flex-1">
+        
+        <div className="flex-1 space-y-3">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="font-semibold">{review.author}</p>
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <StarRating rating={review.rating} readonly />
-                <span className="ml-1">{review.rating}.0</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-muted-foreground">
-                {new Date(review.createdAt).toLocaleDateString()}
-              </p>
-              {isOwner && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleEditToggle}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      <span>수정</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="text-destructive"
-                      onClick={() => setIsDeleteOpen(true)}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>삭제</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+            <div className="flex items-center gap-3">
+              <span className="font-medium">{review.author_name || formatEmailToId(user.user_email) || '알 수 없는 사용자'}</span>
+              <StarRating rating={review.rating} readonly />
+              <span className="text-sm text-muted-foreground">
+                {new Date(review.created_at).toLocaleDateString()}
+              </span>
+              {review.is_verified_purchase && (
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                  구매 인증
+                </span>
               )}
             </div>
+            
+            {isOwner && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleEditToggle}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    수정
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="text-destructive"
+                    onClick={() => setIsDeleteOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    삭제
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
-          <p className="mt-2 text-muted-foreground">{review.content}</p>
+          
+          <p className="text-foreground leading-relaxed">{review.content}</p>
+          
           {review.images && review.images.length > 0 && (
-            <div className="mt-2 flex gap-2">
+            <div className="flex gap-2">
               {review.images.map((image, index) => (
                 <img
                   key={index}
                   src={image}
-                  alt={`review image ${index + 1}`}
-                  className="h-20 w-20 object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity"
+                  alt={`리뷰 이미지 ${index + 1}`}
+                  className="w-20 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
                 />
               ))}
             </div>
           )}
-
-          {/* 리뷰 액션 버튼 */}
-          <div className="flex items-center gap-2 mt-4 pt-3 border-t">
-            <Button 
-              variant={isLiked ? "default" : "ghost"} 
+          
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
               size="sm"
               onClick={handleLike}
+              className={`gap-1 ${isLiked ? 'text-primary' : 'text-muted-foreground'}`}
             >
-              <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
-              좋아요 {review.helpful || 0}
+            <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+              도움이 돼요 {likes > 0 && `(${likes})`}
             </Button>
             
-            {!isOwner && (
-              <Button variant="ghost" size="sm" onClick={handleReport}>
-                <AlertTriangle className="h-4 w-4 mr-1" />
-                신고하기
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowComments(!showComments)}
+              className="gap-1 text-muted-foreground"
+            >
+            <MessageCircle className="h-4 w-4" />
+              댓글 {comments.length > 0 && `(${comments.length})`}
+            </Button>
           </div>
-
-          <ReviewComments comments={review.comments} />
+          
+          {showComments && (
+            <div className="space-y-3 pl-4 border-l-2 border-muted">
+              {comments.length > 0 ? (
+                comments.map((comment) => {
+                  const authorName = comment?.author_name || '알 수 없는 사용자';
+                  const authorInitial = authorName ? authorName[0].toUpperCase() : '?';
+                  
+                  return (
+                    <div key={comment.id} className="flex items-start gap-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={comment?.author_avatar} alt={authorName} />
+                        <AvatarFallback>{authorInitial}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-sm">{authorName}</span>
+                          {comment?.is_seller_reply && (
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                              판매자
+                            </span>
+                          )}
+                          <span className="text-xs text-muted-foreground">
+                            {comment?.created_at ? new Date(comment.created_at).toLocaleDateString() : ''}
+                          </span>
+                        </div>
+                        <p className="text-sm text-foreground">{comment?.content || ''}</p>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-muted-foreground py-2">
+                  아직 댓글이 없습니다. 첫 댓글을 작성해보세요!
+                </p>
+              )}
+              
+              {isAuthenticated && (
+                <div className="flex gap-2 mt-3">
+                  <Textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="댓글을 작성해주세요..."
+                    className="flex-1 min-h-[60px] text-sm"
+                    maxLength={500}
+                  />
+                  <Button 
+                    size="sm" 
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim()}
+                  >
+                    작성
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* 삭제 확인 다이얼로그 */}
+ 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>리뷰를 삭제하시겠습니까?</AlertDialogTitle>
             <AlertDialogDescription>
-              삭제된 리뷰는 복구할 수 없습니다. 이 작업은 되돌릴 수 없습니다.
+              삭제된 리뷰는 복구할 수 없습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>취소</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  삭제 중...
-                </>
-              ) : (
-                '삭제'
-              )}
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>
+              삭제
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

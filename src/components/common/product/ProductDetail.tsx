@@ -21,7 +21,8 @@ import {
   HelpCircle,
   ExternalLink,
   MessageSquare,
-  Plus
+  Plus,
+  Globe
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -223,8 +224,30 @@ const ProductDetail = () => {
             <div className="aspect-square overflow-hidden rounded-lg bg-muted">
               {product.image_url ? (<img src={product.image_url} alt={product.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = '/placeholder-product.png'; }} />) : (<div className="w-full h-full flex items-center justify-center"><ShoppingBag className="h-24 w-24 text-muted-foreground" /></div>)}
             </div>
-            <Card>
+            <Card className="mt-6">
               <CardContent className="p-6">
+                {/* 🎯 변경사항 2: 메시지 리스트 제목 추가 */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5" />
+                      상품 관련 커뮤니티
+                    </h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleCreateMessage}
+                      className="flex items-center gap-1"
+                    >
+                      <Plus className="h-4 w-4" />
+                      글쓰기
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    이 상품에 대한 질문, 후기, 모임 등을 자유롭게 나눠보세요
+                  </p>
+                </div>
+                
                 <div className="space-y-2">
                   {productMessages.map((message) => (
                     <div 
@@ -291,7 +314,7 @@ const ProductDetail = () => {
                     <span className="col-span-2 flex items-center gap-2">
                       {product.brand || '정보 없음'}
                       {/* ✨ [유지] 브랜드 홈페이지 버튼 */}
-                      {product.brand_website && (
+                      {product.brand_website && ( 
                         <Button asChild variant="ghost" size="sm" className="h-auto p-1">
                           <a href={product.brand_website} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-3 w-3" />
@@ -311,16 +334,22 @@ const ProductDetail = () => {
 
             {/* 구매/문의 버튼 영역 */}
             <div className="space-y-3">
-              {product.product_url && (
-                <Button asChild className="w-full" size="lg">
-                  <a href={product.product_url} target="_blank" rel="noopener noreferrer">
-                    <ShoppingBag className="h-5 w-5 mr-2" />
-                    바로 구매
-                  </a>
-                </Button>
-              )}
+              <Button asChild className="w-full" size="lg">
+                <a href={product.product_url} target="_blank" rel="noopener noreferrer">
+                  <ShoppingBag className="h-5 w-5 mr-2" />
+                  바로 구매
+                </a>
+              </Button>
 
               <div className="flex gap-3">
+                {/* 🎯 변경사항 1: 브랜드 홈페이지 가기 버튼 추가 */}
+                <Button asChild variant="outline" className="flex-1">
+                  <a href={product.brand_website} target="_blank" rel="noopener noreferrer">
+                    <Globe className="h-4 w-4 mr-2" />
+                    브랜드 홈페이지 가기
+                  </a>
+                </Button>
+
                 {/* ✨ [추가] 요구사항 3번: 고객센터 버튼 */}
                 <Button asChild variant="outline" className="flex-1">
                   <a href={`https://peerterra.com/one/channel/${currentPeermall?.url}`} target="_blank" rel="noopener noreferrer">
@@ -328,12 +357,6 @@ const ProductDetail = () => {
                     고객센터
                   </a>
                 </Button>
-
-                {/* ✨ [추가] 요구사항 6번: 신고하기 버튼 */}
-                {/* <Button variant="outline" className="flex-1" onClick={handleReport}>
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  신고하기
-                </Button> */}
               </div>
 
               <div className="flex gap-3">
