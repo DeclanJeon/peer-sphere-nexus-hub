@@ -1,5 +1,4 @@
-// Frontend/src/pages/user-peermall/products/reviews/ReviewList.tsx
-import { Review } from './types';
+import { Review } from '@/types/review';
 import { ReviewItem } from './ReviewItem';
 
 interface ReviewListProps {
@@ -13,7 +12,12 @@ export const ReviewList = ({ reviews }: ReviewListProps) => {
   return (
     <div className="mt-6">
       {reviews.map((review) => (
-        <ReviewItem key={review.id} review={review} isOwner={review.author === currentUserId} />
+        <ReviewItem 
+          key={review.id} 
+          review={review} 
+          onUpdate={() => {}} 
+          onDelete={() => {}} 
+        />
       ))}
     </div>
   );

@@ -3,6 +3,8 @@ import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '@/lib/api/clients';
 import { toast } from '@/hooks/use-toast';
+import { SponsorSelection } from '@/components/common/SponsorSelection';
+import { useSponsorSelection } from '@/hooks/useSponsorSelection';
 
 // 타입 정의
 interface User {
@@ -39,6 +41,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const navigate = useNavigate();
+  
+  const { hasSponsor, isLoading: sponsorLoading, saveSponsor } = useSponsorSelection();
+  const [showSponsorDialog, setShowSponsorDialog] = useState(false);
 
   const logout = useCallback(async () => {
     const currentSessionId = localStorage.getItem(SESSION_ID_KEY);
@@ -47,6 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setIsAuthenticated(false);
     setSessionId(null);
+    setShowSponsorDialog(false);
     localStorage.removeItem(SESSION_ID_KEY);
     localStorage.removeItem(CSRF_TOKEN_KEY);
 
@@ -82,10 +88,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
        
-      if (response.data.success) {
+       if (response.data.success) {
         setUser(response.data.data);
         setIsAuthenticated(true);
         setSessionId(storedSessionId);
+        
+        // 스폰서가 선택되지 않았다면 스폰서 선택 다이얼로그 표시
+        if (!hasSponsor && !sponsorLoading) {
+          setShowSponsorDialog(true);
+        }
       } else {
         await logout();
       }
@@ -107,6 +118,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(userData);
     setIsAuthenticated(true);
     setSessionId(sessionData.sessionId);
+    
+    // 스폰서가 선택되지 않았다면 스폰서 선택 다이얼로그 표시
+    if (!hasSponsor) {
+      setShowSponsorDialog(true);
+    }
+  };
+
+  const handleSponsorSelect = (sponsor: any) => {
+    saveSponsor(sponsor);
+    setShowSponsorDialog(false);
+    toast({
+      title: "스폰서 선택 완료",
+      description: `${sponsor.name}이(가) 선택되었습니다.`,
+    });
   };
 
   const value = {
@@ -121,6 +146,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider value={value}>
       {children}
+      <SponsorSelection 
+        open={showSponsorDialog} 
+        onSponsorSelect={handleSponsorSelect}
+      />
     </AuthContext.Provider>
   );
 };

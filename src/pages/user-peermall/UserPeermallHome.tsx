@@ -10,7 +10,8 @@ const UserPeermallHome = () => {
   const [searchQuery, setSearchQuery] = useState('');
   // const [activeTab, setActiveTab] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const {activeTab} = useOutletContext();
+  const context = useOutletContext<{activeTab?: string}>();
+  const activeTab = context?.activeTab || 'all';
 
   // TODO: This should be fetched from the specific peermall's data
   const categories = [
