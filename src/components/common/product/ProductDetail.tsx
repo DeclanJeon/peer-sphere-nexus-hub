@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductModal from '@/components/common/product/ProductModal';
+import { id } from 'date-fns/locale';
 
 const ProductDetail = () => {
   const { url, id } = useParams<{ url: string; id: string }>();
@@ -76,10 +77,7 @@ const ProductDetail = () => {
     try {
       const data = await productApi.getProductById(id);
       setProduct(data);
-      
-      // 더미 데이터에서 현재 상품 ID에 해당하는 판매점 링크를 찾습니다.
-      const links = (sellerLinksData as Record<string, SellerLink[]>)[id] || [];
-      setSellerLinks(links);
+      setSellerLinks(sellerLinksData);
     } catch (error) {
       console.error('상품 조회 실패:', error);
       toast({
@@ -212,9 +210,16 @@ const ProductDetail = () => {
         {/* 상단 네비게이션 */}
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="flex items-center gap-2"><ArrowLeft className="h-4 w-4" />뒤로가기</Button>
+
+          {isLoggedIn && (
+            <div className="flex items-center gap-2 ml-auto">
+              <Button variant="outline" size="sm" onClick={handleEdit}>판매점 등록</Button>
+              <Button variant="outline" size="sm" onClick={handleEdit}>이벤트 신청</Button>
+            </div>
+          )}
           
           {isLoggedIn && isProductOwner() && (
-            <div className="flex items-center gap-2 ml-auto">
+            <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handleEdit}>수정</Button>
               <Button variant="outline" size="sm" onClick={handleDelete}>삭제</Button>
               <Badge variant={product.status === 'active' ? 'default' : 'secondary'} className="text-sm">{product.status === 'active' ? '판매중' : '판매중단'}</Badge>

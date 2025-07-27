@@ -1,5 +1,4 @@
-{
-  "1": [
+[
     {
       "id": "seller-11st",
       "name": "11번가",
@@ -26,9 +25,7 @@
       "shippingInfo": "무료배송",
       "link": "https://www.ssg.com",
       "updateInfo": "최대 3개월"
-    }
-  ],
-  "2": [
+    },
     {
       "id": "seller-gmarket",
       "name": "G마켓",
@@ -47,5 +44,4 @@
       "link": "https://www.auction.co.kr",
       "updateInfo": "최대 12개월"
     }
-  ]
-}
+]

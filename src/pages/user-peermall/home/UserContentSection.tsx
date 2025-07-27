@@ -49,10 +49,11 @@ const UserContentSection = ({ activeTab, selectedCategory, searchQuery }: UserCo
   // 뷰어 모드 상태
   const [viewMode, setViewMode] = useState<'grid' | 'split'>('grid');
   
+  
+  const currentPeermallId = currentPeermall?.id; // number로 유지
+
   // 이벤트 데이터 (현재 피어몰의 이벤트만 필터링)
   const events = eventsData.events.filter(event => event.peermallId === Number(currentPeermallId));
-  
-  const currentPeermallId = currentPeermall?.id.toString();
 
   // 권한 체크: 피어몰 소유주이며 로그인한 유저만 버튼 표시
   const isPeermallOwner = user?.user_uid === currentPeermall?.owner_uid;
