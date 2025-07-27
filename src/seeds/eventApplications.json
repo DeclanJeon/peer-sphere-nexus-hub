@@ -1,0 +1,43 @@
+{
+  "applications": [
+    {
+      "id": "app-001",
+      "userId": "user-123",
+      "eventId": "1",
+      "sponsorId": "1",
+      "userName": "김철수",
+      "userEmail": "kim@example.com",
+      "eventTitle": "클레오파트라솔트 신제품 출시 이벤트",
+      "sponsorName": "클레오파트라솔트",
+      "status": "pending",
+      "appliedAt": "2024-01-15T10:30:00Z",
+      "token": "token-abc-123"
+    },
+    {
+      "id": "app-002",
+      "userId": "user-456",
+      "eventId": "2",
+      "sponsorId": "2",
+      "userName": "이영희",
+      "userEmail": "lee@example.com",
+      "eventTitle": "대한물산 윈터 세일",
+      "sponsorName": "대한물산",
+      "status": "approved",
+      "appliedAt": "2024-01-14T15:20:00Z",
+      "processedAt": "2024-01-15T09:15:00Z"
+    },
+    {
+      "id": "app-003",
+      "userId": "user-789",
+      "eventId": "3",
+      "sponsorId": "3",
+      "userName": "박민수",
+      "userEmail": "park@example.com",
+      "eventTitle": "메리밀스 특가 이벤트",
+      "sponsorName": "메리밀스",
+      "status": "rejected",
+      "appliedAt": "2024-01-13T11:45:00Z",
+      "processedAt": "2024-01-14T16:30:00Z"
+    }
+  ]
+}

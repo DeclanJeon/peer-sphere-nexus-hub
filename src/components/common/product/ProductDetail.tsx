@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Product, SellerLink } from '@/types/product';
 import SellerLinks from './SellerLinks';
 import sellerLinksData from '@/seeds/sellerLinks.json';
+import { eventApi } from '@/services/event.api';
 import ProductDetailTabs from '@/components/common/product/reviews/ProductDetailTabs';
 import BoardList from '@/components/common/community/BoardList';
 import {
@@ -24,7 +25,8 @@ import {
   ExternalLink,
   MessageSquare,
   Plus,
-  Globe
+  Globe,
+  Loader2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -48,6 +50,7 @@ const ProductDetail = () => {
   const [isLiked, setIsLiked] = useState(false);
   // 판매점 링크를 위한 상태 추가
   const [sellerLinks, setSellerLinks] = useState<SellerLink[]>([]);
+  const [applyingEvent, setApplyingEvent] = useState(false);
   const [productMessages] = useState([
     { id: 1, title: "맛있는 요리 먹고 싶어요", author: "김푸드", created_at: "2024-01-15", views: 45, likes: 8, category: "맛집", comment_count: 12 },
     { id: 2, title: "저랑 만나실 분", author: "이만남", created_at: "2024-01-14", views: 67, likes: 15, category: "모임", comment_count: 25 },
@@ -77,7 +80,10 @@ const ProductDetail = () => {
     try {
       const data = await productApi.getProductById(id);
       setProduct(data);
-      setSellerLinks(sellerLinksData);
+      
+      // 더미 데이터에서 현재 상품 ID에 해당하는 판매점 링크를 찾습니다.
+      const links = (sellerLinksData as any)[id] || [];
+      setSellerLinks(links);
     } catch (error) {
       console.error('상품 조회 실패:', error);
       toast({
@@ -89,6 +95,45 @@ const ProductDetail = () => {
       setLoading(false);
     }
   }, [id, toast]);
+
+  // 이벤트 신청 핸들러
+  const handleEventApply = async () => {
+    if (!user || !id) {
+      toast({
+        title: '로그인 필요',
+        description: '이벤트 신청을 위해 로그인해주세요.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setApplyingEvent(true);
+    try {
+      const result = await eventApi.applyForEvent(id, user.user_uid);
+      
+      if (result.success) {
+        toast({
+          title: '신청 완료',
+          description: result.message,
+        });
+      } else {
+        toast({
+          title: '신청 실패',
+          description: result.message,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('이벤트 신청 실패:', error);
+      toast({
+        title: '오류',
+        description: '이벤트 신청 중 오류가 발생했습니다.',
+        variant: 'destructive',
+      });
+    } finally {
+      setApplyingEvent(false);
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -320,6 +365,19 @@ const ProductDetail = () => {
 
               {/* SellerLinks 컴포넌트 렌더링 */}
               <SellerLinks links={sellerLinks} />
+
+              {/* 이벤트 신청 버튼 */}
+              <div className="mt-6">
+                <Button 
+                  onClick={handleEventApply}
+                  disabled={!user || applyingEvent}
+                  size="lg"
+                  className="w-full"
+                >
+                  {applyingEvent && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  이벤트 신청하기
+                </Button>
+              </div>
             </div>
 
             {/* ✨ [추가] 요구사항 4번: 필수 표기 정보 표 */}
