@@ -1,0 +1,59 @@
+{
+  "events": [
+    {
+      "id": 1,
+      "title": "신상품 런칭 기념 50% 할인",
+      "description": "새로 출시된 프리미엄 제품들을 특별 가격으로 만나보세요",
+      "image": "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&h=400&fit=crop",
+      "startDate": "2024-01-15",
+      "endDate": "2024-01-31",
+      "peermallId": 1,
+      "discount": 50,
+      "badge": "HOT"
+    },
+    {
+      "id": 2, 
+      "title": "겨울 시즌 특가 이벤트",
+      "description": "따뜻한 겨울나기를 위한 특별한 할인 혜택",
+      "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop",
+      "startDate": "2024-01-10",
+      "endDate": "2024-02-29",
+      "peermallId": 1,
+      "discount": 30,
+      "badge": "WINTER"
+    },
+    {
+      "id": 3,
+      "title": "멤버십 회원 전용 혜택",
+      "description": "VIP 고객만을 위한 특별한 이벤트가 시작됩니다",
+      "image": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop",
+      "startDate": "2024-01-20",
+      "endDate": "2024-02-15",
+      "peermallId": 1,
+      "discount": 25,
+      "badge": "VIP"
+    },
+    {
+      "id": 4,
+      "title": "친구 추천 이벤트",
+      "description": "친구를 추천하고 함께 혜택을 받아보세요",
+      "image": "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=600&h=400&fit=crop",
+      "startDate": "2024-01-01",
+      "endDate": "2024-03-31",
+      "peermallId": 1,
+      "discount": 15,
+      "badge": "FRIEND"
+    },
+    {
+      "id": 5,
+      "title": "주말 한정 특가",
+      "description": "매주 주말마다 찾아오는 깜짝 할인 이벤트",
+      "image": "https://images.unsplash.com/photo-1556740758-90de374c12ad?w=600&h=400&fit=crop",
+      "startDate": "2024-01-13",
+      "endDate": "2024-01-14",
+      "peermallId": 1,
+      "discount": 40,
+      "badge": "WEEKEND"
+    }
+  ]
+}

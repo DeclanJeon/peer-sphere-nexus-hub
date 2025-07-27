@@ -9,13 +9,29 @@ import { Plus, Loader2, AlertTriangle } from 'lucide-react';
 import ProductList from '@/components/common/product/ProductList';
 import BoardList from '@/components/common/community/BoardList';
 import EventList from '@/components/common/event/EventList';
+import ViewModeSelector from '@/components/common/ViewModeSelector';
+import IntegratedGridView from '@/components/common/views/IntegratedGridView';
+import SplitView from '@/components/common/views/SplitView';
 import { productApi } from '@/services/product.api'; // [추가] Product API import
 import { Product } from '@/types/product'; // [추가] Product 타입 import
+import eventsData from '@/seeds/events.json';
 
 interface UserContentSectionProps {
   activeTab: string;
   selectedCategory: string;
   searchQuery: string;
+}
+
+interface Event {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  startDate: string;
+  endDate: string;
+  peermallId: number;
+  discount: number;
+  badge: string;
 }
 
 const UserContentSection = ({ activeTab, selectedCategory, searchQuery }: UserContentSectionProps) => {
@@ -29,6 +45,12 @@ const UserContentSection = ({ activeTab, selectedCategory, searchQuery }: UserCo
   const [bestProducts, setBestProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // 뷰어 모드 상태
+  const [viewMode, setViewMode] = useState<'grid' | 'split'>('grid');
+  
+  // 이벤트 데이터 (현재 피어몰의 이벤트만 필터링)
+  const events = eventsData.events.filter(event => event.peermallId === Number(currentPeermallId));
   
   const currentPeermallId = currentPeermall?.id.toString();
 
@@ -104,7 +126,7 @@ const UserContentSection = ({ activeTab, selectedCategory, searchQuery }: UserCo
   };
 
   // 상품 섹션 렌더링
-  const renderProductSection = (filteredNewProducts, filteredBestProducts) => {
+  const renderProductSection = (filteredNewProducts: Product[], filteredBestProducts: Product[]) => {
     // [수정] 로딩/에러 상태를 먼저 체크
     const loadingOrErrorUI = renderLoadingOrError();
     if (loadingOrErrorUI) {
@@ -115,56 +137,32 @@ const UserContentSection = ({ activeTab, selectedCategory, searchQuery }: UserCo
       return null;
     }
 
+    // 뷰 모드에 따른 렌더링
+    const allProducts = [...filteredNewProducts, ...filteredBestProducts];
+    
+    // 뷰어 선택 UI는 상품 관련 탭에서만 표시
+    const showViewSelector = ['all', 'new', 'best'].includes(activeTab);
+    
     return (
-      <div className="space-y-8">
-        {/* 신규 상품 섹션 */}
-        {(activeTab === 'all' || activeTab === 'new') && (
-          <Card className="shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-2xl">신규 상품</CardTitle>
-                <CardDescription className="text-base">
-                  최근에 등록된 상품들을 확인해보세요
-                  {selectedCategory !== 'all' && ` (${selectedCategory})`}
-                </CardDescription>
-              </div>
-              <Button variant="outline" asChild>
-                <Link to={`/home/${params.url}/products?tab=신상품`}>전체보기</Link>
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {/* [수정] 직접 fetching한 데이터를 products prop으로 전달 */}
-              <ProductList 
-                products={filteredNewProducts}
-                mode="full" // 미리보기 모드는 ProductList에서 제거하거나, CSS로 처리하는 것을 권장
-              />
-            </CardContent>
-          </Card>
+      <div className="space-y-6">
+        {/* 뷰어 선택 UI */}
+        {showViewSelector && (
+          <div className="flex justify-end">
+            <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />
+          </div>
         )}
 
-        {/* 베스트 상품 섹션 */}
-        {(activeTab === 'all' || activeTab === 'best') && (
-          <Card className="shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-2xl">베스트 상품</CardTitle>
-                <CardDescription className="text-base">
-                  인기 있는 상품들을 만나보세요
-                  {selectedCategory !== 'all' && ` (${selectedCategory})`}
-                </CardDescription>
-              </div>
-              <Button variant="outline" asChild>
-                <Link to={`/home/${params.url}/products?tab=베스트`}>전체보기</Link>
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {/* [수정] 직접 fetching한 데이터를 products prop으로 전달 */}
-              <ProductList 
-                products={filteredBestProducts}
-                mode="full"
-              />
-            </CardContent>
-          </Card>
+        {/* 뷰어에 따른 콘텐츠 */}
+        {viewMode === 'grid' ? (
+          <IntegratedGridView 
+            products={allProducts}
+            events={events}
+          />
+        ) : (
+          <SplitView 
+            products={allProducts}
+            events={events}
+          />
         )}
       </div>
     );
