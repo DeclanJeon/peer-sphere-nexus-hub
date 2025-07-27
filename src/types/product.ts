@@ -26,6 +26,18 @@ export interface Product {
   rating?: number;
   features?: string[];
   specifications?: Record<string, string>;
+  sellerLinks?: SellerLink[]; // 판매점 링크 배열 (선택적)
+}
+
+// 판매점 링크 정보 타입을 정의합니다.
+export interface SellerLink {
+  id: string;
+  name: string;
+  logoUrl: string;
+  price: number;
+  shippingInfo: string;
+  link: string;
+  updateInfo: string;
 }
 
 export interface ProductCreationData {

@@ -1,0 +1,51 @@
+{
+  "1": [
+    {
+      "id": "seller-11st",
+      "name": "11번가",
+      "logoUrl": "https://i.imgur.com/41G152B.png",
+      "price": 1408990,
+      "shippingInfo": "무료배송",
+      "link": "https://www.11st.co.kr",
+      "updateInfo": "최대 22개월"
+    },
+    {
+      "id": "seller-coupang",
+      "name": "쿠팡",
+      "logoUrl": "https://i.imgur.com/22G2d0c.png",
+      "price": 1409000,
+      "shippingInfo": "무료배송",
+      "link": "https://www.coupang.com",
+      "updateInfo": "최대 18개월"
+    },
+    {
+      "id": "seller-ssg",
+      "name": "SSG.COM",
+      "logoUrl": "https://i.imgur.com/tDSi8Qf.png",
+      "price": 1470150,
+      "shippingInfo": "무료배송",
+      "link": "https://www.ssg.com",
+      "updateInfo": "최대 3개월"
+    }
+  ],
+  "2": [
+    {
+      "id": "seller-gmarket",
+      "name": "G마켓",
+      "logoUrl": "https://i.imgur.com/2388z01.png",
+      "price": 250000,
+      "shippingInfo": "무료배송",
+      "link": "https://www.gmarket.co.kr",
+      "updateInfo": "최대 24개월"
+    },
+    {
+      "id": "seller-auction",
+      "name": "옥션",
+      "logoUrl": "https://i.imgur.com/0I2S803.png",
+      "price": 255000,
+      "shippingInfo": "3,000원",
+      "link": "https://www.auction.co.kr",
+      "updateInfo": "최대 12개월"
+    }
+  ]
+}

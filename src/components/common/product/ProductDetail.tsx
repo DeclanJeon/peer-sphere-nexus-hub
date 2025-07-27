@@ -7,7 +7,9 @@ import { useToast } from '@/hooks/use-toast';
 import { productApi } from '@/services/product.api';
 import { usePeermall } from '@/contexts/PeermallContext';
 import { useAuth } from '@/hooks/useAuth';
-import { Product } from '@/types/product';
+import { Product, SellerLink } from '@/types/product';
+import SellerLinks from './SellerLinks';
+import sellerLinksData from '@/seeds/sellerLinks.json';
 import ProductDetailTabs from '@/components/common/product/reviews/ProductDetailTabs';
 import BoardList from '@/components/common/community/BoardList';
 import {
@@ -43,6 +45,8 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  // 판매점 링크를 위한 상태 추가
+  const [sellerLinks, setSellerLinks] = useState<SellerLink[]>([]);
   const [productMessages] = useState([
     { id: 1, title: "맛있는 요리 먹고 싶어요", author: "김푸드", created_at: "2024-01-15", views: 45, likes: 8, category: "맛집", comment_count: 12 },
     { id: 2, title: "저랑 만나실 분", author: "이만남", created_at: "2024-01-14", views: 67, likes: 15, category: "모임", comment_count: 25 },
@@ -72,6 +76,10 @@ const ProductDetail = () => {
     try {
       const data = await productApi.getProductById(id);
       setProduct(data);
+      
+      // 더미 데이터에서 현재 상품 ID에 해당하는 판매점 링크를 찾습니다.
+      const links = (sellerLinksData as Record<string, SellerLink[]>)[id] || [];
+      setSellerLinks(links);
     } catch (error) {
       console.error('상품 조회 실패:', error);
       toast({
@@ -304,6 +312,9 @@ const ProductDetail = () => {
                 {product.price && product.price !== product.selling_price && (<p className="text-lg text-muted-foreground line-through">{Number(product.price).toLocaleString()}원</p>)}
                 <p className="text-3xl font-bold text-primary">{Number(product.selling_price || 0).toLocaleString()}원</p>
               </div>
+
+              {/* SellerLinks 컴포넌트 렌더링 */}
+              <SellerLinks links={sellerLinks} />
             </div>
 
             {/* ✨ [추가] 요구사항 4번: 필수 표기 정보 표 */}
