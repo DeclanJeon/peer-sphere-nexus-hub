@@ -95,19 +95,42 @@ export const ProductReviews = ({
 
   // 🎯 평균 평점 계산 함수
   const calculateAverageRating = () => {
-    if (!stats || stats.total_count === 0) {
-      return averageRating || 0;
-    }
-    
-    const totalScore = (stats.five_star * 5) + 
-                      (stats.four_star * 4) + 
-                      (stats.three_star * 3) + 
-                      (stats.two_star * 2) + 
-                      (stats.one_star * 1);
-    
-    const average = totalScore / stats.total_count;
-    return Math.round(average * 10) / 10; // 소수점 첫째자리까지 반올림
-  };
+  // 기본 조건 체크 - stats가 없거나 total_count가 0인 경우
+  if (!stats || !stats.total_count || stats.total_count === 0) {
+    return averageRating || 0;
+  }
+  
+  // 각 별점 개수를 안전하게 숫자로 변환 (NaN 방지)
+  const fiveStar = Number(stats.five_star) || 0;
+  const fourStar = Number(stats.four_star) || 0;
+  const threeStar = Number(stats.three_star) || 0;
+  const twoStar = Number(stats.two_star) || 0;
+  const oneStar = Number(stats.one_star) || 0;
+  const totalCount = Number(stats.total_count) || 0;
+  
+  // 다시 한번 total_count 검증
+  if (totalCount === 0) {
+    return averageRating || 0;
+  }
+  
+  const totalScore = (fiveStar * 5) + 
+                    (fourStar * 4) + 
+                    (threeStar * 3) + 
+                    (twoStar * 2) + 
+                    (oneStar * 1);
+  
+  const average = totalScore / totalCount;
+  
+  // NaN 체크 및 유효성 검증
+  if (isNaN(average) || !isFinite(average)) {
+    return averageRating || 0;
+  }
+  
+  const roundedAverage = Math.round(average * 10) / 10;
+  
+  // 최종 결과도 한번 더 검증
+  return isNaN(roundedAverage) ? (averageRating || 0) : roundedAverage;
+};
 
   // 🎯 퍼센티지 계산 함수 (0으로 나누기 방지)
   const getPercentage = (count: number, total: number) => {
@@ -139,7 +162,7 @@ export const ProductReviews = ({
             <div className="flex items-center gap-2">
               <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
               <span className="text-3xl font-bold">
-                {displayAverageRating.toFixed(1)}
+                {displayAverageRating}
               </span>
               <span className="text-muted-foreground">/ 5.0</span>
             </div>
