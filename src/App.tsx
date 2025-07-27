@@ -50,6 +50,7 @@ import { OverviewSection } from "./components/admin/OverviewSection";
 import { CommentManagement } from "./components/admin/CommentManagement";
 import { ReviewManagement } from "./components/admin/ReviewManagement";
 import ProductChannelPostDetail from "./pages/common/ProductChannelPostDetail";
+import QRGeneratorPage from "./pages/common/QRGeneratorPage";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,8 @@ const App = () => (
                 <Route path="events" element={<EventPage />} />
                 <Route path="event/create" element={<ProtectedRoute><EventCreate /></ProtectedRoute>} />
                 <Route path="event/:id" element={<EventDetail />} />
+
+                <Route path="qr" element={<ProtectedRoute><QRGeneratorPage /></ProtectedRoute>} />
               </Route>
 
               {/* MyPage Routes - 로그인 필요 */}

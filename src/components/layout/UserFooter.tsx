@@ -4,7 +4,7 @@ const UserFooter = ({ currentPeermall }: { currentPeermall: any }) => {
     return (
       <footer className="bg-gray-100 border-t mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* 피어몰 정보 */}
             <div className="space-y-4">
               <a href={`/home/${currentPeermall.url}`} className="text-2xl font-bold text-primary">
@@ -14,17 +14,6 @@ const UserFooter = ({ currentPeermall }: { currentPeermall: any }) => {
                 세상을 넓히는 연결의 시작,<br />
                 {currentPeermall.name}과 함께 하세요.
               </p>
-            </div>
-
-            {/* 사업자 정보 */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">사업자 정보</h3>
-              <div className="text-sm text-gray-600 space-y-1">
-                <p>피어테라㈜ | 대표이사: 김기환</p>
-                <p>선유로13길 25, 에이스하이테크시티2 408호</p>
-                <p>사업자 등록번호: 110-00-00000</p>
-                <p>통신판매업신고: 2017-서울송파-0680</p>
-              </div>
             </div>
 
             <div className="space-y-4">
