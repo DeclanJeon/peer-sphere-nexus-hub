@@ -343,7 +343,7 @@ const ProductDetail = () => {
                   </div>
                   <div className="grid grid-cols-3 gap-4 py-2 border-b"><span className="font-medium text-muted-foreground">제조사</span><span className="col-span-2">{product.manufacturer || '정보 없음'}</span></div>
                   <div className="grid grid-cols-3 gap-4 py-2 border-b"><span className="font-medium text-muted-foreground">유통사</span><span className="col-span-2">{product.distributor || '정보 없음'}</span></div>
-                  <div className="grid grid-cols-3 gap-4 py-2 border-b"><span className="font-medium text-muted-foreground">카테고리</span><span className="col-span-2">{product.category || '정보 없음'}</span></div>
+                  {/* <div className="grid grid-cols-3 gap-4 py-2 border-b"><span className="font-medium text-muted-foreground">카테고리</span><span className="col-span-2">{product.category || '정보 없음'}</span></div> */}
                   <div className="grid grid-cols-3 gap-4 py-2 border-b"><span className="font-medium text-muted-foreground">상품 상태</span><span className="col-span-2"><Badge variant={product.status === 'active' ? 'default' : 'secondary'}>{product.status === 'active' ? '판매중' : '판매중단'}</Badge></span></div>
                   {product.shipping_fee !== undefined && (<div className="grid grid-cols-3 gap-4 py-2"><span className="font-medium text-muted-foreground">배송비</span><span className="col-span-2">{Number(product.shipping_fee) === 0 ? '무료배송' : `${Number(product.shipping_fee).toLocaleString()}원`}</span></div>)}
                 </div>

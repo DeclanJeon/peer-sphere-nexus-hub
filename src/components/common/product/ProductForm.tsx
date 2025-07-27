@@ -20,6 +20,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface ProductFormData {
   name: string;
@@ -32,6 +33,7 @@ export interface ProductFormData {
   manufacturer: string;
   distributor: string;
   imageUrl: string;
+  userUid: string;
 }
 
 interface ProductFormProps {
@@ -60,10 +62,11 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
 const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
   ({ initialData, onSubmit, formId }, ref) => {
     const { toast } = useToast();
+    const { user } = useAuth();
     
     const [formData, setFormData] = useState<ProductFormData>({
       name: '', sellingPrice: '', shippingFee: '',
-      description: '', brand: '', productUrl: '', brandWebsite: '', manufacturer: '', distributor: '', imageUrl: ''
+      description: '', brand: '', productUrl: '', brandWebsite: '', manufacturer: '', distributor: '', imageUrl: '', userUid: ''
     });
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -85,7 +88,7 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
     const resetForm = useCallback(() => {
       setFormData({
         name: '', sellingPrice: '', shippingFee: '',
-        description: '', brand: '', productUrl: '', brandWebsite: '', manufacturer: '', distributor: '', imageUrl: ''
+        description: '', brand: '', productUrl: '', brandWebsite: '', manufacturer: '', distributor: '', imageUrl: '', userUid: ''
       });
       setImageFile(null);
       setImagePreview(null);
@@ -177,6 +180,7 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
           manufacturer: initialData.manufacturer || '',
           distributor: initialData.distributor || '',
           imageUrl: initialData.imageUrl || '',
+          userUid: user.user_uid || '',
         };
         setFormData(newFormData);
 

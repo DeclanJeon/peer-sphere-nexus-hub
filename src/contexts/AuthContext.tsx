@@ -146,11 +146,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider value={value}>
       {children}
-      <SponsorSelection 
+      {/* <SponsorSelection 
         open={showSponsorDialog} 
         onSponsorSelect={handleSponsorSelect}
         userData={user as User}
-      />
+      /> */}
     </AuthContext.Provider>
   );
 };
