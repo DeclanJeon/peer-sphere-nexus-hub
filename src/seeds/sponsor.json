@@ -1,0 +1,52 @@
+{
+  "sponsors": [
+    {
+      "id": 1,
+      "name": "클레오파트라솔트",
+      "name_en": "Cleopatra Salt"
+    },
+    {
+      "id": 2,
+      "name": "대한물산",
+      "name_en": "Daehan Trading"
+    },
+    {
+      "id": 3,
+      "name": "메리밀스",
+      "name_en": "Merry Mills"
+    },
+    {
+      "id": 4,
+      "name": "퓨어펌",
+      "name_en": "Pure Farm"
+    },
+    {
+      "id": 5,
+      "name": "굿솔트"
+    },
+    {
+      "id": 6,
+      "name": "테미"
+    },
+    {
+      "id": 7,
+      "name": "더에이치코리아",
+      "name_en": "The H Korea"
+    },
+    {
+      "id": 8,
+      "name": "그랑블루",
+      "name_en": "Grand Blue"
+    },
+    {
+      "id": 9,
+      "name": "해피바바",
+      "name_en": "Happy Baba"
+    },
+    {
+      "id": 10,
+      "name": "푸드메이트",
+      "name_en": "Food Mate"
+    }
+  ]
+}
