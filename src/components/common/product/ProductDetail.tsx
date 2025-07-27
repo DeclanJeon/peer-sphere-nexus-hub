@@ -213,8 +213,8 @@ const ProductDetail = () => {
 
           {isLoggedIn && (
             <div className="flex items-center gap-2 ml-auto">
-              <Button variant="outline" size="sm" onClick={handleEdit}>판매점 등록</Button>
-              <Button variant="outline" size="sm" onClick={handleEdit}>이벤트 신청</Button>
+              <Button variant="outline" size="sm">판매점 등록</Button>
+              <Button variant="outline" size="sm">이벤트 신청</Button>
             </div>
           )}
           
