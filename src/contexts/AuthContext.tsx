@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const handleSponsorSelect = (sponsor: any) => {
+  const handleSponsorSelect = (sponsor: any, userData: User) => {
     saveSponsor(sponsor);
     setShowSponsorDialog(false);
     toast({
@@ -149,6 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       <SponsorSelection 
         open={showSponsorDialog} 
         onSponsorSelect={handleSponsorSelect}
+        userData={user as User}
       />
     </AuthContext.Provider>
   );

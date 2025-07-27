@@ -4,39 +4,90 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Star } from 'lucide-react';
-import sponsorData from '@/seeds/sponsor.json';
-
-interface Sponsor {
-  id: number;
-  name: string;
-  name_en?: string;
-}
+import { getSponsors, selectSponsor, Sponsor, UserData } from '@/services/sponsor.api';
 
 interface SponsorSelectionProps {
   open: boolean;
-  onSponsorSelect: (sponsor: Sponsor) => void;
+  onSponsorSelect: (sponsor: Sponsor, userData: UserData) => void;
+  userData: UserData;
 }
 
 export const SponsorSelection: React.FC<SponsorSelectionProps> = ({
   open,
   onSponsorSelect,
+  userData,
 }) => {
   const [selectedSponsor, setSelectedSponsor] = useState<Sponsor | null>(null);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setSponsors(sponsorData.sponsors);
+    const fetchSponsors = async () => {
+      try {
+        const fetchedSponsors = await getSponsors();
+        setSponsors(fetchedSponsors);
+      } catch (err) {
+        setError('Failed to load sponsors.');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSponsors();
   }, []);
 
   const handleSponsorClick = (sponsor: Sponsor) => {
     setSelectedSponsor(sponsor);
   };
 
-  const handleConfirm = () => {
-    if (selectedSponsor) {
-      onSponsorSelect(selectedSponsor);
+  const handleConfirm = async () => {
+    if (selectedSponsor && userData) {
+      try {
+        await selectSponsor(selectedSponsor, userData);
+        onSponsorSelect(selectedSponsor, userData);
+      } catch (err) {
+        setError('Failed to select sponsor.');
+        console.error(err);
+      }
     }
   };
+
+  if (isLoading) {
+    return (
+      <Dialog open={open} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-bold">
+              스폰서를 선택해주세요
+            </DialogTitle>
+            <p className="text-center text-muted-foreground mt-2">
+              피어몰 서비스를 이용하기 위해 스폰서를 선택해야 합니다.
+            </p>
+          </DialogHeader>
+          <div className="text-center py-8">Loading sponsors...</div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (error) {
+    return (
+      <Dialog open={open} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-bold">
+              스폰서를 선택해주세요
+            </DialogTitle>
+            <p className="text-center text-muted-foreground mt-2">
+              피어몰 서비스를 이용하기 위해 스폰서를 선택해야 합니다.
+            </p>
+          </DialogHeader>
+          <div className="text-center py-8 text-red-500">{error}</div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
