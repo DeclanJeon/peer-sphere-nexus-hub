@@ -95,8 +95,8 @@ export const ProductReviews = ({
 
   // 🎯 평균 평점 계산 함수
   const calculateAverageRating = () => {
-    if (!stats || stats.total_count === 0) {
-      return averageRating || 0;
+    if (Number(stats.total_count) === 0 || !stats) {
+      return Number(averageRating) || 0;
     }
     
     const totalScore = (stats.five_star * 5) + 
