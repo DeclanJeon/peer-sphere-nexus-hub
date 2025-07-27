@@ -1,37 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Star, AlertCircle, Loader2, Globe, Mail, Phone } from 'lucide-react';
 import sponsorApi, { Sponsor } from '@/services/sponsor.api';
 import { User } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { peermallApi } from '@/services/peermall.api';
 
-interface SponsorSelectionProps {
-  open: boolean;
-  onSponsorSelect: (sponsor: Sponsor, userData: User) => void;
-  userData?: User; // optional로 변경
-  onClose?: () => void; // 닫기 콜백 추가
-}
-
-export const SponsorSelection: React.FC<SponsorSelectionProps> = ({
-  open,
-  onSponsorSelect,
-  userData,
-  onClose,
-}) => {
+const SponsorSelectionPage: React.FC = () => {
   const [selectedSponsor, setSelectedSponsor] = useState<Sponsor | null>(null);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSelecting, setIsSelecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (open) {
-      fetchSponsors();
-    }
-  }, [open]);
+    fetchSponsors();
+  }, []);
 
   const fetchSponsors = async () => {
     setIsLoading(true);
@@ -67,7 +57,7 @@ export const SponsorSelection: React.FC<SponsorSelectionProps> = ({
   };
 
   const handleConfirm = async () => {
-    if (!selectedSponsor || !userData || isSelecting) return;
+    if (!selectedSponsor || !user || isSelecting) return;
 
     setIsSelecting(true);
     setError(null);
@@ -75,8 +65,8 @@ export const SponsorSelection: React.FC<SponsorSelectionProps> = ({
     try {
       // userData에 user_name 추가 (필요한 경우)
       const userDataWithName = {
-        ...userData,
-        user_name: userData.name || userData.user_uid,
+        ...user,
+        user_name: user.name || user.user_uid,
       };
 
       await sponsorApi.selectSponsor(selectedSponsor, userDataWithName);
@@ -86,7 +76,9 @@ export const SponsorSelection: React.FC<SponsorSelectionProps> = ({
         description: `${selectedSponsor.name}이(가) 성공적으로 선택되었습니다.`,
       });
 
-      onSponsorSelect(selectedSponsor, userData);
+      // 스폰서 선택 후 피어몰 페이지로 이동
+      const mallInfo = await peermallApi.getPeermallByUid(user.user_uid);
+      navigate(`/home/${mallInfo.url}`);
       
     } catch (err: any) {
       console.error('스폰서 선택 실패:', err);
@@ -115,73 +107,48 @@ export const SponsorSelection: React.FC<SponsorSelectionProps> = ({
     fetchSponsors();
   };
 
-  const handleDialogClose = () => {
-    if (isSelecting) return; // 선택 중일 때는 닫기 방지
-    onClose?.();
-  };
-
   // 로딩 상태
   if (isLoading) {
     return (
-      <Dialog open={open} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-center text-xl font-bold">
-              스폰서를 선택해주세요
-            </DialogTitle>
-            <p className="text-center text-muted-foreground mt-2">
-              피어몰 서비스를 이용하기 위해 스폰서를 선택해야 합니다.
-            </p>
-          </DialogHeader>
-          <div className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">스폰서 목록을 불러오는 중...</p>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">스폰서 목록을 불러오는 중...</p>
+        </div>
+      </div>
     );
   }
 
   // 에러 상태
   if (error && sponsors.length === 0) {
     return (
-      <Dialog open={open} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-center text-xl font-bold">
-              스폰서를 선택해주세요
-            </DialogTitle>
-            <p className="text-center text-muted-foreground mt-2">
-              피어몰 서비스를 이용하기 위해 스폰서를 선택해야 합니다.
-            </p>
-          </DialogHeader>
-          <div className="flex flex-col items-center justify-center py-12">
-            <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-            <p className="text-center text-destructive mb-4">{error}</p>
-            <Button onClick={handleRetry} variant="outline">
-              다시 시도
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={handleRetry} variant="outline">
+            다시 시도
+          </Button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-center text-xl font-bold">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
             스폰서를 선택해주세요
-          </DialogTitle>
-          <p className="text-center text-muted-foreground mt-2">
+          </h1>
+          <p className="text-gray-600">
             피어몰 서비스를 이용하기 위해 스폰서를 선택해야 합니다.
           </p>
-        </DialogHeader>
-        
+        </div>
+
         {/* 에러 메시지 표시 (스폰서 목록이 있는 경우) */}
         {error && sponsors.length > 0 && (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 mb-4">
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 mb-6">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-destructive" />
               <p className="text-sm text-destructive">{error}</p>
@@ -189,7 +156,7 @@ export const SponsorSelection: React.FC<SponsorSelectionProps> = ({
           </div>
         )}
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {sponsors.map((sponsor) => (
             <Card
               key={sponsor.id}
@@ -200,48 +167,48 @@ export const SponsorSelection: React.FC<SponsorSelectionProps> = ({
               } ${isSelecting ? 'opacity-50 cursor-not-allowed' : ''}`}
               onClick={() => handleSponsorClick(sponsor)}
             >
-              <CardContent className="p-4">
+              <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="h-4 w-4 text-yellow-500 flex-shrink-0" />
-                      <h3 className="font-semibold text-sm truncate">{sponsor.name}</h3>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Star className="h-5 w-5 text-yellow-500 flex-shrink-0" />
+                      <h3 className="font-semibold text-base truncate">{sponsor.name}</h3>
                     </div>
                     
                     {sponsor.name_en && (
-                      <p className="text-xs text-muted-foreground mb-2 truncate">
+                      <p className="text-sm text-muted-foreground mb-2 truncate">
                         {sponsor.name_en}
                       </p>
                     )}
                     
                     {sponsor.description && (
-                      <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                         {sponsor.description}
                       </p>
                     )}
                     
                     {/* 연락처 정보 */}
-                    <div className="space-y-1 mb-3">
+                    <div className="space-y-2 mb-4">
                       {sponsor.website && (
-                        <div className="flex items-center gap-1">
-                          <Globe className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground truncate">
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground truncate">
                             {sponsor.website.replace(/^https?:\/\//, '')}
                           </span>
                         </div>
                       )}
                       {sponsor.email && (
-                        <div className="flex items-center gap-1">
-                          <Mail className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground truncate">
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground truncate">
                             {sponsor.email}
                           </span>
                         </div>
                       )}
                       {sponsor.phone && (
-                        <div className="flex items-center gap-1">
-                          <Phone className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
                             {sponsor.phone}
                           </span>
                         </div>
@@ -254,7 +221,7 @@ export const SponsorSelection: React.FC<SponsorSelectionProps> = ({
                   </div>
                   
                   {selectedSponsor?.id === sponsor.id && (
-                    <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
+                    <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                   )}
                 </div>
               </CardContent>
@@ -262,27 +229,25 @@ export const SponsorSelection: React.FC<SponsorSelectionProps> = ({
           ))}
         </div>
 
-        <div className="flex justify-center mt-6 gap-3">
-          {onClose && (
-            <Button
-              onClick={handleDialogClose}
-              variant="outline"
-              disabled={isSelecting}
-              className="min-w-[120px]"
-            >
-              취소
-            </Button>
-          )}
+        <div className="flex justify-center mt-8 gap-4">
+          <Button
+            onClick={() => navigate(-1)}
+            variant="outline"
+            disabled={isSelecting}
+            className="min-w-[120px]"
+          >
+            뒤로
+          </Button>
           
           <Button
             onClick={handleConfirm}
-            disabled={!selectedSponsor || !userData || isSelecting}
+            disabled={!selectedSponsor || !user || isSelecting}
             size="lg"
             className="min-w-[200px]"
           >
             {isSelecting ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
                 선택 중...
               </>
             ) : selectedSponsor ? (
@@ -292,7 +257,9 @@ export const SponsorSelection: React.FC<SponsorSelectionProps> = ({
             )}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
+
+export default SponsorSelectionPage;

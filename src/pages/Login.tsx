@@ -195,7 +195,7 @@ const Login = () => {
       });
 
       if (response.data.success) {
-        const { session, user } = response.data.data;
+        const { session, user, isNewUser } = response.data.data;
         
         login(session, user);
 
@@ -204,12 +204,14 @@ const Login = () => {
           description: "성공적으로 로그인되었습니다.",
         });
 
-        // 원래 가려던 페이지로 리다이렉트
-        // location.state가 null일 수 있으므로 optional chaining 사용
-        const state = location.state as LocationState | null;
-        const from = state?.from?.pathname || '/';
-        //navigate(from, { replace: true });
-        navigate(`/home/${response.data.data.peermall.url}`);
+        // 신규 사용자인 경우 스폰서 선택 다이얼로그 표시
+        if (isNewUser) {
+          // AuthContext에서 스폰서 선택 다이얼로그를 표시하도록 상태 업데이트
+          // 이 로직은 AuthContext에서 처리되므로 추가 작업 없음
+        } else {
+          // 기존 사용자는 바로 피어몰 페이지로 이동
+          navigate(`/home/${response.data.data.peermall.url}`);
+        }
       }
     } catch (error: any) {
       console.error('OTP 검증 오류:', error);

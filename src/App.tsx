@@ -11,6 +11,7 @@ import { SessionWarning } from "./components/SessionWarning";
 
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
+import SponsorSelectionPage from "@/pages/common/SponsorSelectionPage";
 
 // Main Layout & Pages
 import MainLayout from "@/components/layout/MainLayout";
@@ -65,13 +66,21 @@ const App = () => (
             <SessionWarning />
             <Routes>
               {/* Public Routes */}
-              <Route 
-                path="/login" 
+              <Route
+                path="/login"
                 element={
                   <PublicRoute>
                     <Login />
                   </PublicRoute>
-                } 
+                }
+              />
+              <Route
+                path="/select-sponsor"
+                element={
+                  <ProtectedRoute>
+                    <SponsorSelectionPage />
+                  </ProtectedRoute>
+                }
               />
               
               {/* Main Routes */}

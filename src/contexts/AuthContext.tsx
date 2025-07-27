@@ -5,9 +5,12 @@ import apiClient from '@/lib/api/clients';
 import { toast } from '@/hooks/use-toast';
 import { SponsorSelection } from '@/components/common/SponsorSelection';
 import { useSponsorSelection } from '@/hooks/useSponsorSelection';
+import { peermallApi } from '@/services/peermall.api';
+import sponsorApi, { Sponsor } from '@/services/sponsor.api';
+
 
 // 타입 정의
-interface User {
+export interface User {
   [x: string]: string;
   user_uid: string;
   email: string;
@@ -40,10 +43,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const navigate = useNavigate();
   
   const { hasSponsor, isLoading: sponsorLoading, saveSponsor } = useSponsorSelection();
-  const [showSponsorDialog, setShowSponsorDialog] = useState(false);
+  const navigate = useNavigate();
 
   const logout = useCallback(async () => {
     const currentSessionId = localStorage.getItem(SESSION_ID_KEY);
@@ -52,7 +54,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setIsAuthenticated(false);
     setSessionId(null);
-    setShowSponsorDialog(false);
     localStorage.removeItem(SESSION_ID_KEY);
     localStorage.removeItem(CSRF_TOKEN_KEY);
 
@@ -93,9 +94,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthenticated(true);
         setSessionId(storedSessionId);
         
-        // 스폰서가 선택되지 않았다면 스폰서 선택 다이얼로그 표시
+        // 스폰서가 선택되지 않았다면 /select-sponsor 페이지로 리다이렉트
         if (!hasSponsor && !sponsorLoading) {
-          setShowSponsorDialog(true);
+          navigate('/select-sponsor');
         }
       } else {
         await logout();
@@ -112,26 +113,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     verifySession();
   }, [verifySession]);
 
-  const login = (sessionData: any, userData: User) => {
+  const login = async (sessionData: any, userData: User) => {
     localStorage.setItem(SESSION_ID_KEY, sessionData.sessionId);
     localStorage.setItem(CSRF_TOKEN_KEY, sessionData.csrfToken);
     setUser(userData);
     setIsAuthenticated(true);
     setSessionId(sessionData.sessionId);
-    
-    // 스폰서가 선택되지 않았다면 스폰서 선택 다이얼로그 표시
-    if (!hasSponsor) {
-      setShowSponsorDialog(true);
+
+    // 로그인 후 스폰서 정보 다시 확인
+    try {
+      const sponsorData = await sponsorApi.getUserSponsor(userData.user_uid);
+      if (sponsorData) {
+        saveSponsor(sponsorData as unknown as Sponsor);
+      } else {
+        navigate('/select-sponsor');
+      }
+    } catch (error) {
+      console.error('스폰서 정보 조회 실패:', error);
+      navigate('/select-sponsor');
     }
   };
 
-  const handleSponsorSelect = (sponsor: any, userData: User) => {
+  const handleSponsorSelect = async (sponsor: any, userData: User) => {
     saveSponsor(sponsor);
-    setShowSponsorDialog(false);
     toast({
       title: "스폰서 선택 완료",
       description: `${sponsor.name}이(가) 선택되었습니다.`,
     });
+
+    const mallInfo = await peermallApi.getPeermallByUid(userData.user_uid);
+    navigate(`/home/${mallInfo.url}`); // 스폰서 선택 후 피어몰 페이지로 이동
   };
 
   const value = {
@@ -146,11 +157,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider value={value}>
       {children}
-      {/* <SponsorSelection 
-        open={showSponsorDialog} 
-        onSponsorSelect={handleSponsorSelect}
-        userData={user as User}
-      /> */}
     </AuthContext.Provider>
   );
 };

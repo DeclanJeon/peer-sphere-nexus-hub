@@ -29,6 +29,12 @@ class PeermallApi {
     return response.data.data;
   }
 
+  async getPeermallByUid(uid: string): Promise<Peermall> {
+    const response = await apiClient.get(`/peermalls/uid/${uid}`);
+    console.log(response);
+    return response.data.data;
+  }
+
   // 사용자의 피어몰 목록 조회
   async getPeermallsByOwner(ownerId: string): Promise<Peermall[]> {
     const response = await apiClient.get(`/peermalls/owner/${ownerId}`);
